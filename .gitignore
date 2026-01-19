@@ -1,0 +1,47 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE and editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.cursor/
+
+# Development files
+*.log
+*.sql
+*.bak
+*.swp
+*~
+
+# Node (if ever used for build tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Composer (if ever used)
+vendor/
+
+# Build artifacts
+*.zip
+*.tar.gz
+
+# Local development
+.env
+.env.local
+wp-config-local.php
+
+# Documentation drafts (keep readme.txt and README.md)
+*.docx
+*.pdf
+NOTES.md
+TODO.md

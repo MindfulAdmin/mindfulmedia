@@ -1669,8 +1669,8 @@ class MindfulMedia_Shortcodes {
         
         // Search bar on the right
         $output .= '<div class="mm-search-container mm-browse-nav-search">';
-        $output .= '<svg class="mm-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
-        $output .= '<input type="text" class="mindful-media-search-input mm-browse-search" placeholder="' . esc_attr__('Search...', 'mindful-media') . '" />';
+        $output .= '<svg class="mm-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#606060;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+        $output .= '<input type="text" class="mindful-media-search-input mm-browse-search" placeholder="' . esc_attr__('Search...', 'mindful-media') . '" style="width:200px;padding:10px 32px 10px 38px;border:1px solid #e5e5e5;border-radius:9999px;font-size:14px;outline:none;" />';
         $output .= '<button type="button" class="mm-search-clear" aria-label="' . esc_attr__('Clear search', 'mindful-media') . '">&times;</button>';
         $output .= '</div>';
         

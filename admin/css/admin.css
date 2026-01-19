@@ -1,0 +1,682 @@
+/**
+ * MindfulMedia Admin Styles
+ * Mindful Design Branding - WooCommerce-style Interface
+ * 
+ * @package MindfulMedia
+ * @since 1.8.2
+ */
+
+/* Brand Colors - Mindful Design:
+ * Gold Primary: #e1ca8e
+ * Gold Medium: #b8a064
+ * Gold Dark: #93845e
+ * Text: #50575e (grey)
+ * Background: #ffffff (white)
+ */
+
+:root {
+    --mindful-gold-primary: #e1ca8e;
+    --mindful-gold-medium: #b8a064;
+    --mindful-gold-dark: #93845e;
+    --mindful-text: #50575e;
+    --mindful-text-dark: #1d2327;
+    --mindful-text-medium: #2c3338;
+    --mindful-bg-white: #ffffff;
+    --mindful-bg-light: #f9f9f9;
+    --mindful-border: #dcdcde;
+}
+
+/* CRITICAL FIX: Hide WordPress notices initially to prevent flash during JS repositioning */
+#wpbody-content > .notice:not(.notice-positioned),
+#wpbody-content > .updated:not(.notice-positioned),
+#wpbody-content > .error:not(.notice-positioned),
+#wpbody-content > .fs-notice:not(.notice-positioned),
+.wrap .notice:not(.notice-positioned):not(.inline),
+.wrap .updated:not(.notice-positioned):not(.inline),
+.wrap .error:not(.notice-positioned):not(.inline) {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+}
+
+/* Show notices once positioned by JavaScript */
+.notice.notice-positioned,
+.updated.notice-positioned,
+.error.notice-positioned {
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    top: auto !important;
+    left: 0 !important;
+    margin: 10px 20px 10px 0 !important;
+}
+
+/* Ensure notices appear before branding header */
+.mindful-media-branding-header {
+    clear: both;
+    position: relative;
+    z-index: 1;
+}
+
+/* ========================================
+   BRANDING HEADER - WooCommerce Style
+   ======================================== */
+
+.mindful-media-branding-header {
+    background: var(--mindful-bg-white);
+    padding: 25px 30px;
+    margin: 20px 20px 0 0;
+    border-bottom: 1px solid var(--mindful-border);
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    max-width: none !important;
+    box-sizing: border-box;
+    clear: both;
+    position: relative;
+    z-index: 1;
+}
+
+.mindful-media-brand-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.mindful-media-brand-icon img {
+    height: 40px;
+    width: auto;
+    opacity: 1;
+}
+
+.mindful-media-brand-text h1 {
+    margin: 0;
+    font-size: 23px;
+    font-weight: 400;
+    color: var(--mindful-text-dark);
+    line-height: 1.3;
+}
+
+.mindful-media-brand-text .mindful-media-brand-tagline {
+    margin: 3px 0 0 0;
+    font-size: 13px;
+    color: var(--mindful-text);
+}
+
+.mindful-media-brand-tagline a {
+    color: var(--mindful-gold-dark);
+    text-decoration: none;
+}
+
+.mindful-media-brand-tagline a:hover {
+    color: var(--mindful-gold-medium);
+}
+
+.mindful-media-brand-logo img {
+    height: 32px;
+    width: auto;
+    opacity: 0.9;
+}
+
+/* Main Wrapper - WooCommerce Style */
+.mindful-media-admin-wrap,
+.mindful-media-settings-page,
+.mindful-media-import-export {
+    margin: 0 20px 20px 0 !important;
+    max-width: none !important;
+    background: var(--mindful-bg-white);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* ========================================
+   END BRANDING HEADER
+   ======================================== */
+
+
+/* Admin List Table Enhancements */
+.wp-list-table .column-featured_image {
+    width: 60px;
+}
+
+.wp-list-table .column-featured_image img {
+    border-radius: 4px;
+    max-width: 50px;
+    height: auto;
+}
+
+.wp-list-table .column-teacher {
+    width: 150px;
+}
+
+.wp-list-table .column-duration {
+    width: 80px;
+}
+
+.wp-list-table .column-media_type {
+    width: 80px;
+}
+
+.wp-list-table .column-featured {
+    width: 60px;
+    text-align: center;
+}
+
+.wp-list-table .column-featured .dashicons {
+    color: #ffb900;
+}
+
+/* Meta Box Styling */
+.mindful-media-meta-box {
+    background: var(--mindful-bg-white);
+    border: 1px solid var(--mindful-border);
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.mindful-media-meta-box .form-table th {
+    width: 200px;
+    padding: 15px 10px 15px 0;
+    vertical-align: top;
+    color: var(--mindful-text-medium);
+    font-weight: 500;
+}
+
+.mindful-media-meta-box .form-table td {
+    padding: 15px 0;
+    color: var(--mindful-text);
+}
+
+.mindful-media-meta-box input[type="text"],
+.mindful-media-meta-box input[type="url"],
+.mindful-media-meta-box input[type="date"],
+.mindful-media-meta-box input[type="number"],
+.mindful-media-meta-box textarea,
+.mindful-media-meta-box select {
+    width: 100%;
+    max-width: 400px;
+    border-color: #c3c4c7;
+}
+
+.mindful-media-meta-box input[type="text"]:focus,
+.mindful-media-meta-box input[type="url"]:focus,
+.mindful-media-meta-box input[type="date"]:focus,
+.mindful-media-meta-box input[type="number"]:focus,
+.mindful-media-meta-box textarea:focus,
+.mindful-media-meta-box select:focus {
+    border-color: var(--mindful-gold-medium);
+    box-shadow: 0 0 0 1px var(--mindful-gold-medium);
+}
+
+.mindful-media-meta-box input[type="number"] {
+    width: 80px;
+}
+
+.mindful-media-meta-box .description {
+    color: #646970;
+    font-style: normal;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+/* Custom Fields Section */
+#mindful-media-custom-fields .form-table {
+    margin-top: 15px;
+}
+
+#mindful-media-custom-fields .widefat {
+    margin-top: 15px;
+}
+
+#mindful-media-custom-fields .widefat th,
+#mindful-media-custom-fields .widefat td {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+#mindful-media-custom-fields .widefat input[type="text"] {
+    width: 100%;
+}
+
+#mindful-media-custom-fields .widefat select {
+    width: 100%;
+}
+
+#mindful-media-custom-fields .remove-field {
+    background: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+#mindful-media-custom-fields .remove-field:hover {
+    background: #c82333;
+    border-color: #bd2130;
+}
+
+/* Settings Page - WooCommerce Style */
+.mindful-media-settings-page {
+    max-width: 1000px;
+    background: var(--mindful-bg-white);
+    padding: 30px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+
+.mindful-media-settings-page h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--mindful-text-dark);
+    margin-top: 0;
+}
+
+.mindful-media-settings-page h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--mindful-text-medium);
+    margin-top: 40px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--mindful-gold-primary);
+}
+
+.mindful-media-settings-page .form-table {
+    margin-top: 20px;
+}
+
+.mindful-media-settings-page .form-table th {
+    width: 250px;
+    padding: 20px 10px 20px 0;
+    color: var(--mindful-text-medium);
+    font-weight: 500;
+}
+
+.mindful-media-settings-page .form-table td {
+    padding: 20px 0;
+    color: var(--mindful-text);
+}
+
+.mindful-media-settings-page input[type="color"] {
+    width: 60px;
+    height: 40px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.mindful-media-settings-page input[type="number"] {
+    width: 80px;
+}
+
+.mindful-media-settings-page select {
+    min-width: 200px;
+    border-color: #c3c4c7;
+}
+
+.mindful-media-settings-page input[type="text"]:focus,
+.mindful-media-settings-page input[type="number"]:focus,
+.mindful-media-settings-page textarea:focus,
+.mindful-media-settings-page select:focus {
+    border-color: var(--mindful-gold-medium);
+    box-shadow: 0 0 0 1px var(--mindful-gold-medium);
+}
+
+.mindful-media-settings-page .description {
+    color: #646970;
+    font-size: 13px;
+    font-style: normal;
+    margin-top: 8px;
+}
+
+/* Color Picker Section */
+.mindful-media-color-section {
+    background: var(--mindful-bg-light);
+    border: 1px solid var(--mindful-border);
+    border-radius: 4px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.mindful-media-color-section h3 {
+    margin-top: 0;
+    color: var(--mindful-text-dark);
+    font-weight: 600;
+}
+
+.mindful-media-color-preview {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+/* Custom Fields Editor */
+.mindful-media-custom-fields-editor {
+    background: var(--mindful-bg-light);
+    border: 1px solid var(--mindful-border);
+    border-radius: 4px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.mindful-media-custom-fields-editor h3 {
+    margin-top: 0;
+    color: var(--mindful-text-dark);
+    border-bottom: 2px solid var(--mindful-gold-primary);
+    padding-bottom: 10px;
+    font-weight: 600;
+}
+
+.mindful-media-custom-fields-editor .widefat {
+    background: white;
+    border: 1px solid #ddd;
+}
+
+.mindful-media-custom-fields-editor .widefat thead th {
+    background: #f1f1f1;
+    font-weight: 600;
+}
+
+.mindful-media-custom-fields-editor .button {
+    margin-top: 10px;
+}
+
+/* Import/Export Page */
+.mindful-media-import-export {
+    max-width: 800px;
+}
+
+.mindful-media-import-export .postbox {
+    margin-bottom: 20px;
+}
+
+.mindful-media-import-export .inside {
+    padding: 20px;
+}
+
+.mindful-media-export-section,
+.mindful-media-import-section {
+    background: var(--mindful-bg-white);
+    border: 1px solid var(--mindful-border);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+
+.mindful-media-export-section h2,
+.mindful-media-import-section h2 {
+    margin-top: 0;
+    color: var(--mindful-text-dark);
+    border-bottom: 2px solid var(--mindful-gold-primary);
+    padding-bottom: 10px;
+    font-weight: 600;
+}
+
+/* Success/Error Messages - Mindful Design */
+.mindful-media-notice {
+    background: var(--mindful-bg-white);
+    border-left: 4px solid var(--mindful-gold-medium);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    margin: 20px 0;
+    padding: 12px 15px;
+}
+
+.mindful-media-notice.error {
+    border-left-color: #dc3232;
+}
+
+.mindful-media-notice.warning {
+    border-left-color: var(--mindful-gold-primary);
+}
+
+.mindful-media-notice.success {
+    border-left-color: #46b450;
+}
+
+.mindful-media-notice p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--mindful-text);
+}
+
+/* Responsive Design */
+@media (max-width: 782px) {
+    .mindful-media-settings-page .form-table th,
+    .mindful-media-settings-page .form-table td {
+        display: block;
+        width: 100%;
+        padding: 10px 0;
+    }
+    
+    .mindful-media-settings-page .form-table th {
+        border-bottom: 1px solid #e1e1e1;
+        margin-bottom: 10px;
+    }
+    
+    #mindful-media-custom-fields .widefat {
+        font-size: 14px;
+    }
+    
+    #mindful-media-custom-fields .widefat th,
+    #mindful-media-custom-fields .widefat td {
+        padding: 8px;
+    }
+}
+
+/* WordPress Admin Theme Compatibility */
+body.admin-color-blue .mindful-media-settings-page h2 {
+    border-bottom-color: #096484;
+}
+
+body.admin-color-coffee .mindful-media-settings-page h2 {
+    border-bottom-color: #c7a589;
+}
+
+body.admin-color-ectoplasm .mindful-media-settings-page h2 {
+    border-bottom-color: #a3b745;
+}
+
+body.admin-color-midnight .mindful-media-settings-page h2 {
+    border-bottom-color: #e14d43;
+}
+
+body.admin-color-ocean .mindful-media-settings-page h2 {
+    border-bottom-color: #9ebaa0;
+}
+
+body.admin-color-sunrise .mindful-media-settings-page h2 {
+    border-bottom-color: #dd823b;
+}
+
+/* Loading States */
+.mindful-media-loading {
+    position: relative;
+    opacity: 0.6;
+}
+
+.mindful-media-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #0073aa;
+    border-radius: 50%;
+    animation: mindful-media-admin-spin 1s linear infinite;
+}
+
+@keyframes mindful-media-admin-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Buttons - Mindful Design Branded */
+.mindful-media-settings-page .button-primary,
+.mindful-media-meta-box .button-primary,
+.mindful-media-import-export .button-primary {
+    background: var(--mindful-gold-medium) !important;
+    border-color: var(--mindful-gold-medium) !important;
+    color: #fff !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+}
+
+.mindful-media-settings-page .button-primary:hover,
+.mindful-media-settings-page .button-primary:focus,
+.mindful-media-meta-box .button-primary:hover,
+.mindful-media-meta-box .button-primary:focus,
+.mindful-media-import-export .button-primary:hover,
+.mindful-media-import-export .button-primary:focus {
+    background: var(--mindful-gold-dark) !important;
+    border-color: var(--mindful-gold-dark) !important;
+}
+
+/* Help Text */
+.mindful-media-help {
+    background: var(--mindful-bg-light);
+    border-left: 4px solid var(--mindful-gold-primary);
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 4px;
+}
+
+.mindful-media-help p {
+    margin: 0;
+    color: var(--mindful-text);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.mindful-media-help .dashicons {
+    color: var(--mindful-gold-dark);
+    margin-right: 5px;
+}
+
+/* Info Boxes */
+.mindful-media-info-box {
+    background: var(--mindful-bg-light);
+    border-left: 4px solid var(--mindful-gold-primary);
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.mindful-media-info-box p {
+    color: var(--mindful-text);
+    margin: 0;
+} 
+/* Settings Tabs Styling - Modern Document Reader Style */
+.mindful-media-settings-tabs {
+    margin: 0 0 0 0;
+}
+
+.mindful-media-tab-content {
+    display: none;
+    background: var(--mindful-bg-white);
+    border: 1px solid var(--mindful-border);
+    border-top: none;
+    padding: 30px;
+    margin: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border-radius: 0 0 4px 4px;
+}
+
+.mindful-media-tab-content.active {
+    display: block;
+}
+
+.nav-tab-wrapper {
+    border-bottom: 1px solid var(--mindful-border);
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: inherit;
+    background: var(--mindful-bg-light);
+}
+
+.nav-tab {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #646970;
+    display: inline-block;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 24px;
+    margin: 0 5px -1px 0;
+    padding: 14px 24px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-tab:hover {
+    background-color: var(--mindful-bg-white);
+    color: var(--mindful-text-medium);
+    border-bottom-color: #ccc;
+}
+
+.nav-tab-active {
+    background: var(--mindful-bg-white) !important;
+    border-bottom: 3px solid var(--mindful-gold-medium) !important;
+    color: var(--mindful-text-dark) !important;
+    position: relative;
+    top: 1px;
+    font-weight: 600;
+}
+
+.nav-tab-active:hover {
+    background: var(--mindful-bg-white) !important;
+    border-bottom-color: var(--mindful-gold-medium) !important;
+}
+
+/* Font Size Slider Styling */
+input[type="range"] {
+    width: 200px;
+    margin: 5px 0;
+}
+
+.mindful-media-tab-content h3 {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #23282d;
+}
+
+.mindful-media-tab-content h3:first-child {
+    margin-top: 0;
+}
+
+/* Improve form table spacing in tabs */
+.mindful-media-tab-content .form-table {
+    margin-top: 0;
+}
+
+.mindful-media-tab-content .form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+}
+
+.mindful-media-tab-content .form-table td {
+    padding: 15px 10px;
+}
+
+/* Font size display styling */
+span[id$="_display"] {
+    display: inline-block;
+    min-width: 40px;
+    font-weight: 600;
+    color: #0073aa;
+}
+
+/* Hide WordPress default settings saved notice on our settings page */

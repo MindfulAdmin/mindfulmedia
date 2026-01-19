@@ -1,0 +1,5576 @@
+/* MindfulMedia Frontend Styles - YouTube-Style Design
+   ====================================================
+   Contextual theming: Light theme for browse/archive,
+   Dark theme for modal player (like YouTube)
+   ==================================================== */
+
+/* ====== CSS VARIABLES - YouTube Color Palette ====== */
+:root {
+    /* Light theme (browse/archive) */
+    --mm-bg-primary: #ffffff;
+    --mm-bg-secondary: #f2f2f2;
+    --mm-bg-elevated: #ffffff;
+    --mm-bg-hover: #f2f2f2;
+    --mm-text-primary: #0f0f0f;
+    --mm-text-secondary: #606060;
+    --mm-text-muted: #909090;
+    --mm-border: #e5e5e5;
+    --mm-border-hover: #ccc;
+    
+    /* Dark theme (modal player) - used with .mindful-media-inline-player */
+    --mm-dark-bg-primary: #0f0f0f;
+    --mm-dark-bg-secondary: #212121;
+    --mm-dark-bg-elevated: #272727;
+    --mm-dark-bg-hover: #3f3f3f;
+    --mm-dark-text-primary: #f1f1f1;
+    --mm-dark-text-secondary: #aaaaaa;
+    --mm-dark-text-muted: #717171;
+    --mm-dark-border: #3f3f3f;
+    
+    /* Accent colors */
+    --mm-accent-primary: #ff0000;
+    --mm-accent-secondary: #065fd4;
+    --mm-accent-success: #2ba640;
+    
+    /* Typography */
+    --mm-font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mm-font-size-xs: 12px;
+    --mm-font-size-sm: 13px;
+    --mm-font-size-base: 14px;
+    --mm-font-size-lg: 16px;
+    --mm-font-size-xl: 18px;
+    --mm-font-size-2xl: 20px;
+    --mm-font-size-3xl: 24px;
+    
+    /* Spacing */
+    --mm-spacing-xs: 4px;
+    --mm-spacing-sm: 8px;
+    --mm-spacing-md: 12px;
+    --mm-spacing-lg: 16px;
+    --mm-spacing-xl: 20px;
+    --mm-spacing-2xl: 24px;
+    
+    /* Border radius */
+    --mm-radius-sm: 4px;
+    --mm-radius-md: 8px;
+    --mm-radius-lg: 12px;
+    --mm-radius-xl: 16px;
+    --mm-radius-full: 9999px;
+    
+    /* Shadows */
+    --mm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --mm-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --mm-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --mm-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    /* Color-Coded Media Types */
+    --mindful-media-audio-color: #9333EA;
+    --mindful-media-video-color: #DC2626;
+}
+
+/* Container */
+.mindful-media-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--mm-spacing-lg);
+    font-family: var(--mm-font-family);
+    color: var(--mm-text-primary);
+    background: var(--mm-bg-primary);
+}
+
+/* Playlist Icon Overlay - Small, subtle indicator on image */
+.mindful-media-playlist-icon-overlay {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    color: white;
+    padding: 6px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+/* Lock Icon Overlay - Password protected content indicator */
+/* Lock Icon Overlay - Modern minimal design */
+.mindful-media-lock-icon-overlay {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    color: #dc2626;
+    padding: 6px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+.mindful-media-lock-icon-overlay:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.mindful-media-lock-icon-overlay svg {
+    display: block;
+}
+
+.mindful-media-playlist-icon-overlay:hover {
+    background: rgba(0, 0, 0, 0.85);
+    transform: scale(1.05);
+}
+
+.mindful-media-playlist-icon-overlay svg {
+    display: block;
+}
+
+/* Playlist Link - Below title, above description */
+.mindful-media-playlist-link {
+    margin: 8px 0 12px 0;
+}
+
+.playlist-link-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+    text-decoration: none;
+    color: #666;
+    font-size: 12px;
+    font-weight: 400;
+    transition: all 0.2s ease;
+}
+
+.playlist-link-text:hover {
+    background: rgba(139, 0, 0, 0.05);
+    border-color: rgba(139, 0, 0, 0.2);
+    color: #8B0000;
+}
+
+.playlist-link-text .playlist-icon-inline {
+    flex-shrink: 0;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.playlist-link-text:hover .playlist-icon-inline {
+    opacity: 1;
+}
+
+.playlist-link-text .playlist-count {
+    color: #999;
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+.playlist-link-text:hover .playlist-count {
+    color: #8B0000;
+    opacity: 1;
+}
+
+/* Image Letterboxing for Audio (Square image in widescreen container with black bars) */
+/* All single page thumbnails - consistent 16:9 with letterboxing */
+.mindful-media-single-thumbnail.audio-letterbox,
+.mindful-media-single-thumbnail.video-widescreen,
+.mindful-media-single-thumbnail {
+    background: #000 !important;
+    width: 100% !important;
+    aspect-ratio: 16 / 9 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+.mindful-media-single-thumbnail.audio-letterbox img,
+.mindful-media-single-thumbnail.video-widescreen img,
+.mindful-media-single-thumbnail img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    display: block !important;
+}
+
+/* Ensure single page player area respects this */
+.mindful-media-single-player {
+    width: 100%;
+    max-width: 100%;
+    background: #000;
+}
+
+.mindful-media-single-player .mindful-media-single-thumbnail {
+    width: 100%;
+    margin: 0;
+    background: #000;
+}
+
+/* Ensure single page respects letterbox */
+body.single-mindful_media .mindful-media-single-thumbnail.audio-letterbox {
+    background: #000 !important;
+    aspect-ratio: 16 / 9 !important;
+}
+
+/* Single page - full width dark theme (like modal player) */
+body.single-mindful_media .entry-content .mindful-media-container,
+body.single-mindful_media #primary .mindful-media-container,
+body.single-mindful_media article .mindful-media-container,
+body.single-mindful_media .mindful-media-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    background: var(--mm-dark-bg-primary) !important;
+}
+
+/* Wrapper - YouTube-style layout */
+.mindful-media-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mm-spacing-lg);
+}
+
+/* ====== SEARCH BAR - YouTube Style ====== */
+.mm-search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.mm-search-container .mm-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--mm-text-secondary);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* v2.6.1 - Search input padding fix */
+
+.mindful-media-search-input {
+    width: 200px;
+    min-width: 200px;
+    padding: 10px 32px 10px 38px !important;
+    border: 1px solid var(--mm-border);
+    border-radius: var(--mm-radius-full);
+    font-family: var(--mm-font-family);
+    font-size: var(--mm-font-size-base);
+    color: var(--mm-text-primary);
+    background: var(--mm-bg-primary);
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.mindful-media-search-input:hover {
+    border-color: var(--mm-border-hover);
+}
+
+.mindful-media-search-input:focus {
+    border-color: var(--mm-accent-secondary);
+    box-shadow: 0 0 0 2px rgba(6, 95, 212, 0.15);
+}
+
+.mindful-media-search-input::placeholder {
+    color: var(--mm-text-muted);
+}
+
+.mm-search-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--mm-bg-secondary);
+    color: var(--mm-text-secondary);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.mm-search-clear:hover {
+    background: var(--mm-text-secondary);
+    color: var(--mm-bg-primary);
+}
+
+.mindful-media-search-input:not(:placeholder-shown) + .mm-search-clear,
+.mm-search-container.has-value .mm-search-clear {
+    display: flex;
+}
+
+/* Search in filter chips - compact inline */
+.mindful-media-filter-chips .mm-search-container {
+    margin-right: var(--mm-spacing-md);
+}
+
+/* Filter chips inner wrapper for proper layout */
+.mm-filter-chips-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--mm-spacing-sm);
+    flex: 1;
+}
+
+/* Search positioned on the right of filter chips */
+.mm-filter-chips-search {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* Ensure search input has proper padding for icon */
+.mm-filter-chips-search .mindful-media-search-input {
+    padding-left: 40px !important;
+}
+
+/* Search in taxonomy pages */
+.mm-taxonomy-search-bar {
+    display: flex;
+    justify-content: flex-start;
+    padding: 0;
+    margin-bottom: var(--mm-spacing-md);
+}
+
+.mm-taxonomy-search-bar .mindful-media-search-input {
+    width: 280px;
+}
+
+/* Search bar dark theme (for modal/single pages) */
+.mindful-media-inline-player .mm-search-container .mm-search-icon,
+.mindful-media-single .mm-search-container .mm-search-icon {
+    color: var(--mm-dark-text-secondary);
+}
+
+.mindful-media-inline-player .mindful-media-search-input,
+.mindful-media-single .mindful-media-search-input {
+    background: var(--mm-dark-bg-secondary);
+    border-color: var(--mm-dark-border);
+    color: var(--mm-dark-text-primary);
+}
+
+.mindful-media-inline-player .mindful-media-search-input::placeholder,
+.mindful-media-single .mindful-media-search-input::placeholder {
+    color: var(--mm-dark-text-muted);
+}
+
+.mindful-media-inline-player .mm-search-clear,
+.mindful-media-single .mm-search-clear {
+    background: var(--mm-dark-bg-elevated);
+    color: var(--mm-dark-text-secondary);
+}
+
+/* Responsive search */
+@media (max-width: 768px) {
+    .mindful-media-search-input {
+        width: 160px;
+        min-width: 140px;
+    }
+    
+    .mm-browse-nav-search .mindful-media-search-input {
+        width: 160px;
+    }
+    
+    .mm-taxonomy-search-bar .mindful-media-search-input {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .mindful-media-filter-chips {
+        flex-direction: column;
+    }
+    
+    .mindful-media-filter-chips .mm-filter-chips-inner {
+        width: 100%;
+        order: 2;
+    }
+    
+    .mindful-media-filter-chips .mm-search-container,
+    .mindful-media-filter-chips .mm-filter-chips-search {
+        width: 100%;
+        margin-right: 0;
+        margin-left: 0;
+        margin-bottom: var(--mm-spacing-sm);
+        order: 1;
+    }
+    
+    .mindful-media-filter-chips .mindful-media-search-input {
+        width: 100%;
+    }
+}
+
+/* ====== FILTER CHIPS - YouTube Style ====== */
+.mindful-media-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start; /* Align search bar to top */
+    gap: var(--mm-spacing-sm);
+    padding: var(--mm-spacing-md) 0;
+    margin-bottom: var(--mm-spacing-lg);
+    border-bottom: 1px solid var(--mm-border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.mindful-media-filter-chips::-webkit-scrollbar {
+    display: none;
+}
+
+.mm-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--mm-spacing-xs);
+    padding: var(--mm-spacing-sm) var(--mm-spacing-md);
+    background: var(--mm-bg-secondary);
+    border: none;
+    border-radius: var(--mm-radius-md);
+    font-family: var(--mm-font-family);
+    font-size: var(--mm-font-size-base);
+    font-weight: 500;
+    color: var(--mm-text-primary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.mm-chip:hover {
+    background: var(--mm-bg-hover);
+    color: var(--mm-text-primary) !important;
+}
+
+.mm-chip:active {
+    background: var(--mm-bg-hover);
+    color: var(--mm-text-primary) !important;
+}
+
+.mm-chip.active {
+    background: var(--mm-text-primary);
+    color: var(--mm-bg-primary) !important;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mm-chip svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+}
+
+.mm-chip.active svg {
+    opacity: 1;
+}
+
+/* Chip with count badge */
+.mm-chip-count {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 2px 6px;
+    border-radius: var(--mm-radius-full);
+    font-size: var(--mm-font-size-xs);
+    margin-left: var(--mm-spacing-xs);
+}
+
+.mm-chip.active .mm-chip-count {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Teacher and Topic chips - icon is the only distinction */
+.mm-chip.mm-chip-teacher svg,
+.mm-chip.mm-chip-topic svg {
+    opacity: 0.7;
+}
+
+/* Content area */
+.mindful-media-content {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Full width content (no sidebar) */
+.mindful-media-content.mindful-media-content-full {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* ====== ARCHIVE GRID - YouTube Style Responsive ====== */
+.mindful-media-archive {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--mm-spacing-lg);
+    padding: 0;
+    background: transparent;
+}
+
+/* Large screens - more columns */
+@media (min-width: 1600px) {
+    .mindful-media-archive {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (min-width: 1200px) and (max-width: 1599px) {
+    .mindful-media-archive {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+    .mindful-media-archive {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+    .mindful-media-archive {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--mm-spacing-md);
+    }
+}
+
+@media (max-width: 599px) {
+    .mindful-media-archive {
+        grid-template-columns: 1fr;
+        gap: var(--mm-spacing-lg);
+    }
+}
+
+/* ====== MEDIA CARD - YouTube Style ====== */
+.mindful-media-card {
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+}
+
+/* Thumbnail container - 16:9 with rounded corners */
+.mindful-media-card-thumbnail {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--mm-bg-secondary);
+    overflow: hidden;
+    border-radius: var(--mm-radius-lg);
+    margin-bottom: var(--mm-spacing-md);
+}
+
+.mindful-media-card-thumb-btn {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.mindful-media-card-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.mindful-media-card:hover .mindful-media-card-thumbnail img {
+    transform: scale(1.03);
+}
+
+/* Duration badge on thumbnail (bottom right) */
+.mindful-media-card-duration {
+    position: absolute;
+    bottom: var(--mm-spacing-sm);
+    right: var(--mm-spacing-sm);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 3px 6px;
+    border-radius: var(--mm-radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    z-index: 2;
+}
+
+/* Playlist icon (top left) */
+.mindful-media-card-playlist-icon {
+    position: absolute;
+    top: var(--mm-spacing-sm);
+    left: var(--mm-spacing-sm);
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    padding: 4px 6px;
+    border-radius: var(--mm-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.mindful-media-card-playlist-icon svg {
+    display: block;
+}
+
+/* Lock icon (top right) */
+.mindful-media-card-lock-icon {
+    position: absolute;
+    top: var(--mm-spacing-sm);
+    right: var(--mm-spacing-sm);
+    background: rgba(255, 255, 255, 0.9);
+    color: #dc2626;
+    padding: 4px 6px;
+    border-radius: var(--mm-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.mindful-media-card-lock-icon svg {
+    display: block;
+}
+
+/* Play overlay on hover */
+.mindful-media-card-play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.mindful-media-card-play-overlay svg {
+    width: 56px;
+    height: 56px;
+    fill: white;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+    transform: scale(0.9);
+    transition: transform 0.2s ease;
+}
+
+.mindful-media-card:hover .mindful-media-card-play-overlay {
+    opacity: 1;
+}
+
+.mindful-media-card:hover .mindful-media-card-play-overlay svg {
+    transform: scale(1);
+}
+
+/* Content area below thumbnail */
+.mindful-media-card-content {
+    padding: 0 var(--mm-spacing-xs);
+}
+
+/* Title */
+/* Card title - YouTube style, prevent theme overrides */
+.mindful-media-card-title {
+    margin: 0 0 var(--mm-spacing-xs) 0 !important;
+    font-size: var(--mm-font-size-base) !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+    color: var(--mm-text-primary) !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+    text-decoration: none !important;
+}
+
+.mindful-media-card-title button,
+.mindful-media-card-title a {
+    all: unset !important;
+    cursor: pointer !important;
+    color: var(--mm-text-primary) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    display: block !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    text-decoration: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.mindful-media-card-title button:hover,
+.mindful-media-card-title a:hover,
+.mindful-media-card-title button:focus,
+.mindful-media-card-title a:focus,
+.mindful-media-card-title button:visited,
+.mindful-media-card-title a:visited,
+.mindful-media-card-title button:active,
+.mindful-media-card-title a:active {
+    color: var(--mm-text-primary) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    text-decoration: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Thumbnail and title trigger buttons - complete reset of theme styles */
+.mindful-media-thumb-trigger,
+.mindful-media-title-trigger,
+.mindful-media-play-inline,
+button.mindful-media-play-inline {
+    all: unset !important;
+    cursor: pointer !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.mindful-media-thumb-trigger {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    position: relative;
+}
+
+.mindful-media-title-trigger {
+    display: block !important;
+    color: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+}
+
+.mindful-media-thumb-trigger:hover,
+.mindful-media-thumb-trigger:focus,
+.mindful-media-thumb-trigger:active,
+.mindful-media-title-trigger:hover,
+.mindful-media-title-trigger:focus,
+.mindful-media-title-trigger:active,
+.mindful-media-play-inline:hover,
+.mindful-media-play-inline:focus,
+.mindful-media-play-inline:active {
+    background: transparent !important;
+    background-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: inherit !important;
+}
+
+/* Loading state for playlist buttons - show spinner overlay */
+.mindful-media-playlist-watch-btn.loading {
+    pointer-events: none;
+    position: relative;
+}
+
+.mindful-media-playlist-watch-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: mm-spinner 0.8s linear infinite;
+    z-index: 100;
+}
+
+@keyframes mm-spinner {
+    to { transform: rotate(360deg); }
+}
+
+/* Meta (teacher name) */
+.mindful-media-card-meta {
+    font-size: var(--mm-font-size-xs);
+    color: var(--mm-text-secondary);
+    line-height: 1.4;
+}
+
+.mindful-media-card-teacher {
+    display: block;
+}
+
+/* Legacy support - old .mindful-media-item class (redirect to card styles) */
+.mindful-media-item {
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+/* Thumbnail container - 16:9 with rounded corners */
+.mindful-media-item .mindful-media-item-image {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--mm-bg-secondary);
+    overflow: hidden;
+    border-radius: var(--mm-radius-lg);
+    margin-bottom: var(--mm-spacing-md);
+}
+
+.mindful-media-item .mindful-media-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.mindful-media-item:hover .mindful-media-item-image img {
+    transform: scale(1.05);
+}
+
+/* Duration badge on thumbnail */
+.mindful-media-duration-badge {
+    position: absolute;
+    bottom: var(--mm-spacing-sm);
+    right: var(--mm-spacing-sm);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 3px 4px;
+    border-radius: var(--mm-radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+/* Progress bar on thumbnail (for watched items) */
+.mindful-media-progress-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.mindful-media-progress-indicator-bar {
+    height: 100%;
+    background: var(--mm-accent-primary);
+}
+
+/* Play button overlay on hover */
+.mindful-media-item .mindful-media-item-image::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    width: 48px;
+    height: 48px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    opacity: 0;
+    transition: all 0.2s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 24px;
+}
+
+.mindful-media-item:hover .mindful-media-item-image::after {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Playlist Badge (Feature #3) */
+.mindful-media-series-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.mindful-media-item-image {
+    position: relative;
+}
+
+/* Color-Coded Media Types (Feature #6) */
+.mindful-media-item.media-type-audio .mindful-media-item-type-link,
+.mindful-media-item.media-type-audio .mindful-media-item-category {
+    background: var(--mindful-media-audio-color) !important;
+    color: white !important;
+}
+
+.mindful-media-item.media-type-video .mindful-media-item-type-link,
+.mindful-media-item.media-type-video .mindful-media-item-category {
+    background: var(--mindful-media-video-color) !important;
+    color: white !important;
+}
+
+/* Playlist Info on Single Page - YouTube Style */
+.mindful-media-playlist-info {
+    background: var(--mm-bg-secondary);
+    border: 1px solid var(--mm-border);
+    border-radius: var(--mm-radius-lg);
+    padding: var(--mm-spacing-xl);
+    margin-top: var(--mm-spacing-2xl);
+}
+
+.mindful-media-playlist-info h4 {
+    margin: 0 0 var(--mm-spacing-sm) 0;
+    color: var(--mm-text-primary);
+    font-size: var(--mm-font-size-xl);
+    font-weight: 600;
+}
+
+.playlist-description {
+    color: var(--mm-text-secondary);
+    font-size: var(--mm-font-size-base);
+    margin-bottom: var(--mm-spacing-md);
+    line-height: 1.5;
+}
+
+.playlist-items {
+    background: var(--mm-bg-primary);
+    border: 1px solid var(--mm-border);
+    border-radius: var(--mm-radius-md);
+    padding: var(--mm-spacing-md);
+    margin: var(--mm-spacing-md) 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.playlist-item {
+    padding: var(--mm-spacing-sm) var(--mm-spacing-md);
+    border-bottom: 1px solid var(--mm-border);
+    display: flex;
+    align-items: center;
+    gap: var(--mm-spacing-md);
+    border-radius: var(--mm-radius-sm);
+    transition: background 0.2s ease;
+}
+
+.playlist-item:hover {
+    background: var(--mm-bg-hover);
+}
+
+.playlist-item:last-child {
+    border-bottom: none;
+}
+
+.playlist-item.current {
+    background: var(--mm-bg-hover);
+    border-left: 3px solid var(--mm-accent-secondary);
+    margin-left: -var(--mm-spacing-md);
+    padding-left: calc(var(--mm-spacing-md) + var(--mm-spacing-md) - 3px);
+}
+
+.playlist-item a {
+    color: var(--mm-text-primary);
+    text-decoration: none;
+    font-size: var(--mm-font-size-base);
+}
+
+.playlist-item a:hover {
+    color: var(--mm-accent-secondary);
+}
+
+.playlist-item .item-number {
+    color: var(--mm-text-muted);
+    font-weight: 500;
+    min-width: 28px;
+    font-size: var(--mm-font-size-sm);
+}
+
+.playlist-item.current .item-number {
+    color: var(--mm-accent-secondary);
+    font-weight: 600;
+}
+
+.playlist-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--mm-spacing-md);
+    padding-top: var(--mm-spacing-md);
+    border-top: 1px solid var(--mm-border);
+    gap: var(--mm-spacing-md);
+}
+
+.playlist-progress {
+    color: var(--mm-text-secondary);
+    font-size: var(--mm-font-size-sm);
+    font-weight: 500;
+}
+
+.playlist-nav-btn {
+    background: var(--mm-text-primary);
+    color: var(--mm-bg-primary);
+    padding: var(--mm-spacing-sm) var(--mm-spacing-lg);
+    border-radius: var(--mm-radius-full);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: var(--mm-font-size-sm);
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.playlist-nav-btn:hover {
+    background: #660000;
+}
+
+.playlist-progress {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Collapsible Filters - Show first 3 items even when collapsed */
+.mindful-media-filter-section.collapsible .filter-section-title {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mindful-media-filter-section.collapsible .filter-section-title:hover {
+    color: #8B0000;
+}
+
+.mindful-media-filter-section .toggle-icon {
+    transition: transform 0.3s;
+    font-size: 10px;
+}
+
+.mindful-media-filter-section.expanded .toggle-icon {
+    transform: rotate(-180deg);
+}
+
+/* Show first 3 items when collapsed */
+.mindful-media-filter-section .filter-options.collapsed {
+    max-height: 90px; /* Roughly 3 items at ~30px each */
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    position: relative;
+}
+
+.mindful-media-filter-section .filter-options.collapsed::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(to bottom, transparent, white);
+    pointer-events: none;
+}
+
+.mindful-media-filter-section .filter-options {
+    max-height: 1000px;
+    transition: max-height 0.3s ease-in;
+    overflow-y: auto;
+}
+
+/* Image at top */
+.mindful-media-item-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    order: -1;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mindful-media-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* ====== CARD CONTENT - YouTube Typography ====== */
+.mindful-media-item-content {
+    padding: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ====== CARD META - YouTube Style ====== */
+.mindful-media-item .mindful-media-item-content .mindful-media-item-meta {
+    display: none; /* Hide old meta in YouTube style */
+}
+
+/* ====== CARD TITLE - YouTube Typography ====== */
+/* Item title - strong overrides to prevent theme bleeding */
+.mindful-media-item-title,
+h3.mindful-media-item-title {
+    margin: 0 0 var(--mm-spacing-xs) 0 !important;
+    font-size: var(--mm-font-size-base) !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    color: var(--mm-text-primary) !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-height: 2.8em;
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+.mindful-media-item-title a,
+h3.mindful-media-item-title a,
+.mindful-media-playlist-card .mindful-media-item-title a {
+    color: var(--mm-text-primary) !important;
+    text-decoration: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    font-weight: 500 !important;
+    transition: color 0.2s ease;
+}
+
+.mindful-media-item-title a:hover,
+h3.mindful-media-item-title a:hover,
+.mindful-media-item-title a:visited,
+h3.mindful-media-item-title a:visited,
+.mindful-media-item-title a:active,
+h3.mindful-media-item-title a:active,
+.mindful-media-item-title a:focus,
+h3.mindful-media-item-title a:focus {
+    color: var(--mm-text-primary) !important;
+    text-decoration: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* ====== CARD TEACHER/CHANNEL - YouTube Style ====== */
+.mindful-media-item-teacher {
+    margin-bottom: var(--mm-spacing-xs);
+    font-style: normal;
+    color: var(--mm-text-secondary);
+    font-size: var(--mm-font-size-xs);
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.mindful-media-item-teacher span {
+    font-style: normal;
+    color: var(--mm-text-secondary);
+    font-size: var(--mm-font-size-xs);
+}
+
+.mindful-media-item-teacher a {
+    color: var(--mm-text-secondary);
+    text-decoration: none;
+    font-style: normal;
+}
+
+.mindful-media-item-teacher a:hover {
+    color: var(--mm-text-primary);
+}
+
+/* Card meta line (views, date) - YouTube style */
+.mindful-media-item-stats {
+    font-size: var(--mm-font-size-xs);
+    color: var(--mm-text-secondary);
+    line-height: 1.4;
+}
+
+.mindful-media-item-stats span:not(:last-child)::after {
+    content: '•';
+    margin: 0 var(--mm-spacing-xs);
+}
+
+/* Excerpt - hidden in YouTube style cards */
+.mindful-media-item-excerpt {
+    display: none;
+}
+
+/* Categories and Type Pills - hidden in YouTube style */
+.mindful-media-item-categories {
+    display: none;
+}
+
+.mindful-media-item-category,
+.mindful-media-item-type-link {
+    display: none;
+}
+
+/* CTA Button - hidden in YouTube style (whole card is clickable) */
+.mindful-media-item-button,
+.mindful-media-item-cta {
+    display: none;
+}
+
+/* Loading State */
+.mindful-media-archive.mindful-media-loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.mindful-media-archive.mindful-media-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 3px solid #ddd;
+    border-top-color: #8B0000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* No Results */
+.mindful-media-no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    background: #f8f9fa;
+    border: 1px solid #e1e5e9;
+    border-radius: 6px;
+}
+
+/* Pagination */
+.mindful-media-pagination {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.mindful-media-pagination .page-numbers {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 0 4px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #666;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.mindful-media-pagination .page-numbers:hover,
+.mindful-media-pagination .page-numbers.current {
+    background: var(--mindful-media-primary, #8B0000);
+    color: var(--mindful-media-text-light, white);
+    border-color: var(--mindful-media-primary, #8B0000);
+}
+
+/* Breadcrumbs */
+.mindful-media-breadcrumbs {
+    margin-bottom: var(--mm-spacing-lg);
+    padding-bottom: var(--mm-spacing-md);
+    border-bottom: 1px solid var(--mm-border);
+    position: relative;
+    z-index: 1; /* Below player controls */
+}
+
+/* Breadcrumbs on single page */
+.single-mindful_media .mindful-media-breadcrumbs {
+    max-width: 1000px;
+    margin: 0 auto 20px auto;
+    padding: 20px;
+    border-bottom: 1px solid #272727;
+}
+
+.single-mindful_media .mindful-media-breadcrumb-nav {
+    color: #aaa;
+}
+
+.single-mindful_media .mindful-media-breadcrumb-link {
+    color: #3ea6ff;
+}
+
+.single-mindful_media .mindful-media-breadcrumb-current {
+    color: #f1f1f1;
+}
+
+.mindful-media-breadcrumb-nav {
+    font-size: var(--mm-font-size-sm);
+    color: var(--mm-text-secondary);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.mindful-media-breadcrumb-link {
+    color: var(--mm-accent-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.mindful-media-breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+.mindful-media-breadcrumb-separator {
+    margin: 0 var(--mm-spacing-sm);
+    color: var(--mm-text-muted);
+}
+
+.mindful-media-breadcrumb-current {
+    color: var(--mm-text-primary);
+    font-weight: 500;
+}
+
+/* ====== SINGLE MEDIA PAGE - FULLSCREEN MODAL STYLE ====== */
+
+/* Reset all theme containers for single media pages */
+body.single-mindful_media,
+body.single-mindful_media #page,
+body.single-mindful_media .site,
+body.single-mindful_media .site-content,
+body.single-mindful_media #content,
+body.single-mindful_media #primary,
+body.single-mindful_media .content-area,
+body.single-mindful_media .entry-content,
+body.single-mindful_media .site-main,
+body.single-mindful_media main,
+body.single-mindful_media article {
+    background: #000 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Hide theme header on single media pages for immersive experience */
+body.single-mindful_media .site-header,
+body.single-mindful_media header#masthead {
+    display: none !important;
+}
+
+/* Fullscreen container */
+.mindful-media-single-fullscreen {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    background: #000;
+    font-family: var(--mm-font-family);
+    color: #f1f1f1;
+}
+
+/* Account for WordPress admin bar on fullscreen container */
+.admin-bar .mindful-media-single-fullscreen {
+    margin-top: 0;
+}
+
+/* Header overlay - floating on top like modal */
+.mindful-media-single-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px 24px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 70%, transparent 100%);
+    pointer-events: none;
+}
+
+/* Account for WordPress admin bar when logged in */
+.admin-bar .mindful-media-single-header {
+    top: 32px;
+}
+
+/* Player area should also account for admin bar */
+.admin-bar .mindful-media-single-player-area {
+    padding-top: 32px;
+    min-height: calc(100vh - 32px);
+    box-sizing: content-box;
+}
+
+@media screen and (max-width: 782px) {
+    .admin-bar .mindful-media-single-header {
+        top: 46px;
+    }
+    
+    .admin-bar .mindful-media-single-player-area {
+        padding-top: 46px;
+        min-height: calc(100vh - 46px);
+    }
+}
+
+.mindful-media-single-header * {
+    pointer-events: auto;
+}
+
+.mindful-media-single-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mindful-media-single-header-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    line-height: 1.3;
+}
+
+.mindful-media-single-header-teacher {
+    font-weight: 400;
+    font-style: italic;
+    color: rgba(255,255,255,0.8);
+}
+
+.mindful-media-single-back {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s ease;
+}
+
+.mindful-media-single-back:hover {
+    color: #fff;
+}
+
+/* Full width player area */
+.mindful-media-single-player-area {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+}
+
+.mindful-media-single-player-area .mindful-media-unified-player {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+}
+
+.mindful-media-single-player-area .mindful-media-player-aspect-ratio {
+    width: 100% !important;
+    max-width: 100vw !important;
+}
+
+/* Image container for items without video */
+.mindful-media-single-image-container {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: #000;
+}
+
+.mindful-media-single-image-container img {
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+}
+
+.mindful-media-big-play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    background: rgba(0,0,0,0.6);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.mindful-media-big-play-overlay:hover {
+    background: rgba(0,0,0,0.8);
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Scroll indicator */
+.mindful-media-single-scroll-indicator {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.6);
+    animation: bounce 2s ease infinite;
+    cursor: pointer;
+    z-index: 100;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+    40% { transform: translateX(-50%) translateY(-10px); }
+    60% { transform: translateX(-50%) translateY(-5px); }
+}
+
+/* Content section below player */
+.mindful-media-single-content-section {
+    background: #0f0f0f;
+    padding: 60px 20px 80px;
+    min-height: 50vh;
+}
+
+.mindful-media-single-content-inner {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Meta row */
+.mindful-media-single-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #272727;
+    margin-bottom: 24px;
+}
+
+.mindful-media-single-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #aaa;
+}
+
+.mindful-media-single-meta-item a {
+    color: #3ea6ff;
+    text-decoration: none;
+}
+
+.mindful-media-single-meta-item a:hover {
+    text-decoration: underline;
+}
+
+.mindful-media-meta-icon {
+    width: 16px;
+    height: 16px;
+    fill: #aaa;
+    flex-shrink: 0;
+}
+
+/* Description */
+.mindful-media-single-description {
+    line-height: 1.7;
+    color: #f1f1f1;
+    font-size: 15px;
+    margin-bottom: 30px;
+}
+
+/* Taxonomies - Chip Style (like YouTube) */
+.mindful-media-single-taxonomies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #272727;
+}
+
+.mindful-media-single-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #272727;
+    color: #f1f1f1;
+    padding: 8px 16px;
+    border-radius: 18px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.mindful-media-single-chip:hover {
+    background: #3f3f3f;
+    color: #fff;
+    text-decoration: none;
+}
+
+.mindful-media-single-chip svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+}
+
+.mindful-media-single-chip.chip-category {
+    background: rgba(62, 166, 255, 0.15);
+    color: #3ea6ff;
+}
+
+.mindful-media-single-chip.chip-category:hover {
+    background: rgba(62, 166, 255, 0.25);
+}
+
+.mindful-media-single-chip.chip-topic {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+}
+
+.mindful-media-single-chip.chip-topic:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.mindful-media-single-custom-fields {
+    padding: var(--mm-spacing-lg) var(--mm-spacing-2xl);
+    border-top: 1px solid var(--mm-dark-border);
+    margin-top: var(--mm-spacing-lg);
+    background: var(--mm-dark-bg-primary);
+}
+
+.mindful-media-single-custom-fields h4 {
+    margin: 0 0 var(--mm-spacing-md) 0;
+    font-size: var(--mm-font-size-lg);
+    font-weight: 600;
+    color: var(--mm-text-primary);
+}
+
+.mindful-media-single-custom-field {
+    margin-bottom: var(--mm-spacing-sm);
+    font-size: var(--mm-font-size-base);
+}
+
+.mindful-media-single-custom-field strong {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--mm-text-primary);
+}
+
+.mindful-media-single-custom-field span {
+    color: var(--mm-text-secondary);
+}
+
+/* More Media Section (Related Items) */
+.mindful-media-more-section {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid #272727;
+}
+
+.mindful-media-more-section h3 {
+    margin: 0 0 24px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #f1f1f1;
+}
+
+.mindful-media-more-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+@media (min-width: 768px) {
+    .mindful-media-more-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 767px) {
+    .mindful-media-more-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.mindful-media-more-card {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #181818;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.mindful-media-more-card:hover {
+    transform: translateY(-4px);
+    background: #222;
+}
+
+.mindful-media-more-card a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.mindful-media-more-card-thumbnail {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #0f0f0f;
+    overflow: hidden;
+}
+
+.mindful-media-more-card-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mindful-media-more-card-duration {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.mindful-media-more-card-info {
+    padding: 10px;
+}
+
+.mindful-media-more-card-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #f1f1f1;
+    line-height: 1.3;
+    margin: 0 0 4px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.mindful-media-more-card-meta {
+    font-size: 11px;
+    color: #aaa;
+}
+
+/* Simple Archive.org Player - Clean and Minimal */
+.mindful-media-archive-player,
+.mindful-media-soundcloud-player {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 60px auto; /* 60px bottom margin for dropdown space */
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.mindful-media-image-container {
+    width: 100%;
+    aspect-ratio: 16/9; /* Modern CSS for 16:9 ratio */
+    background: #000; /* Black background for letterboxing */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* Fallback for older browsers */
+@supports not (aspect-ratio: 16/9) {
+    .mindful-media-image-container {
+        height: 0;
+        padding-bottom: 56.25%; /* 16:9 fallback */
+    }
+}
+
+.mindful-media-main-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain; /* Show full image, no crop */
+    display: block;
+}
+
+.mindful-media-image-placeholder {
+    font-size: 72px;
+    color: rgba(255, 255, 255, 0.7);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.mindful-media-player-controls {
+    width: 100%;
+    height: 80px;
+    background: #1a1a1a;
+    border-top: 1px solid #333;
+}
+
+.mindful-media-player-controls iframe {
+    width: 100%;
+    height: 80px;
+    border: none;
+    display: block;
+}
+
+/* Archive.org player controls - balanced height for playlist and single files */
+.mindful-media-archive-player .mindful-media-player-controls {
+    height: 200px !important;
+    background: #000; /* Black background to match player */
+    overflow: hidden; /* Hide any loading artifacts */
+}
+
+.mindful-media-archive-player .mindful-media-player-controls iframe {
+    height: 200px !important;
+    min-height: 200px !important;
+    background: #000; /* Ensure black background during loading */
+    border: none;
+}
+
+/* SoundCloud player controls - optimal height */
+.mindful-media-soundcloud-player .mindful-media-player-controls {
+    height: 180px !important;
+}
+
+.mindful-media-soundcloud-player .mindful-media-player-controls iframe {
+    height: 180px !important;
+    min-height: 180px !important;
+}
+
+/* Clean up audio embed wrapper when Archive.org player is used */
+.mindful-media-audio-embed .mindful-media-archive-player {
+    width: 100%;
+    height: auto;
+}
+
+/* Mobile Responsive */
+/* Filter Toggle Button (hidden on desktop) */
+.mindful-media-filter-toggle {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mindful-media-container {
+        padding: 10px;
+    }
+    
+    .mindful-media-wrapper {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    /* Filter Toggle Button */
+    .mindful-media-filter-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--mindful-media-primary, #8B0000);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 10px;
+    }
+    
+    .mindful-media-filter-toggle:hover {
+        background: var(--mindful-media-primary-hover, #6d0000);
+    }
+    
+    .mindful-media-filter-toggle svg {
+        transition: transform 0.3s ease;
+    }
+    
+    .mindful-media-filter-toggle.active svg {
+        transform: rotate(180deg);
+    }
+    
+    .mindful-media-item {
+        margin: 0;
+    }
+    
+    .mindful-media-single {
+        margin: 0 -15px;
+        border-radius: 0;
+    }
+    
+    .mindful-media-breadcrumbs {
+        margin: 0 -15px 20px -15px;
+        padding: 15px;
+    }
+    
+    .mindful-media-breadcrumb-nav {
+        font-size: 13px;
+    }
+    
+    .mindful-media-single-player {
+        background: transparent;
+    }
+    
+    .mindful-media-image-placeholder {
+        font-size: 48px;
+    }
+    
+    .mindful-media-archive-player,
+    .mindful-media-soundcloud-player {
+        margin: 0 0 40px 0; /* Reduced margin on mobile */
+    }
+    
+    .mindful-media-single-title {
+        font-size: 24px;
+        margin: 15px 15px 10px 15px;
+    }
+    
+    .mindful-media-single-meta-row {
+        padding: 0 15px 15px 15px;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .mindful-media-single-description {
+        padding: 0 15px 15px 15px;
+    }
+    
+    .mindful-media-single-taxonomies {
+        padding: 15px;
+    }
+    
+    .mindful-media-single-custom-fields {
+        padding: 15px;
+    }
+}
+
+/* ============================================
+   MEDIA PLAYER STYLES
+   ============================================ */
+
+/* Player Wrapper - Base Container */
+.mindful-media-player-wrapper {
+    width: 100%;
+    margin: 0 0 30px 0;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 0;
+}
+
+/* Aspect Ratio Container for Video Players */
+.mindful-media-player-aspect-ratio {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+}
+
+.mindful-media-player-aspect-ratio iframe,
+.mindful-media-player-aspect-ratio video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Native HTML5 Players */
+.mindful-media-player.native-player {
+    width: 100%;
+    display: block;
+    background: #000;
+}
+
+/* Native audio player - adjust height based on common aspect ratios */
+.native-audio-player {
+    min-height: 400px !important;
+    height: auto !important;
+    display: block !important;
+    position: relative !important;
+    background: #000;
+    aspect-ratio: 16 / 9; /* Maintain 16:9 for consistency */
+}
+
+/* Image container for audio players */
+.native-audio-player .mindful-media-image-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #000;
+}
+
+.native-audio-player .mindful-media-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Fill the space */
+    object-position: center;
+}
+
+/* Audio player - no aspect ratio needed */
+.native-audio-player .mindful-media-player-aspect-ratio {
+    padding-bottom: 0;
+    height: auto;
+    position: relative;
+}
+
+.native-audio-player audio {
+    position: absolute !important;
+    bottom: -9999px !important;
+    left: -9999px !important;
+    width: 1px !important;
+    height: 1px !important;
+    z-index: -1 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Ensure no native audio controls ever show */
+.mindful-media-unified-player audio,
+.mindful-media-unified-player audio::-webkit-media-controls-panel,
+.mindful-media-unified-player audio::-webkit-media-controls {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* SoundCloud specific - taller player */
+.soundcloud-player .soundcloud-iframe {
+    height: 300px;
+    border: none;
+}
+
+.soundcloud-player .mindful-media-player-aspect-ratio {
+    padding-bottom: 0;
+    height: 300px;
+}
+
+/* YouTube Player */
+.youtube-player {
+    background: #000;
+}
+
+/* Vimeo Player */
+.vimeo-player {
+    background: #000;
+}
+
+/* Archive.org Player */
+.archive-player {
+    margin-bottom: 0;
+}
+
+.archive-player .mindful-media-player-aspect-ratio {
+    padding-bottom: 56.25%; /* 16:9 ratio */
+    height: 0;
+    position: relative;
+}
+
+/* Archive playlist - taller to accommodate playlist view */
+.archive-player .mindful-media-player-aspect-ratio.archive-playlist {
+    padding-bottom: 75%;
+    min-height: 200px;
+}
+
+/* Preview mode - fixed height for admin preview */
+.archive-player.preview-mode {
+    background: #000;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+.archive-player.preview-mode iframe {
+    display: block;
+    border: none;
+    position: relative;
+    z-index: 1;
+}
+
+.archive-player iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Archive.org Loading Indicator */
+.mindful-media-archive-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #111;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    gap: 16px;
+}
+
+.mindful-media-archive-loading p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    margin: 0;
+    font-family: var(--mm-font-family);
+}
+
+.mindful-media-archive-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    border-top-color: var(--mm-primary, #8B0000);
+    border-radius: 50%;
+    animation: mm-archive-spin 1s linear infinite;
+}
+
+@keyframes mm-archive-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Fallback Player */
+.fallback-player {
+    background: #f5f5f5;
+    border: 2px dashed #ddd;
+}
+
+.mindful-media-player-fallback {
+    padding: 60px 30px;
+    text-align: center;
+}
+
+.mindful-media-player-fallback p {
+    margin: 0 0 20px 0;
+    color: #666;
+    font-size: 16px;
+}
+
+.mindful-media-external-link {
+    display: inline-block;
+    padding: 12px 24px;
+    background: var(--mindful-media-primary, #8B0000);
+    color: white !important;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.mindful-media-external-link:hover {
+    background: var(--mindful-media-primary-hover, #6d0000);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+
+/* ============================================
+   MODAL PLAYER STYLES - YouTube Style with Scroll
+   Full-screen black background, scrollable to browse below
+   ============================================ */
+
+/* Modal Overlay - Full screen black background, allow scrolling */
+.mindful-media-inline-player {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000000;
+    z-index: 99999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mindful-media-inline-player.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Modal Content Container */
+.mindful-media-modal-content {
+    background: transparent;
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column; /* Stack vertically by default */
+    position: relative;
+}
+
+/* When there's no playlist, keep column layout */
+/* When there's a playlist, player content needs to avoid the fixed sidebar on the right */
+.mindful-media-inline-player.has-playlist .mindful-media-inline-player-content {
+    flex: 1 1 auto;
+    min-width: 600px;
+    max-width: calc(100vw - 420px); /* Sidebar is 402px + buffer */
+    padding-right: 20px;
+}
+
+/* Ensure browse section is also not overlapped by sidebar */
+.mindful-media-inline-player.has-playlist .mindful-media-browse-below {
+    max-width: calc(100vw - 420px); /* Match player content width */
+    padding-right: 20px;
+}
+
+/* Ensure modal content section (description, meta) is not overlapped by sidebar */
+.mindful-media-inline-player.has-playlist .mindful-media-modal-content-section {
+    max-width: calc(100vw - 420px); /* Match player content width */
+    padding-right: 20px;
+}
+
+/* ====== PLAYLIST SIDEBAR - YouTube Style ====== */
+.mindful-media-playlist-sidebar {
+    width: 402px;
+    background: var(--mm-dark-bg-secondary);
+    border-left: 1px solid var(--mm-dark-border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 100001;
+    transition: transform 0.3s ease;
+}
+
+/* Collapsed state */
+.mindful-media-playlist-sidebar.collapsed {
+    transform: translateX(402px);
+}
+
+.mindful-media-playlist-sidebar.collapsed .mindful-media-playlist-items {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Adjust player content when playlist visible */
+.mindful-media-inline-player.has-playlist .mindful-media-inline-player-content {
+    transition: max-width 0.3s ease, padding-right 0.3s ease;
+}
+
+.mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-inline-player-content {
+    max-width: 100vw;
+    padding-right: 60px;
+}
+
+.mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-browse-below {
+    max-width: 100vw;
+    padding-right: 60px;
+}
+
+.mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-modal-content-section {
+    max-width: 100vw;
+    padding-right: 60px;
+}
+
+/* Playlist header - YouTube style */
+.mindful-media-playlist-header {
+    display: flex;
+    flex-direction: column;
+    padding: 80px var(--mm-spacing-lg) var(--mm-spacing-lg);
+    border-bottom: 1px solid var(--mm-dark-border);
+    flex-shrink: 0;
+    background: var(--mm-dark-bg-elevated);
+}
+
+.mindful-media-playlist-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mm-spacing-xs);
+}
+
+/* Playlist toggle button */
+.mindful-media-playlist-toggle {
+    background: var(--mm-dark-bg-elevated);
+    border: 1px solid var(--mm-dark-border);
+    color: var(--mm-dark-text-secondary);
+    cursor: pointer;
+    padding: var(--mm-spacing-md) var(--mm-spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    position: fixed;
+    right: 402px;
+    top: 90px;
+    z-index: 100003;
+    border-radius: var(--mm-radius-sm) 0 0 var(--mm-radius-sm);
+}
+
+.mindful-media-playlist-toggle:hover {
+    color: var(--mm-dark-text-primary);
+    background: var(--mm-dark-bg-hover);
+}
+
+.mindful-media-playlist-toggle svg {
+    transition: transform 0.3s ease;
+}
+
+.mindful-media-playlist-sidebar.collapsed ~ .mindful-media-playlist-toggle {
+    right: 0;
+}
+
+.mindful-media-playlist-sidebar.collapsed ~ .mindful-media-playlist-toggle svg {
+    transform: rotate(180deg);
+}
+
+.mindful-media-playlist-header h3 {
+    margin: 0;
+    font-size: var(--mm-font-size-lg);
+    font-weight: 600;
+    color: var(--mm-dark-text-primary);
+    line-height: 1.3;
+}
+
+.mindful-media-playlist-count {
+    font-size: var(--mm-font-size-xs);
+    color: var(--mm-dark-text-secondary);
+}
+
+/* Playlist items container */
+.mindful-media-playlist-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--mm-spacing-sm) 0;
+}
+
+/* Individual playlist item - YouTube style */
+.mindful-media-playlist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--mm-spacing-sm);
+    padding: var(--mm-spacing-sm) var(--mm-spacing-lg);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.mindful-media-playlist-item:hover {
+    background: var(--mm-dark-bg-hover);
+}
+
+.mindful-media-playlist-item.active {
+    background: var(--mm-dark-bg-elevated);
+    border-left-color: var(--mm-accent-primary);
+}
+
+/* Item number */
+.mindful-media-playlist-item-number {
+    font-size: var(--mm-font-size-xs);
+    color: var(--mm-dark-text-muted);
+    font-weight: 400;
+    min-width: 20px;
+    text-align: center;
+    padding-top: 2px;
+}
+
+.mindful-media-playlist-item.active .mindful-media-playlist-item-number {
+    color: var(--mm-dark-text-primary);
+}
+
+/* Item thumbnail (optional) */
+.mindful-media-playlist-item-thumb {
+    width: 120px;
+    height: 68px;
+    border-radius: var(--mm-radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--mm-dark-bg-primary);
+}
+
+.mindful-media-playlist-item-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Item info */
+.mindful-media-playlist-item-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mindful-media-playlist-item-title {
+    font-size: var(--mm-font-size-sm);
+    color: var(--mm-dark-text-primary);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+}
+
+.mindful-media-playlist-item-title *,
+.mindful-media-playlist-item-title span {
+    color: inherit;
+}
+
+.mindful-media-playlist-item.active .mindful-media-playlist-item-title {
+    font-weight: 500;
+}
+
+.mindful-media-playlist-item-duration {
+    font-size: var(--mm-font-size-xs);
+    color: var(--mm-dark-text-muted);
+}
+
+/* Playing indicator */
+.mindful-media-playlist-item-playing {
+    color: var(--mm-accent-primary);
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+}
+
+/* Adjust player content width when playlist is shown */
+.mindful-media-inline-player.has-playlist .mindful-media-inline-player-content {
+    padding-right: 0;
+}
+
+/* Playlist description */
+.mindful-media-playlist-description {
+    font-size: var(--mm-font-size-xs);
+    color: var(--mm-dark-text-muted);
+    margin: var(--mm-spacing-xs) 0 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Hierarchical playlist modules */
+.mindful-media-playlist-module {
+    border-bottom: 1px solid var(--mm-dark-border);
+}
+
+.mindful-media-playlist-module:last-child {
+    border-bottom: none;
+}
+
+.mindful-media-module-header {
+    display: flex;
+    align-items: center;
+    gap: var(--mm-spacing-sm);
+    padding: var(--mm-spacing-md) var(--mm-spacing-lg);
+    cursor: pointer;
+    background: var(--mm-dark-bg-elevated);
+    transition: background 0.2s ease;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.mindful-media-module-header:hover {
+    background: var(--mm-dark-bg-hover);
+}
+
+.mindful-media-playlist-module.active .mindful-media-module-header {
+    background: rgba(139, 0, 0, 0.2);
+}
+
+.mindful-media-module-chevron {
+    color: var(--mm-dark-text-secondary);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.mindful-media-playlist-module.collapsed .mindful-media-module-chevron {
+    transform: rotate(-90deg);
+}
+
+.mindful-media-module-name {
+    font-size: var(--mm-font-size-sm);
+    font-weight: 600;
+    color: var(--mm-dark-text-primary);
+    flex: 1;
+}
+
+.mindful-media-module-count {
+    font-size: var(--mm-font-size-xs);
+    color: var(--mm-dark-text-muted);
+}
+
+.mindful-media-module-items {
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+    overflow: hidden;
+}
+
+.mindful-media-playlist-module.collapsed .mindful-media-module-items {
+    max-height: 0;
+    opacity: 0;
+}
+
+/* Responsive: Stack playlist below on mobile */
+@media (max-width: 968px) {
+    .mindful-media-playlist-sidebar {
+        position: relative;
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        max-height: 50vh;
+    }
+    
+    .mindful-media-inline-player.has-playlist .mindful-media-modal-content {
+        flex-direction: column;
+    }
+    
+    .mindful-media-playlist-header {
+        padding-top: 20px;
+    }
+    
+    /* FIX: Reset header to full width on mobile */
+    .mindful-media-inline-player.has-playlist .mindful-media-inline-player-header {
+        right: 0 !important;
+        left: 0 !important;
+    }
+    
+    /* FIX: Remove min-width constraint on mobile */
+    .mindful-media-inline-player.has-playlist .mindful-media-inline-player-content {
+        min-width: 0;
+        max-width: 100%;
+        padding-right: 0;
+    }
+    
+    /* FIX: Ensure video fits mobile screen */
+    .mindful-media-inline-player.has-playlist .youtube-player,
+    .mindful-media-inline-player.has-playlist .vimeo-player,
+    .mindful-media-inline-player.has-playlist .mindful-media-inline-embed {
+        max-width: 100% !important;
+    }
+}
+
+/* Additional smaller breakpoint for close button adjustment */
+@media (max-width: 768px) {
+    .mindful-media-inline-player-header {
+        padding: 12px 16px !important;
+    }
+    
+    .mindful-media-inline-close {
+        position: relative !important;
+        right: auto !important;
+    }
+}
+
+/* Header - dark translucent background, floats on top */
+.mindful-media-inline-player-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100003; /* Above playlist sidebar (100001) */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: rgba(0, 0, 0, 0.7) !important; /* Translucent dark */
+    backdrop-filter: blur(10px);
+    transition: background 0.3s ease, right 0.3s ease;
+    pointer-events: auto;
+}
+
+/* When playlist sidebar is visible, header should not overlap it */
+.mindful-media-inline-player.has-playlist .mindful-media-inline-player-header {
+    right: 402px; /* Width of playlist sidebar */
+}
+
+.mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-inline-player-header {
+    right: 0; /* Full width when sidebar collapsed */
+}
+
+.mindful-media-inline-player:hover .mindful-media-inline-player-header,
+.mindful-media-inline-player-header:hover {
+    background: rgba(0, 0, 0, 0.85) !important; /* Darker on hover */
+    backdrop-filter: blur(12px);
+}
+
+.mindful-media-inline-player-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mindful-media-inline-player-info h3,
+.mindful-media-inline-player-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+    opacity: 0.85;
+    transition: opacity 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* Ensure title spans are also white */
+.mindful-media-inline-player-title span,
+.mindful-media-inline-player-info h3 span {
+    color: inherit !important;
+}
+
+.mindful-media-inline-player:hover .mindful-media-inline-player-title,
+.mindful-media-inline-player:hover .mindful-media-inline-player-info h3 {
+    opacity: 1;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.mindful-media-inline-view-full {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 400;
+    transition: all 0.3s ease;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+}
+
+/* Hide "View Full" link when playlist is present (has its own navigation) */
+.mindful-media-inline-player.has-playlist .mindful-media-inline-view-full {
+    display: none;
+}
+
+.mindful-media-inline-player:hover .mindful-media-inline-view-full {
+    color: rgba(255,255,255,0.9);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.mindful-media-inline-view-full:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+/* Close Button - always visible */
+.mindful-media-inline-player-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.mindful-media-inline-close {
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(5px);
+    border: none !important;
+    color: #fff !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    font-size: 32px !important;
+    font-weight: 300 !important;
+    line-height: 1 !important;
+    transition: all 0.2s ease;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 100010 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.mindful-media-inline-close:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    transform: scale(1.05);
+}
+
+.mindful-media-inline-minimize {
+    display: none;
+}
+
+/* Player Content Area */
+.mindful-media-inline-player-content {
+    padding: 0;
+    width: 100%;
+    min-height: auto; /* Changed from 100vh to avoid mobile black space */
+    display: block;
+    background: #000;
+    position: relative;
+}
+
+/* Inline embed container - MUST have full width! */
+.mindful-media-inline-embed {
+    width: 100% !important;
+    max-width: 1920px !important; /* Reasonable max size */
+    margin: 0 auto !important;
+    display: block !important;
+}
+
+/* SoundCloud player centering */
+.soundcloud-player {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+}
+
+/* Archive.org player sizing */
+.archive-player {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Scroll indicator arrow - appears on hover (YouTube style) */
+.mindful-media-scroll-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99;
+    pointer-events: auto !important;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+    background: rgba(0,0,0,0.75);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer !important;
+}
+
+.mindful-media-scroll-indicator:hover {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.1);
+    background: rgba(0,0,0,0.9);
+}
+
+.mindful-media-scroll-indicator svg {
+    width: 28px;
+    height: 28px;
+    fill: #fff;
+    animation: bounce-arrow 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes bounce-arrow {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-8px);
+    }
+    60% {
+        transform: translateY(-4px);
+    }
+}
+
+/* Hide scroll indicator when scrolled */
+.mindful-media-inline-player.scrolled .mindful-media-scroll-indicator {
+    display: none;
+}
+
+/* Hide scroll indicator when playlist is present (no browse section to scroll to) */
+.mindful-media-inline-player.has-playlist .mindful-media-scroll-indicator {
+    display: none;
+}
+
+/* Modal Content Section - description, meta, tags (matches single page layout) */
+.mindful-media-modal-content-section {
+    background: #0f0f0f;
+    padding: 40px 20px 40px;
+    color: #fff;
+    width: 100%;
+}
+
+.mindful-media-modal-content-inner {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.mindful-media-modal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #272727;
+    margin-bottom: 24px;
+}
+
+.mindful-media-modal-description {
+    color: #f1f1f1 !important;
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 30px;
+    opacity: 1 !important;
+}
+
+.mindful-media-modal-taxonomies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid #272727;
+}
+
+.mindful-media-modal-tax-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mindful-media-modal-tax-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    font-weight: 500;
+    margin-right: 4px;
+}
+
+.mindful-media-modal-chip {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.mindful-media-modal-chip:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Below player section - scrollable browse area */
+.mindful-media-browse-below {
+    background: #000;
+    width: 100%;
+    min-height: auto; /* Changed from 100vh */
+    padding: 40px 20px 60px;
+}
+
+.mindful-media-browse-below-container {
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.mindful-media-browse-below h3 {
+    color: #fff !important;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 30px 0;
+    padding: 0 4px;
+}
+
+/* Ensure "More Media" title and all child elements are white */
+.mindful-media-browse-below h3 *,
+.mindful-media-browse-below h3 span {
+    color: inherit !important;
+}
+
+/* Grid layout for browse below section - 3 columns on desktop */
+.mindful-media-browse-below .mindful-media-browse-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 0;
+}
+
+@media (max-width: 1024px) {
+    .mindful-media-browse-below .mindful-media-browse-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (max-width: 640px) {
+    .mindful-media-browse-below .mindful-media-browse-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .mindful-media-browse-below {
+        padding: 40px 16px 60px;
+    }
+}
+
+/* Browse item styling */
+.mindful-media-browse-item {
+    background: #181818;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.mindful-media-browse-item:hover {
+    background: #282828;
+    transform: translateY(-2px);
+}
+
+.mindful-media-browse-item-image {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    overflow: hidden;
+    background: #0a0a0a;
+}
+
+.mindful-media-browse-item-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mindful-media-browse-item-info {
+    padding: 16px;
+}
+
+.mindful-media-browse-item-title {
+    color: #fff !important;
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0 0 6px 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Ensure browse item titles and child elements are white */
+.mindful-media-browse-item-title *,
+.mindful-media-browse-item-title span {
+    color: inherit !important;
+}
+
+.mindful-media-browse-item-meta {
+    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    margin: 0;
+}
+
+/* Loading indicator for browse content */
+.mindful-media-browse-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255,255,255,0.6);
+    font-size: 14px;
+}
+
+/* All players styling - no borders, full width */
+.mindful-media-inline-player-content .mindful-media-soundcloud-player,
+.mindful-media-inline-player-content .mindful-media-archive-player,
+.mindful-media-inline-player-content .mindful-media-player-wrapper {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    max-width: 1400px !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* YouTube and Vimeo players need to respect sidebar width */
+.mindful-media-inline-player-content .youtube-player,
+.mindful-media-inline-player-content .vimeo-player {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* When playlist sidebar is visible, constrain video width */
+.mindful-media-inline-player.has-playlist .mindful-media-inline-player-content .youtube-player,
+.mindful-media-inline-player.has-playlist .mindful-media-inline-player-content .vimeo-player,
+.mindful-media-inline-player.has-playlist .mindful-media-inline-player-content .mindful-media-inline-embed {
+    max-width: calc(100vw - 420px) !important;
+}
+
+/* Regular page players - full width */
+.youtube-player,
+.vimeo-player {
+    width: 100%;
+    max-width: 100%;
+}
+
+.mindful-media-inline-player-content .mindful-media-player-aspect-ratio {
+    border-radius: 0 !important;
+    padding-bottom: 56.25% !important; /* Enforce 16:9 */
+    height: 0 !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Ensure iframes render properly with proper dimensions */
+.mindful-media-inline-player-content iframe,
+.mindful-media-inline-player-content video {
+    border-radius: 0 !important;
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+}
+
+/* Image containers for audio - smart scaling based on aspect ratio */
+.mindful-media-inline-player-content .mindful-media-image-container {
+    position: relative;
+    width: 100%;
+    height: auto;
+    min-height: 50vh; /* Reduced from 100vh */
+    overflow: hidden;
+    background: #000 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Landscape images - cover to fill background */
+.mindful-media-inline-player-content .mindful-media-image-container .mindful-media-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* If image has class "square" - use contain */
+.mindful-media-inline-player-content .mindful-media-image-container .mindful-media-main-image.square {
+    object-fit: contain;
+}
+
+/* Player controls stay visible */
+.mindful-media-inline-player-content .mindful-media-player-controls {
+    display: block !important;
+    visibility: visible !important;
+}
+
+.mindful-media-inline-player-content .mindful-media-archive-player,
+.mindful-media-inline-player-content .mindful-media-soundcloud-player {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: auto; /* Changed from 100vh */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .mindful-media-inline-player-header {
+        padding: 15px 16px;
+    }
+    
+    .mindful-media-inline-player-info h3,
+    .mindful-media-inline-player-title {
+        font-size: 16px;
+    }
+    
+    .mindful-media-inline-view-full {
+        font-size: 12px;
+    }
+    
+    .mindful-media-inline-close {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+    }
+}
+
+/* Now Playing Button Styling */
+/* Now playing state - subtle indicator only, no background change */
+.mindful-media-play-inline.now-playing,
+.mindful-media-play-inline.now-playing:hover {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: inherit !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+    overflow: hidden;
+}
+
+
+/* ============================================
+   UNIFIED PLAYER CONTROLS - YouTube Style
+   Consistent controls across all platforms
+   ============================================ */
+
+/* Player container with unified controls */
+.mindful-media-unified-player {
+    position: relative;
+    width: 100%;
+    background: #000;
+    overflow: hidden;
+}
+
+/* Iframe needs to be below controls - disable pointer events so our controls work */
+.mindful-media-unified-player iframe {
+    pointer-events: none; /* Block direct interaction with iframe - use custom controls */
+    position: relative;
+    z-index: 1; /* Below controls */
+}
+
+/* Allow pointer events on iframe only for big play button click (before controls are active) */
+.mindful-media-unified-player:not(.controls-active) iframe {
+    pointer-events: auto;
+}
+
+/* Once playing, block iframe pointer events so our controls are used */
+.mindful-media-unified-player.playing iframe,
+.mindful-media-unified-player.controls-active iframe {
+    pointer-events: none;
+}
+
+.mindful-media-unified-player video,
+.mindful-media-unified-player audio {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    background: #000 !important;
+    z-index: 1;
+}
+
+/* Audio elements should be invisible but functional */
+.mindful-media-unified-player audio {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+}
+
+/* Aspect ratio container */
+.mindful-media-unified-player .mindful-media-player-aspect-ratio {
+    position: relative;
+    width: 100% !important;
+    padding-bottom: 56.25% !important; /* 16:9 aspect ratio - REQUIRED! */
+    height: 0 !important;
+    z-index: 1; /* Below controls */
+}
+
+.mindful-media-unified-player video::-webkit-media-controls,
+.mindful-media-unified-player audio::-webkit-media-controls {
+    display: none !important;
+}
+
+.mindful-media-unified-player video::-webkit-media-controls-enclosure,
+.mindful-media-unified-player audio::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+
+/* SoundCloud: Hide native player OFF-SCREEN but keep functional for API */
+.mindful-media-unified-player.soundcloud-player iframe {
+    position: absolute;
+    top: -9999px !important; /* Off-screen but functional */
+    left: -9999px !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0 !important;
+    pointer-events: none !important; /* Our controls handle clicks */
+    z-index: -1; /* Behind everything */
+}
+
+/* Archive.org: Show native player (CORS prevents API control) */
+.mindful-media-unified-player.archive-player iframe {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 10 !important; /* Above background image */
+}
+
+/* Hide custom controls for Archive.org (use their native player) */
+.mindful-media-unified-player.archive-player .mindful-media-custom-controls,
+.mindful-media-unified-player.archive-player .mindful-media-big-play-btn {
+    display: none !important;
+}
+
+/* Keep custom controls visible for SoundCloud */
+.mindful-media-unified-player.soundcloud-player .mindful-media-custom-controls {
+    display: block !important;
+    pointer-events: auto !important;
+}
+
+/* Keep big play button for SoundCloud */
+.mindful-media-unified-player.soundcloud-player .mindful-media-big-play-btn {
+    display: flex !important;
+    pointer-events: auto !important;
+}
+
+/* Featured image for audio players (behind controls) */
+.mindful-media-unified-player .mindful-media-image-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    overflow: hidden;
+    background: #000;
+}
+
+.mindful-media-unified-player .mindful-media-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Custom control overlay */
+.mindful-media-custom-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 50%, transparent 100%);
+    padding: 60px 20px 16px;
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.3s ease;
+    z-index: 200 !important; /* Above everything */
+    pointer-events: none; /* Don't block clicks when hidden */
+}
+
+.mindful-media-unified-player:hover .mindful-media-custom-controls,
+.mindful-media-unified-player.controls-active .mindful-media-custom-controls,
+.mindful-media-custom-controls.active,
+.mindful-media-custom-controls.force-show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Ensure all control buttons are clickable */
+.mindful-media-custom-controls * {
+    pointer-events: auto !important;
+}
+
+/* Progress bar - YouTube red style (customizable via settings) */
+.mindful-media-progress-container {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 2px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    position: relative;
+    transition: height 0.1s ease;
+    z-index: 10;
+    pointer-events: auto !important;
+}
+
+.mindful-media-progress-container:hover {
+    height: 5px;
+}
+
+.mindful-media-progress-container.dragging {
+    height: 5px;
+    cursor: grabbing !important;
+}
+
+.mindful-media-progress-bar {
+    height: 100%;
+    background: var(--mindful-media-progress-color, #ff0000); /* Use CSS variable with fallback */
+    border-radius: 2px;
+    position: relative;
+    transition: width 0.1s linear;
+    pointer-events: none;
+}
+
+.mindful-media-progress-handle {
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: var(--mindful-media-progress-color, #ff0000); /* Use CSS variable with fallback */
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.mindful-media-progress-container:hover .mindful-media-progress-handle {
+    opacity: 1;
+}
+
+/* Buffered progress */
+.mindful-media-progress-buffered {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(255,255,255,0.4);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+/* Control buttons row */
+.mindful-media-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Reduced gap for tighter spacing like YouTube */
+}
+
+/* Play/Pause button - YouTube style */
+.mindful-media-play-btn {
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: transform 0.15s ease, opacity 0.2s ease;
+    padding: 0;
+    opacity: 0.85;
+}
+
+.mindful-media-play-btn:hover {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.mindful-media-play-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+/* Volume controls - YouTube style */
+.mindful-media-volume-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.mindful-media-volume-btn {
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    padding: 0;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+}
+
+.mindful-media-volume-btn:hover {
+    opacity: 1;
+}
+
+.mindful-media-volume-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.mindful-media-volume-slider {
+    width: 60px !important;
+    max-width: 60px !important;
+    height: 3px !important;
+    max-height: 3px !important;
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden !important;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+    flex-shrink: 0 !important;
+}
+
+.mindful-media-volume-container:hover .mindful-media-volume-slider {
+    opacity: 1;
+}
+
+.mindful-media-volume-slider input[type="range"] {
+    width: 100%;
+    height: 3px !important;
+    max-height: 3px !important;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent !important;
+    outline: none;
+    margin: 0 !important;
+    padding: 0 !important;
+    cursor: pointer;
+    vertical-align: middle;
+    display: block;
+}
+
+.mindful-media-volume-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.mindful-media-volume-slider input[type="range"]::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+/* Volume slider track styling - CRITICAL to hide default browser track */
+.mindful-media-volume-slider input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    border: none;
+}
+
+.mindful-media-volume-slider input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    border: none;
+}
+
+.mindful-media-volume-slider input[type="range"]::-ms-track {
+    width: 100%;
+    height: 3px;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+}
+
+.mindful-media-volume-slider input[type="range"]::-ms-fill-lower {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 2px;
+}
+
+.mindful-media-volume-slider input[type="range"]::-ms-fill-upper {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+}
+
+/* Time display - YouTube style */
+.mindful-media-time-display {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.2px;
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+/* Spacer */
+.mindful-media-controls-spacer {
+    flex: 1;
+}
+
+/* Settings button - YouTube style */
+.mindful-media-settings-btn {
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    padding: 0;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+}
+
+.mindful-media-settings-btn:hover {
+    opacity: 1;
+}
+
+.mindful-media-settings-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+/* Fullscreen button - YouTube style */
+.mindful-media-fullscreen-btn {
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    padding: 0;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+}
+
+.mindful-media-fullscreen-btn:hover {
+    opacity: 1;
+}
+
+.mindful-media-fullscreen-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+/* Loading spinner */
+.mindful-media-loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: mindful-spin 0.8s linear infinite;
+    z-index: 5;
+}
+
+@keyframes mindful-spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Big play button overlay - YouTube style */
+.mindful-media-big-play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 64px;
+    height: 64px;
+    background: rgba(0,0,0,0.65);
+    border: 2px solid rgba(255,255,255,0.85);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 150 !important; /* Above iframe, below controls */
+    transition: all 0.2s ease;
+    backdrop-filter: blur(2px);
+    pointer-events: auto !important;
+}
+
+/* YouTube player - show big play button (user expects to click to play) */
+.mindful-media-unified-player.youtube-player .mindful-media-big-play-btn {
+    display: flex !important;
+}
+
+/* YouTube player - show custom controls (opacity still controlled by hover/playing state) */
+.mindful-media-unified-player.youtube-player .mindful-media-custom-controls {
+    display: block !important;
+}
+
+/* Vimeo native player - use native Vimeo controls, no custom overlays */
+.mindful-media-unified-player.vimeo-native .mindful-media-big-play-btn,
+.mindful-media-unified-player.vimeo-native .mindful-media-custom-controls {
+    display: none !important;
+}
+
+/* Ensure Vimeo iframe is fully visible and clickable */
+.mindful-media-unified-player.vimeo-native .mindful-media-player-aspect-ratio {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 */
+    height: 0;
+    overflow: hidden;
+}
+
+.mindful-media-unified-player.vimeo-native iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.mindful-media-big-play-btn:hover {
+    transform: translate(-50%, -50%) scale(1.08);
+    background: rgba(0,0,0,0.8);
+    border-color: #fff;
+}
+
+.mindful-media-big-play-btn::before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 11px 0 11px 18px;
+    border-color: transparent transparent transparent rgba(255,255,255,0.9);
+    margin-left: 3px;
+}
+
+.mindful-media-unified-player.playing .mindful-media-big-play-btn,
+.mindful-media-big-play-btn.hidden {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Hide image container when playing (especially for SoundCloud) */
+.mindful-media-image-container.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+/* SoundCloud specific - show iframe when playing */
+.mindful-media-unified-player.soundcloud-player.playing .mindful-media-player-aspect-ratio {
+    z-index: 10;
+}
+
+.mindful-media-unified-player.soundcloud-player .mindful-media-image-container {
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+}
+
+/* Responsive controls */
+@media (max-width: 768px) {
+    .mindful-media-custom-controls {
+        padding: 40px 15px 15px;
+    }
+    
+    .mindful-media-controls-row {
+        gap: 8px;
+    }
+    
+    .mindful-media-play-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+    }
+    
+    .mindful-media-volume-slider {
+        width: 50px;
+    }
+    
+    .mindful-media-time-display {
+        font-size: 12px;
+    }
+}
+
+/* Modal responsive improvements */
+@media (max-width: 768px) {
+    .mindful-media-inline-player {
+        padding: 10px;
+    }
+    
+    .mindful-media-modal-content {
+        max-width: 100%;
+        max-height: 95vh;
+        margin: 0;
+    }
+    
+    .mindful-media-inline-player-header {
+        padding: 15px 20px;
+    }
+    
+    .mindful-media-inline-player-title {
+        font-size: 16px;
+    }
+}
+
+/* Escape key hint */
+.mindful-media-inline-player::before {
+    content: "Press ESC to close";
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .mindful-media-inline-player::before {
+        display: none;
+    }
+}
+
+/* Password Protection Modal */
+#mindful-media-password-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 100000;
+    backdrop-filter: blur(4px);
+}
+
+.password-modal-content {
+    position: relative !important;
+    background: #fff !important;
+    max-width: 450px !important;
+    width: 90% !important;
+    margin: 100px auto !important;
+    border-radius: 12px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
+    overflow: hidden !important;
+    max-height: 90vh !important;
+    height: auto !important;
+    min-height: auto !important;
+    display: block !important;
+    flex-direction: initial !important;
+    color: #333 !important;
+}
+
+.password-modal-header {
+    background: linear-gradient(135deg, #8B0000 0%, #660000 100%) !important;
+    color: #fff !important;
+    padding: 30px !important;
+    text-align: center !important;
+}
+
+.password-modal-header svg {
+    margin-bottom: 15px;
+    opacity: 0.9;
+    stroke: #fff !important;
+}
+
+.password-modal-header h3 {
+    margin: 0 0 10px 0 !important;
+    font-size: 24px !important;
+    font-weight: 600 !important;
+    color: #fff !important;
+}
+
+.password-modal-header p {
+    margin: 0 !important;
+    opacity: 0.9;
+    font-size: 14px !important;
+    color: #fff !important;
+}
+
+.password-modal-body {
+    padding: 30px;
+}
+
+#mindful-media-password-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+#mindful-media-password-input:focus {
+    outline: none;
+    border-color: #8B0000;
+}
+
+.password-error {
+    background: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.password-modal-footer {
+    padding: 0 30px 30px 30px;
+    display: flex;
+    gap: 10px;
+}
+
+#mindful-media-password-submit,
+#mindful-media-password-cancel {
+    flex: 1;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#mindful-media-password-submit {
+    background: #8B0000;
+    color: white;
+}
+
+#mindful-media-password-submit:hover {
+    background: #660000;
+}
+
+#mindful-media-password-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#mindful-media-password-cancel {
+    background: #f5f5f5;
+    color: #333;
+}
+
+#mindful-media-password-cancel:hover {
+    background: #e5e5e5;
+}
+
+.mindful-media-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 28px;
+    line-height: 1;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mindful-media-modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+@media (max-width: 768px) {
+    .password-modal-content {
+        max-width: 90%;
+        margin: 50px auto;
+    }
+    
+    .password-modal-header {
+        padding: 20px;
+    }
+    
+    .password-modal-body {
+        padding: 20px;
+    }
+    
+    .password-modal-footer {
+        padding: 0 20px 20px 20px;
+        flex-direction: column;
+    }
+}
+
+/* ==========================================
+   Playlist Card Styles (Archive Display)
+   ========================================== */
+
+/* Playlist badge overlay on thumbnail */
+.mindful-media-playlist-badge {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.mindful-media-playlist-badge svg {
+    width: 18px;
+    height: 18px;
+    opacity: 0.9;
+}
+
+/* ==========================================
+   Shortcode Embed Styles
+   ========================================== */
+
+/* Embed thumbnail with play button */
+/* Embed shortcode wrapper - YouTube style */
+.mindful-media-embed {
+    margin: 20px 0;
+}
+
+/* Embed Size Classes */
+.mindful-media-embed.mm-embed-small,
+.mindful-media-embed-player.mm-embed-small {
+    max-width: 320px;
+}
+
+.mindful-media-embed.mm-embed-medium,
+.mindful-media-embed-player.mm-embed-medium {
+    max-width: 560px;
+}
+
+.mindful-media-embed.mm-embed-large,
+.mindful-media-embed-player.mm-embed-large {
+    max-width: 800px;
+}
+
+.mindful-media-embed.mm-embed-full,
+.mindful-media-embed-player.mm-embed-full {
+    max-width: 100%;
+}
+
+.mindful-media-embed .mindful-media-card {
+    background: transparent;
+}
+
+/* Embed thumbnail (playlist & single) */
+.mindful-media-embed-thumbnail {
+    margin: 20px 0;
+    cursor: pointer;
+}
+
+/* Size classes for thumbnail embeds */
+.mindful-media-embed-thumbnail.mm-embed-small {
+    max-width: 320px;
+}
+
+.mindful-media-embed-thumbnail.mm-embed-medium {
+    max-width: 560px;
+}
+
+.mindful-media-embed-thumbnail.mm-embed-large {
+    max-width: 800px;
+}
+
+.mindful-media-embed-thumbnail.mm-embed-full {
+    max-width: 100%;
+}
+
+.mindful-media-embed-thumbnail-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.mindful-media-embed-thumbnail-wrapper:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.mindful-media-embed-thumbnail-wrapper img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.mindful-media-embed-play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.mindful-media-embed-thumbnail-wrapper:hover .mindful-media-embed-play-overlay {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.mindful-media-embed-play-btn {
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mindful-media-embed-play-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+}
+
+.mindful-media-embed-play-btn svg {
+    margin-left: 4px; /* Optical centering */
+}
+
+.mindful-media-embed-title {
+    margin-top: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Playlist embed badge */
+.mindful-media-embed-playlist-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.mindful-media-embed-playlist-badge svg {
+    opacity: 0.9;
+}
+
+/* Lock badge for protected playlist embeds */
+.mindful-media-embed-lock-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mindful-media-embed-lock-badge svg {
+    opacity: 0.9;
+}
+
+/* Direct player embed */
+.mindful-media-embed-player {
+    max-width: 800px;
+    margin: 20px 0;
+}
+
+/* ==========================================
+   Teacher & Playlist Archive Pages - White Text Override
+   ========================================== */
+
+/* Teacher page title */
+.mindful-media-teacher-page-title {
+    color: #fff !important;
+}
+
+.mindful-media-teacher-page-title *,
+.mindful-media-teacher-page-title span {
+    color: inherit !important;
+}
+
+/* Playlist page title */
+.mindful-media-playlist-page-title {
+    color: #fff !important;
+}
+
+.mindful-media-playlist-page-title *,
+.mindful-media-playlist-page-title span {
+    color: inherit !important;
+}
+
+/* Teacher grid item titles */
+.mindful-media-teacher-item-title {
+    color: #fff !important;
+}
+
+.mindful-media-teacher-item-title *,
+.mindful-media-teacher-item-title span {
+    color: inherit !important;
+}
+
+/* Playlist grid item titles */
+.mindful-media-playlist-item-title {
+    color: #fff !important;
+}
+
+.mindful-media-playlist-item-title *,
+.mindful-media-playlist-item-title span {
+    color: inherit !important;
+}
+
+/* Override any theme colors that might leak through */
+.mindful-media-teacher-page h1,
+.mindful-media-teacher-page h2,
+.mindful-media-teacher-page h3,
+.mindful-media-playlist-page h1,
+.mindful-media-playlist-page h2,
+.mindful-media-playlist-page h3 {
+    color: #fff !important;
+}
+
+.mindful-media-teacher-page h1 *,
+.mindful-media-teacher-page h2 *,
+.mindful-media-teacher-page h3 *,
+.mindful-media-playlist-page h1 *,
+.mindful-media-playlist-page h2 *,
+.mindful-media-playlist-page h3 * {
+    color: inherit !important;
+}
+
+
+/* =====================================================
+   BROWSE/LANDING PAGE STYLES - YouTube Style
+   ===================================================== */
+
+.mindful-media-browse {
+    padding: var(--mm-spacing-xl) var(--mm-spacing-lg);
+    background: var(--mm-bg-primary);
+    min-height: 400px;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* Ensure full width inside Elementor containers */
+.elementor-widget-container .mindful-media-browse,
+.elementor-element .mindful-media-browse {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+.elementor-widget-container .mindful-media-browse-sections,
+.elementor-widget-container .mindful-media-browse-section-wrapper,
+.elementor-widget-container .mm-slider-row,
+.elementor-widget-container .mm-slider-container,
+.elementor-widget-container .mm-slider-track {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+.mindful-media-browse-title {
+    font-size: var(--mm-font-size-3xl);
+    font-weight: 700;
+    margin-bottom: var(--mm-spacing-2xl);
+    text-align: center;
+    color: var(--mm-text-primary);
+}
+
+/* Remove underlines from all links in browse block */
+.mindful-media-browse a {
+    text-decoration: none !important;
+}
+
+.mindful-media-browse a:hover,
+.mindful-media-browse a:visited,
+.mindful-media-browse a:active {
+    text-decoration: none !important;
+}
+
+/* Navigation Bar - YouTube Filter Chips Style */
+.mindful-media-browse-nav {
+    margin-bottom: var(--mm-spacing-2xl);
+    padding: var(--mm-spacing-md) 0;
+    border-bottom: 1px solid var(--mm-border);
+}
+
+.mindful-media-browse-nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--mm-spacing-md);
+}
+
+.mindful-media-browse-nav-tabs {
+    display: flex;
+    gap: var(--mm-spacing-sm);
+    flex-wrap: wrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Search in navigation bar */
+.mm-browse-nav-search {
+    flex-shrink: 0;
+}
+
+.mm-browse-nav-search .mindful-media-search-input {
+    width: 200px;
+}
+
+.mindful-media-browse-nav-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--mm-spacing-sm);
+    padding: var(--mm-spacing-sm) var(--mm-spacing-lg);
+    background: var(--mm-bg-secondary);
+    border-radius: var(--mm-radius-md);
+    color: var(--mm-text-primary);
+    text-decoration: none;
+    font-size: var(--mm-font-size-base);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+}
+
+.mindful-media-browse-nav-item:hover {
+    background: var(--mm-bg-hover);
+    color: var(--mm-text-primary);
+    text-decoration: none;
+}
+
+.mindful-media-browse-nav-item:visited,
+.mindful-media-browse-nav-item:focus {
+    color: var(--mm-text-primary);
+    text-decoration: none;
+}
+
+.mindful-media-browse-nav-item.active {
+    background: var(--mm-text-primary);
+    color: var(--mm-bg-primary);
+}
+
+.mindful-media-browse-nav-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+}
+
+.mindful-media-browse-nav-item:hover .mindful-media-browse-nav-icon,
+.mindful-media-browse-nav-item.active .mindful-media-browse-nav-icon {
+    opacity: 1;
+}
+
+.mindful-media-browse-nav-label {
+    color: inherit;
+}
+
+.mindful-media-browse-nav-icon svg {
+    stroke: currentColor;
+    width: 18px;
+    height: 18px;
+}
+
+/* Browse Section Wrappers - ensure full width */
+.mindful-media-browse-section-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    display: block;
+}
+
+.mindful-media-browse-sections {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block;
+}
+
+/* Browse Sections */
+.mindful-media-browse-section {
+    margin-bottom: var(--mm-spacing-2xl);
+    width: 100% !important;
+}
+
+/* Force all slider components to be full width */
+.mindful-media-browse-section-wrapper .mm-slider-row,
+.mindful-media-browse-section-wrapper .mm-slider-container,
+.mindful-media-browse-section-wrapper .mm-slider-track,
+.mindful-media-browse-section-wrapper .mm-slider-header {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.mindful-media-browse-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--mm-spacing-lg);
+}
+
+.mindful-media-browse-section-title {
+    font-size: var(--mm-font-size-xl);
+    font-weight: 600;
+    margin: 0;
+    color: var(--mm-text-primary);
+}
+
+.mindful-media-browse-section-title a {
+    color: var(--mm-text-primary);
+    text-decoration: none;
+}
+
+.mindful-media-browse-section-title a:hover {
+    text-decoration: none;
+    color: var(--mm-primary);
+}
+
+/* Browse Grid - Fixed columns, NO auto-fill */
+.mindful-media-browse-grid {
+    display: grid;
+    gap: var(--mm-spacing-lg);
+    grid-template-columns: repeat(5, 1fr); /* Default to 5 columns */
+}
+
+.mindful-media-browse-grid-2 { grid-template-columns: repeat(2, 1fr) !important; }
+.mindful-media-browse-grid-3 { grid-template-columns: repeat(3, 1fr) !important; }
+.mindful-media-browse-grid-4 { grid-template-columns: repeat(4, 1fr) !important; }
+.mindful-media-browse-grid-5 { grid-template-columns: repeat(5, 1fr) !important; }
+.mindful-media-browse-grid-6 { grid-template-columns: repeat(6, 1fr) !important; }
+
+/* Browse Card - YouTube Style */
+.mindful-media-browse-card {
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border-radius: 0;
+    overflow: visible;
+    text-decoration: none;
+    color: var(--mm-text-primary);
+    transition: all 0.2s ease;
+    position: relative;
+    width: 100%; /* Fill grid cell */
+}
+
+.mindful-media-browse-card:hover {
+    text-decoration: none;
+    color: var(--mm-text-primary);
+}
+
+.mindful-media-browse-card:visited,
+.mindful-media-browse-card:focus {
+    color: var(--mm-text-primary);
+    text-decoration: none;
+}
+
+/* Card Image - Fixed aspect ratio */
+.mindful-media-browse-card-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--mm-bg-secondary);
+    position: relative;
+    border-radius: var(--mm-radius-lg);
+    margin-bottom: var(--mm-spacing-md);
+}
+
+.mindful-media-browse-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.mindful-media-browse-card:hover .mindful-media-browse-card-image img {
+    transform: scale(1.05);
+}
+
+.mindful-media-browse-card-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--mm-text-muted);
+    background: var(--mm-bg-secondary);
+}
+
+/* Icon-based placeholder for categories with specific icons */
+.mindful-media-browse-card-placeholder.mindful-media-browse-card-icon {
+    font-size: inherit;
+    font-weight: normal;
+}
+
+.mindful-media-browse-card-placeholder.mindful-media-browse-card-icon svg {
+    width: 48px;
+    height: 48px;
+    stroke: var(--mm-text-muted);
+    opacity: 0.6;
+    transition: all 0.2s ease;
+}
+
+.mindful-media-browse-card:hover .mindful-media-browse-card-icon svg {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+/* Card Badges */
+.mindful-media-browse-card-badge {
+    position: absolute;
+    top: var(--mm-spacing-sm);
+    left: var(--mm-spacing-sm);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: var(--mm-radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mindful-media-browse-card-lock {
+    position: absolute;
+    top: var(--mm-spacing-sm);
+    right: var(--mm-spacing-sm);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card Content */
+.mindful-media-browse-card-content {
+    padding: 0 !important;
+}
+
+/* Browse card title - YouTube style, prevent theme overrides */
+.mindful-media-browse-card-title {
+    font-size: var(--mm-font-size-base) !important;
+    font-weight: 500 !important;
+    margin: 0 0 var(--mm-spacing-xs) !important;
+    color: var(--mm-text-primary) !important;
+    line-height: 1.4 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+    text-decoration: none !important;
+}
+
+.mindful-media-browse-card-title,
+.mindful-media-browse-card-title a,
+.mindful-media-browse-card a {
+    color: var(--mm-text-primary) !important;
+    text-decoration: none !important;
+    background: transparent !important;
+}
+
+.mindful-media-browse-card-title:hover,
+.mindful-media-browse-card-title a:hover,
+.mindful-media-browse-card-title a:visited,
+.mindful-media-browse-card a:hover,
+.mindful-media-browse-card a:visited {
+    color: var(--mm-text-primary) !important;
+    text-decoration: none !important;
+}
+
+.mindful-media-browse-card-count {
+    font-size: var(--mm-font-size-xs) !important;
+    color: var(--mm-text-secondary) !important;
+}
+
+/* Featured Hero Section */
+.mindful-media-featured-hero {
+    position: relative;
+    height: 500px;
+    margin-bottom: 50px;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.mindful-media-featured-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(0);
+}
+
+.mindful-media-featured-hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.3) 100%);
+}
+
+.mindful-media-featured-hero-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 50px;
+    max-width: 600px;
+}
+
+.mindful-media-featured-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    width: fit-content;
+}
+
+.mindful-media-featured-title {
+    font-size: 42px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 16px;
+    line-height: 1.2;
+}
+
+.mindful-media-featured-excerpt {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    margin: 0 0 12px;
+}
+
+.mindful-media-featured-teacher {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 24px;
+}
+
+.mindful-media-featured-play {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: #fff;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mindful-media-featured-play:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: scale(1.05);
+}
+
+.mindful-media-featured-play svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Responsive Browse Styles */
+@media (max-width: 1200px) {
+    .mindful-media-browse-grid-5,
+    .mindful-media-browse-grid-6 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .mindful-media-browse-grid-4,
+    .mindful-media-browse-grid-5,
+    .mindful-media-browse-grid-6 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .mindful-media-featured-hero {
+        height: 400px;
+    }
+    
+    .mindful-media-featured-title {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 768px) {
+    .mindful-media-browse-nav-inner {
+        flex-wrap: wrap;
+    }
+    
+    .mindful-media-browse-nav-tabs {
+        flex: 1 1 100%;
+        order: 2;
+        margin-top: var(--mm-spacing-sm);
+    }
+    
+    .mm-browse-nav-search {
+        flex: 1 1 100%;
+        order: 1;
+    }
+    
+    .mm-browse-nav-search .mindful-media-search-input {
+        width: 100%;
+    }
+    
+    .mindful-media-browse-grid-2,
+    .mindful-media-browse-grid-3,
+    .mindful-media-browse-grid-4,
+    .mindful-media-browse-grid-5,
+    .mindful-media-browse-grid-6 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .mindful-media-featured-hero {
+        height: 350px;
+    }
+    
+    .mindful-media-featured-hero-content {
+        padding: 30px;
+    }
+    
+    .mindful-media-featured-title {
+        font-size: 26px;
+    }
+    
+    .mindful-media-featured-excerpt {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .mindful-media-browse-grid-2,
+    .mindful-media-browse-grid-3,
+    .mindful-media-browse-grid-4,
+    .mindful-media-browse-grid-5,
+    .mindful-media-browse-grid-6 {
+        grid-template-columns: 1fr;
+    }
+    
+    .mindful-media-browse-nav-item {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+    
+    .mindful-media-featured-hero {
+        height: 300px;
+    }
+    
+    .mindful-media-featured-hero-content {
+        padding: 20px;
+    }
+    
+    .mindful-media-featured-title {
+        font-size: 22px;
+    }
+}
+
+/* ====== TAXONOMY ARCHIVE SHORTCODE ====== */
+
+.mindful-media-taxonomy-archive {
+    padding: var(--mm-spacing-lg) 0;
+}
+
+/* Remove underlines from all links in taxonomy archive */
+.mindful-media-taxonomy-archive a {
+    text-decoration: none !important;
+}
+
+.mindful-media-taxonomy-archive a:hover,
+.mindful-media-taxonomy-archive a:visited,
+.mindful-media-taxonomy-archive a:active {
+    text-decoration: none !important;
+}
+
+.mindful-media-taxonomy-archive-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--mm-spacing-md);
+    padding: 0 var(--mm-spacing-lg) var(--mm-spacing-lg);
+    margin-bottom: var(--mm-spacing-md);
+    border-bottom: 1px solid var(--mm-border);
+}
+
+.mindful-media-taxonomy-archive-title {
+    font-size: var(--mm-font-size-2xl);
+    font-weight: 700;
+    color: var(--mm-text-primary);
+    margin: 0;
+    padding: 0;
+}
+
+.mm-taxonomy-archive-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.mm-taxonomy-archive-search .mm-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--mm-text-secondary);
+    pointer-events: none;
+}
+
+.mm-taxonomy-archive-search .mindful-media-search-input {
+    width: 240px;
+    padding: 10px 32px 10px 40px;
+    border: 1px solid var(--mm-border);
+    border-radius: var(--mm-radius-full);
+    font-size: var(--mm-font-size-base);
+    color: var(--mm-text-primary);
+    background: var(--mm-bg-primary);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.mm-taxonomy-archive-search .mindful-media-search-input:hover {
+    border-color: var(--mm-border-hover);
+}
+
+.mm-taxonomy-archive-search .mindful-media-search-input:focus {
+    border-color: var(--mm-accent-secondary);
+    box-shadow: 0 0 0 2px rgba(6, 95, 212, 0.15);
+}
+
+.mm-taxonomy-archive-search .mm-search-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--mm-bg-secondary);
+    color: var(--mm-text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-taxonomy-archive-search.has-value .mm-search-clear {
+    display: flex;
+}
+
+@media (max-width: 768px) {
+    .mindful-media-taxonomy-archive-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .mm-taxonomy-archive-search {
+        width: 100%;
+    }
+    
+    .mm-taxonomy-archive-search .mindful-media-search-input {
+        width: 100%;
+    }
+}
+
+.mm-term-count {
+    font-size: var(--mm-font-size-sm);
+    font-weight: 400;
+    color: var(--mm-text-secondary);
+    margin-left: var(--mm-spacing-xs);
+}
+
+/* ====== NETFLIX-STYLE HORIZONTAL SLIDER ====== */
+
+/* Slider Row Container */
+.mm-slider-row {
+    position: relative;
+    margin-bottom: var(--mm-spacing-2xl);
+    overflow: visible;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* Locked Playlist Placeholder */
+.mm-playlist-locked {
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    border-radius: var(--mm-radius-lg);
+    padding: 40px 20px;
+    margin-bottom: var(--mm-spacing-md);
+}
+
+.mm-playlist-locked-link {
+    text-decoration: none;
+    display: block;
+}
+
+.mm-playlist-locked-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.mm-playlist-locked-content svg {
+    color: #666;
+    opacity: 0.7;
+}
+
+.mm-playlist-locked-content p {
+    margin: 0;
+    color: #666;
+    font-size: var(--mm-font-size-base);
+}
+
+.mm-playlist-locked-btn {
+    display: inline-block;
+    background: var(--mm-text-primary);
+    color: var(--mm-bg-primary);
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-size: var(--mm-font-size-sm);
+    font-weight: 500;
+    margin-top: 8px;
+    transition: all 0.2s ease;
+}
+
+.mm-playlist-locked-link:hover .mm-playlist-locked-btn {
+    background: var(--mm-accent);
+    transform: translateY(-2px);
+}
+
+.mm-lock-icon {
+    opacity: 0.7;
+}
+
+/* Slider Header with clickable title */
+.mm-slider-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--mm-spacing-md);
+    padding: 0 var(--mm-spacing-lg);
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+.mm-slider-title {
+    font-size: var(--mm-font-size-xl);
+    font-weight: 600;
+    color: var(--mm-text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--mm-spacing-sm);
+}
+
+.mm-slider-title a {
+    color: inherit !important;
+    text-decoration: none !important;
+    display: flex;
+    align-items: center;
+    gap: var(--mm-spacing-sm);
+}
+
+.mm-slider-title a:hover,
+.mm-slider-title a:visited,
+.mm-slider-title a:active {
+    color: var(--mm-accent-secondary);
+    text-decoration: none !important;
+}
+
+.mm-slider-title-arrow {
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: all 0.2s ease;
+}
+
+.mm-slider-title a:hover .mm-slider-title-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.mm-slider-see-all {
+    font-size: var(--mm-font-size-sm);
+    color: var(--mm-text-secondary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.mm-slider-see-all:hover {
+    color: var(--mm-accent-secondary);
+}
+
+/* Slider Track */
+.mm-slider-container {
+    position: relative;
+    overflow: hidden;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+.mm-slider-track {
+    display: flex;
+    gap: var(--mm-spacing-md);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--mm-spacing-sm) var(--mm-spacing-lg);
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+}
+
+.mm-slider-track::-webkit-scrollbar {
+    display: none;
+}
+
+/* Slider Items */
+.mm-slider-item {
+    flex: 0 0 auto;
+    width: calc((100% - (var(--mm-spacing-md) * 4)) / 5);
+    transition: transform 0.2s ease;
+}
+
+.mm-slider-item:hover {
+    transform: scale(1.02);
+}
+
+/* Responsive slider item widths */
+@media (max-width: 1400px) {
+    .mm-slider-item {
+        width: calc((100% - (var(--mm-spacing-md) * 3)) / 4);
+    }
+}
+
+@media (max-width: 1024px) {
+    .mm-slider-item {
+        width: calc((100% - (var(--mm-spacing-md) * 2)) / 3);
+    }
+}
+
+@media (max-width: 768px) {
+    .mm-slider-item {
+        width: calc((100% - var(--mm-spacing-md)) / 2);
+    }
+}
+
+@media (max-width: 480px) {
+    .mm-slider-item {
+        width: 85%;
+    }
+}
+
+/* Navigation Arrows - Clean Simple Style */
+/* Arrows overlay ONLY the thumbnail area, not the title/text below */
+.mm-slider-nav {
+    position: absolute;
+    top: 4px;
+    /* Height covers thumbnail area only (16:9 ratio = ~56% of card height) */
+    height: calc(56.25% - 8px);
+    width: 60px;
+    border: none;
+    background: transparent !important;
+    color: #333;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+}
+
+.mm-slider-nav--prev {
+    left: 0;
+    justify-content: flex-start;
+    padding-left: 8px;
+}
+
+.mm-slider-nav--next {
+    right: 0;
+    justify-content: flex-end;
+    padding-right: 8px;
+}
+
+.mm-slider-container:hover .mm-slider-nav {
+    opacity: 1;
+}
+
+.mm-slider-nav:hover {
+    background: transparent !important;
+}
+
+.mm-slider-nav--next:hover {
+    background: transparent !important;
+}
+
+.mm-slider-nav:disabled {
+    opacity: 0 !important;
+    cursor: default;
+    pointer-events: none;
+}
+
+.mm-slider-nav svg {
+    width: 56px;
+    height: 56px;
+    transition: transform 0.2s ease;
+    stroke-width: 2.5;
+    stroke: #333;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.mm-slider-nav:hover svg {
+    transform: scale(1.15);
+}
+
+/* Touch/Mobile - always show faded arrows */
+@media (hover: none) {
+    .mm-slider-nav {
+        opacity: 0.7;
+        width: 50px;
+    }
+    
+    .mm-slider-nav svg {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+/* ====== SKELETON LOADERS ====== */
+
+/* Base skeleton animation */
+@keyframes mm-skeleton-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.mm-skeleton {
+    background: linear-gradient(90deg, 
+        var(--mm-bg-secondary) 25%, 
+        var(--mm-bg-hover) 50%, 
+        var(--mm-bg-secondary) 75%
+    );
+    background-size: 200% 100%;
+    animation: mm-skeleton-shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--mm-radius-md);
+}
+
+/* Skeleton card */
+.mm-skeleton-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mm-spacing-sm);
+}
+
+.mm-skeleton-thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--mm-radius-lg);
+}
+
+.mm-skeleton-title {
+    height: 18px;
+    width: 90%;
+}
+
+.mm-skeleton-meta {
+    height: 14px;
+    width: 60%;
+}
+
+/* Dark theme skeleton */
+.mindful-media-inline-player .mm-skeleton {
+    background: linear-gradient(90deg, 
+        var(--mm-dark-bg-secondary) 25%, 
+        var(--mm-dark-bg-hover) 50%, 
+        var(--mm-dark-bg-secondary) 75%
+    );
+    background-size: 200% 100%;
+}
+
+/* Skeleton slider row */
+.mm-slider-skeleton {
+    padding: 0 var(--mm-spacing-lg);
+}
+
+.mm-slider-skeleton .mm-skeleton-header {
+    height: 24px;
+    width: 150px;
+    margin-bottom: var(--mm-spacing-md);
+}
+
+.mm-slider-skeleton .mm-skeleton-items {
+    display: flex;
+    gap: var(--mm-spacing-md);
+    overflow: hidden;
+}
+
+/* ====== LAZY LOADING ====== */
+
+.mm-lazy-image {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mm-lazy-image.loaded {
+    opacity: 1;
+}
+
+.mm-lazy-placeholder {
+    background: var(--mm-bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mm-lazy-placeholder svg {
+    width: 48px;
+    height: 48px;
+    color: var(--mm-text-muted);
+    opacity: 0.5;
+}
+
+/* ====== FEATURED SECTION - 3 ITEMS ROW ====== */
+
+.mindful-media-featured-section {
+    margin-bottom: var(--mm-spacing-2xl);
+}
+
+.mindful-media-featured-badge-inline {
+    background: var(--mm-accent-primary);
+    color: white;
+    padding: 4px 12px;
+    border-radius: var(--mm-radius-sm);
+    font-size: var(--mm-font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mindful-media-featured-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--mm-spacing-lg);
+    padding: 0 var(--mm-spacing-lg);
+}
+
+@media (max-width: 1024px) {
+    .mindful-media-featured-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .mindful-media-featured-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mindful-media-featured-card {
+    position: relative;
+    border-radius: var(--mm-radius-lg);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.mindful-media-featured-card:hover {
+    transform: scale(1.02);
+}
+
+.mindful-media-featured-card-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: var(--mm-radius-lg);
+}
+
+.mindful-media-featured-card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.mindful-media-featured-card:hover .mindful-media-featured-card-thumb img {
+    transform: scale(1.05);
+}
+
+.mindful-media-featured-card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.mindful-media-featured-card:hover .mindful-media-featured-card-overlay {
+    opacity: 1;
+}
+
+.mindful-media-featured-card-play {
+    width: 72px;
+    height: 72px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.mindful-media-featured-card:hover .mindful-media-featured-card-play {
+    transform: scale(1.1);
+    background: rgba(139, 0, 0, 0.9);
+}
+
+.mindful-media-featured-card-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--mm-accent-primary);
+    color: white;
+    padding: 4px 10px;
+    border-radius: var(--mm-radius-sm);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mindful-media-featured-card-content {
+    padding: var(--mm-spacing-md) var(--mm-spacing-xs);
+}
+
+.mindful-media-featured-card-title {
+    font-size: var(--mm-font-size-base);
+    font-weight: 600;
+    color: var(--mm-text-primary);
+    margin: 0 0 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.mindful-media-featured-card-teacher {
+    font-size: var(--mm-font-size-sm);
+    color: var(--mm-text-secondary);
+    margin: 0;
+}
+
+/* ====== SLIDER CARD STYLES ====== */
+
+.mindful-media-card {
+    background: transparent;
+    border-radius: var(--mm-radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.mindful-media-card:hover {
+    transform: scale(1.02);
+}
+
+.mindful-media-card-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--mm-radius-lg);
+    background: var(--mm-bg-secondary);
+}
+
+.mindful-media-card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.mindful-media-card:hover .mindful-media-card-thumb img {
+    transform: scale(1.05);
+}
+
+.mindful-media-card-play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.mindful-media-card:hover .mindful-media-card-play-overlay {
+    opacity: 1;
+}
+
+.mindful-media-card-play-overlay svg {
+    width: 56px;
+    height: 56px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.mindful-media-card-content {
+    padding: var(--mm-spacing-md) var(--mm-spacing-xs);
+}
+
+.mindful-media-card-title {
+    font-size: var(--mm-font-size-sm);
+    font-weight: 500;
+    color: var(--mm-text-primary);
+    margin: 0 0 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+}
+
+.mindful-media-card-teacher {
+    font-size: var(--mm-font-size-xs);
+    color: var(--mm-text-secondary);
+    margin: 0;
+}
+
+/* Playlist badge - shows which playlist a video belongs to */
+.mindful-media-card-playlist-badge {
+    margin-top: 4px;
+}
+
+.mindful-media-card-playlist-badge .mindful-media-playlist-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: var(--mm-bg-secondary);
+    border-radius: var(--mm-radius-full);
+    font-size: 11px;
+    color: var(--mm-text-secondary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    max-width: 100%;
+}
+
+.mindful-media-card-playlist-badge .mindful-media-playlist-link:hover {
+    background: var(--mm-bg-hover);
+    color: var(--mm-text-primary);
+}
+
+.mindful-media-card-playlist-badge .mindful-media-playlist-link svg {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.mindful-media-card-playlist-badge .mindful-media-playlist-link span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Duration badge - positioned on thumbnail */
+.mindful-media-duration-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 2px 6px;
+    border-radius: var(--mm-radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Media type icons (video/audio) - positioned on thumbnail */
+.mindful-media-card-type-icon {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 4px 6px;
+    border-radius: var(--mm-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+
+.mindful-media-card-type-audio {
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.mindful-media-card-type-video {
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.mindful-media-card-type-icon svg {
+    width: 14px;
+    height: 14px;
+    fill: white;
+}
+
+/* ==========================================================================
+   ELEMENTOR FULL WIDTH OVERRIDE - Ensures browse widget is always full width
+   ========================================================================== */
+
+/* Force all browse components to be full width inside Elementor */
+.elementor .mindful-media-browse,
+.elementor-widget .mindful-media-browse,
+.elementor-widget-container .mindful-media-browse,
+.elementor-section .mindful-media-browse {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding-left: var(--mm-spacing-lg) !important;
+    padding-right: var(--mm-spacing-lg) !important;
+    box-sizing: border-box !important;
+}
+
+/* Override any Elementor widget spacing that might constrain width */
+.elementor-widget-mindful_media_browse .elementor-widget-container,
+.elementor-widget-mindful_media_browse,
+.elementor-widget .mindful-media-browse {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* Ensure sections container and all children stretch full width */
+.elementor .mindful-media-browse-sections,
+.elementor .mindful-media-browse-section-wrapper,
+.elementor .mindful-media-browse-section,
+.elementor .mm-slider-row,
+.elementor .mm-slider-header,
+.elementor .mm-slider-container,
+.elementor .mm-slider-track {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Ensure section wrappers display correctly when visible */
+.mindful-media-browse-section-wrapper:not([style*="display: none"]) {
+    display: block !important;
+    width: 100% !important;
+}
+
+/* Browse view containers (cards vs videos) */
+.mm-browse-cards-view,
+.mm-browse-videos-view {
+    width: 100% !important;
+}
+
+.mm-browse-video-rows {
+    width: 100% !important;
+}
+
+/* No content message styling */
+.mm-no-content,
+.mm-no-items {
+    padding: var(--mm-spacing-lg);
+    color: var(--mm-text-secondary);
+    font-style: italic;
+}

@@ -1,0 +1,122 @@
+/**
+ * MindfulMedia Blocks Editor Styles
+ */
+
+/* Block wrapper styles in editor */
+.mindful-media-block-browse,
+.mindful-media-block-embed,
+.mindful-media-block-archive {
+    border: 2px solid #b8a064;
+    padding: 0;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.mindful-media-block-browse:hover,
+.mindful-media-block-embed:hover,
+.mindful-media-block-archive:hover {
+    border-color: #8a7446;
+    box-shadow: 0 2px 8px rgba(184, 160, 100, 0.2);
+}
+
+/* Make server-side render fill the container */
+.mindful-media-block-browse .components-server-side-render,
+.mindful-media-block-embed .components-server-side-render,
+.mindful-media-block-archive .components-server-side-render {
+    display: block;
+}
+
+/* Placeholder when no content */
+.mindful-media-block-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+    color: #666;
+}
+
+.mindful-media-block-placeholder svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.mindful-media-block-placeholder p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Block icons in inserter */
+.block-editor-block-icon[data-type="mindful-media/browse"],
+.block-editor-block-icon[data-type="mindful-media/embed"],
+.block-editor-block-icon[data-type="mindful-media/archive"] {
+    color: #b8a064;
+}
+
+/* Server side render loading */
+.components-server-side-render {
+    min-height: 100px;
+}
+
+/* ========================================
+   EDITOR PREVIEW OVERRIDES
+   Light theme preview for blocks
+   ======================================== */
+
+/* Browse container in editor */
+.editor-styles-wrapper .mindful-media-browse {
+    border-radius: 0;
+    margin: 0;
+}
+
+/* Override grids for editor preview - show in proper columns */
+.editor-styles-wrapper .mindful-media-browse-grid {
+    display: grid !important;
+    gap: 16px !important;
+}
+
+.editor-styles-wrapper .mindful-media-browse-grid-2 { grid-template-columns: repeat(2, 1fr) !important; }
+.editor-styles-wrapper .mindful-media-browse-grid-3 { grid-template-columns: repeat(3, 1fr) !important; }
+.editor-styles-wrapper .mindful-media-browse-grid-4 { grid-template-columns: repeat(4, 1fr) !important; }
+.editor-styles-wrapper .mindful-media-browse-grid-5 { grid-template-columns: repeat(5, 1fr) !important; }
+.editor-styles-wrapper .mindful-media-browse-grid-6 { grid-template-columns: repeat(6, 1fr) !important; }
+
+/* Make cards look proper in editor but not clickable */
+.editor-styles-wrapper .mindful-media-browse-card {
+    pointer-events: none;
+}
+
+/* Prevent editor from making links blue */
+.editor-styles-wrapper .mindful-media-browse-nav-item,
+.editor-styles-wrapper .mindful-media-browse-card,
+.editor-styles-wrapper .mindful-media-browse-card a {
+    text-decoration: none !important;
+}
+
+/* Archive preview in editor - limit height */
+.editor-styles-wrapper .mindful-media-archive {
+    max-height: 600px;
+    overflow: hidden;
+    position: relative;
+}
+
+.editor-styles-wrapper .mindful-media-archive::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(transparent, rgba(255, 255, 255, 0.95));
+    pointer-events: none;
+}
+
+/* Hero section in editor */
+.editor-styles-wrapper .mindful-media-hero-section {
+    margin: 0;
+    border-radius: 0;
+}

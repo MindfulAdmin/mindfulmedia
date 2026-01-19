@@ -1184,16 +1184,16 @@ class MindfulMedia_Shortcodes {
             $modal_output = true;
         }
         
-        // Output slider row
-        echo '<section class="mm-slider-row mindful-media-row ' . esc_attr($atts['class']) . '">';
+        // Output slider row - with inline styles for theme isolation
+        echo '<section class="mm-slider-row mindful-media-row ' . esc_attr($atts['class']) . '" style="margin-bottom:32px;">';
         
         // Header with title
-        echo '<div class="mm-slider-header">';
-        echo '<h3 class="mm-slider-title">';
+        echo '<div class="mm-slider-header" style="display:flex;align-items:center;justify-content:space-between;padding:0 24px 12px;margin-bottom:8px;">';
+        echo '<h3 class="mm-slider-title" style="margin:0;padding:0;font-size:20px;font-weight:600;color:#0f0f0f;line-height:1.3;">';
         if ($atts['show_link'] === 'true' && !is_wp_error($archive_link)) {
-            echo '<a href="' . esc_url($archive_link) . '">';
+            echo '<a href="' . esc_url($archive_link) . '" style="color:#0f0f0f;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">';
             echo esc_html($title);
-            echo '<svg class="mm-slider-title-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+            echo '<svg class="mm-slider-title-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;opacity:0;transition:opacity 0.2s;"><polyline points="9 18 15 12 9 6"></polyline></svg>';
             echo '</a>';
         } else {
             echo esc_html($title);
@@ -1202,18 +1202,19 @@ class MindfulMedia_Shortcodes {
         echo '</div>';
         
         // Slider container
-        echo '<div class="mm-slider-container">';
+        $nav_btn_style = 'position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:10;transition:all 0.2s;';
+        echo '<div class="mm-slider-container" style="position:relative;padding:0 24px;">';
         
         // Navigation arrows
-        echo '<button class="mm-slider-nav mm-slider-nav--prev" aria-label="Previous">';
-        echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>';
+        echo '<button class="mm-slider-nav mm-slider-nav--prev" aria-label="Previous" style="' . $nav_btn_style . 'left:8px;">';
+        echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#0f0f0f;"><polyline points="15 18 9 12 15 6"></polyline></svg>';
         echo '</button>';
-        echo '<button class="mm-slider-nav mm-slider-nav--next" aria-label="Next">';
-        echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+        echo '<button class="mm-slider-nav mm-slider-nav--next" aria-label="Next" style="' . $nav_btn_style . 'right:8px;">';
+        echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#0f0f0f;"><polyline points="9 18 15 12 9 6"></polyline></svg>';
         echo '</button>';
         
         // Slider track
-        echo '<div class="mm-slider-track">';
+        echo '<div class="mm-slider-track" style="display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;padding:4px 0;">';
         
         while ($query->have_posts()) {
             $query->the_post();
@@ -1397,21 +1398,21 @@ class MindfulMedia_Shortcodes {
             $term_link = get_term_link($term);
             
             // Row section
-            echo '<section class="mm-slider-row mindful-media-row">';
+            echo '<section class="mm-slider-row mindful-media-row" style="margin-bottom:32px;">';
             
             // Row header with term name (use total count for playlists)
-            echo '<div class="mm-slider-header">';
-            echo '<h3 class="mm-slider-title">';
+            echo '<div class="mm-slider-header" style="display:flex;align-items:center;justify-content:space-between;padding:0 24px 12px;margin-bottom:8px;">';
+            echo '<h3 class="mm-slider-title" style="margin:0;padding:0;font-size:20px;font-weight:600;color:#0f0f0f;line-height:1.3;">';
             if (!is_wp_error($term_link)) {
-                echo '<a href="' . esc_url($term_link) . '">';
+                echo '<a href="' . esc_url($term_link) . '" style="color:#0f0f0f;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">';
                 if ($is_protected) {
-                    echo '<svg class="mm-lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px; vertical-align: middle;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
+                    echo '<svg class="mm-lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;margin-right:6px;vertical-align:middle;color:#606060;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
                 }
                 echo esc_html($term->name);
                 if ($total_count > 0) {
-                    echo ' <span class="mm-term-count">(' . $total_count . ')</span>';
+                    echo ' <span class="mm-term-count" style="color:#606060;font-weight:400;">(' . $total_count . ')</span>';
                 }
-                echo '<svg class="mm-slider-title-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+                echo '<svg class="mm-slider-title-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;opacity:0;transition:opacity 0.2s;"><polyline points="9 18 15 12 9 6"></polyline></svg>';
                 echo '</a>';
             } else {
                 echo esc_html($term->name);
@@ -1421,10 +1422,10 @@ class MindfulMedia_Shortcodes {
             
             // If protected and no access, show locked placeholder (compact version)
             if ($is_protected && !$has_access) {
-                echo '<div class="mm-playlist-locked">';
-                echo '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
-                echo '<p class="mm-playlist-locked-text">' . __('This playlist is password protected.', 'mindful-media') . '</p>';
-                echo '<a href="' . esc_url($term_link) . '" class="mm-playlist-locked-link">' . __('Enter password to view', 'mindful-media') . '</a>';
+                echo '<div class="mm-playlist-locked" style="background:linear-gradient(135deg,#f8f8f8 0%,#efefef 100%);border-radius:12px;padding:20px 24px;margin:0 24px 16px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;">';
+                echo '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;color:#606060;flex-shrink:0;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
+                echo '<p class="mm-playlist-locked-text" style="margin:0;padding:0;color:#606060;font-size:14px;flex:1;">' . __('This playlist is password protected.', 'mindful-media') . '</p>';
+                echo '<a href="' . esc_url($term_link) . '" class="mm-playlist-locked-link" style="display:inline-block;background:#0f0f0f;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap;">' . __('Enter password to view', 'mindful-media') . '</a>';
                 echo '</div>';
                 echo '</section>';
                 continue;
@@ -1469,18 +1470,19 @@ class MindfulMedia_Shortcodes {
             }
             
             // Slider container
-            echo '<div class="mm-slider-container">';
+            echo '<div class="mm-slider-container" style="position:relative;padding:0 24px;">';
             
-            // Navigation arrows
-            echo '<button class="mm-slider-nav mm-slider-nav--prev" aria-label="Previous">';
-            echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>';
+            // Navigation arrows - with inline styles for theme isolation
+            $nav_btn_style = 'position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:10;transition:all 0.2s;';
+            echo '<button class="mm-slider-nav mm-slider-nav--prev" aria-label="Previous" style="' . $nav_btn_style . 'left:8px;">';
+            echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#0f0f0f;"><polyline points="15 18 9 12 15 6"></polyline></svg>';
             echo '</button>';
-            echo '<button class="mm-slider-nav mm-slider-nav--next" aria-label="Next">';
-            echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+            echo '<button class="mm-slider-nav mm-slider-nav--next" aria-label="Next" style="' . $nav_btn_style . 'right:8px;">';
+            echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#0f0f0f;"><polyline points="9 18 15 12 9 6"></polyline></svg>';
             echo '</button>';
             
             // Slider track
-            echo '<div class="mm-slider-track">';
+            echo '<div class="mm-slider-track" style="display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;padding:4px 0;">';
             
             while ($query->have_posts()) {
                 $query->the_post();
@@ -1508,38 +1510,38 @@ class MindfulMedia_Shortcodes {
                 $teachers = get_the_terms($post_id, 'media_teacher');
                 $teacher_name = ($teachers && !is_wp_error($teachers)) ? $teachers[0]->name : '';
                 
-                echo '<div class="mm-slider-item">';
-                echo '<div class="mindful-media-card mindful-media-thumb-trigger" data-post-id="' . $post_id . '">';
+                echo '<div class="mm-slider-item" style="flex:0 0 auto;width:210px;scroll-snap-align:start;">';
+                echo '<div class="mindful-media-card mindful-media-thumb-trigger" data-post-id="' . $post_id . '" style="cursor:pointer;background:transparent;border:none;border-radius:12px;overflow:hidden;">';
                 
                 // Thumbnail
-                echo '<div class="mindful-media-card-thumb">';
-                echo '<img src="' . esc_url($thumbnail_url) . '" alt="' . esc_attr(get_the_title()) . '" loading="lazy">';
+                echo '<div class="mindful-media-card-thumb" style="position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#f2f2f2;">';
+                echo '<img src="' . esc_url($thumbnail_url) . '" alt="' . esc_attr(get_the_title()) . '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;">';
                 
                 // Play overlay
-                echo '<div class="mindful-media-card-play-overlay">';
-                echo '<svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
+                echo '<div class="mindful-media-card-play-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;">';
+                echo '<svg width="48" height="48" viewBox="0 0 24 24" fill="white" style="width:48px;height:48px;"><path d="M8 5v14l11-7z"/></svg>';
                 echo '</div>';
                 
                 // Duration badge
                 if ($duration_badge) {
-                    echo '<span class="mindful-media-duration-badge">' . esc_html($duration_badge) . '</span>';
+                    echo '<span class="mindful-media-duration-badge" style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.8);color:#fff;padding:2px 6px;border-radius:4px;font-size:12px;font-weight:500;">' . esc_html($duration_badge) . '</span>';
                 }
                 
                 echo '</div>'; // .mindful-media-card-thumb
                 
-                // Content
-                echo '<div class="mindful-media-card-content">';
-                echo '<h4 class="mindful-media-card-title">' . esc_html(get_the_title()) . '</h4>';
+                // Content - with inline styles to prevent theme interference
+                echo '<div class="mindful-media-card-content" style="padding:12px 4px 8px;background:transparent;">';
+                echo '<h4 class="mindful-media-card-title" style="margin:0 0 4px;padding:0;font-size:14px;font-weight:500;color:#0f0f0f;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' . esc_html(get_the_title()) . '</h4>';
                 if ($teacher_name && $atts['taxonomy'] !== 'media_teacher') {
-                    echo '<p class="mindful-media-card-teacher">' . esc_html($teacher_name) . '</p>';
+                    echo '<p class="mindful-media-card-teacher" style="margin:0;padding:0;font-size:12px;color:#606060;line-height:1.4;">' . esc_html($teacher_name) . '</p>';
                 }
                 
                 // Playlist badge
                 $playlist_info = $this->get_media_playlist_info($post_id);
                 if ($playlist_info) {
-                    echo '<div class="mindful-media-card-playlist-badge">';
-                    echo '<a href="' . esc_url($playlist_info['url']) . '" class="mindful-media-playlist-link">';
-                    echo '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4zm14 0v6l5-3-5-3z"/></svg>';
+                    echo '<div class="mindful-media-card-playlist-badge" style="margin-top:4px;">';
+                    echo '<a href="' . esc_url($playlist_info['url']) . '" class="mindful-media-playlist-link" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#065fd4;text-decoration:none;">';
+                    echo '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4zm14 0v6l5-3-5-3z"/></svg>';
                     echo '<span>' . esc_html($playlist_info['name']) . '</span>';
                     echo '</a>';
                     echo '</div>';
@@ -1660,8 +1662,10 @@ class MindfulMedia_Shortcodes {
             $active_class = $first ? ' active' : '';
             $first = false;
             
-            $output .= '<a href="' . esc_attr($item['url']) . '" class="mindful-media-browse-nav-item' . $active_class . '" ' . $data_attrs . '>';
-            $output .= '<span class="mindful-media-browse-nav-icon">' . $item['icon'] . '</span>';
+            // Navigation item with inline styles for theme isolation
+            $nav_item_style = 'display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:' . ($active_class ? '#0f0f0f' : '#f2f2f2') . ';color:' . ($active_class ? '#fff' : '#0f0f0f') . ';border-radius:8px;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;';
+            $output .= '<a href="' . esc_attr($item['url']) . '" class="mindful-media-browse-nav-item' . $active_class . '" ' . $data_attrs . ' style="' . $nav_item_style . '">';
+            $output .= '<span class="mindful-media-browse-nav-icon" style="display:flex;align-items:center;">' . $item['icon'] . '</span>';
             $output .= '<span class="mindful-media-browse-nav-label">' . esc_html($item['label']) . '</span>';
             $output .= '</a>';
         }
@@ -1702,32 +1706,33 @@ class MindfulMedia_Shortcodes {
         // Get archive link for this taxonomy
         $archive_link = get_post_type_archive_link('mindful_media');
         
-        // Netflix-style slider row with term cards
-        $output = '<section class="mindful-media-browse-section mm-slider-row" data-taxonomy="' . esc_attr($taxonomy) . '">';
+        // Netflix-style slider row with term cards - with inline styles for theme isolation
+        $output = '<section class="mindful-media-browse-section mm-slider-row" data-taxonomy="' . esc_attr($taxonomy) . '" style="margin-bottom:32px;">';
         
         // Section header with clickable title
-        $output .= '<div class="mm-slider-header">';
-        $output .= '<h3 class="mm-slider-title">';
-        $output .= '<a href="' . esc_url($archive_link) . '?browse=' . esc_attr($taxonomy) . '">';
+        $output .= '<div class="mm-slider-header" style="display:flex;align-items:center;justify-content:space-between;padding:0 24px 12px;margin-bottom:8px;">';
+        $output .= '<h3 class="mm-slider-title" style="margin:0;padding:0;font-size:20px;font-weight:600;color:#0f0f0f;line-height:1.3;">';
+        $output .= '<a href="' . esc_url($archive_link) . '?browse=' . esc_attr($taxonomy) . '" style="color:#0f0f0f;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">';
         $output .= esc_html($title);
-        $output .= '<svg class="mm-slider-title-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+        $output .= '<svg class="mm-slider-title-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;opacity:0;transition:opacity 0.2s;"><polyline points="9 18 15 12 9 6"></polyline></svg>';
         $output .= '</a>';
         $output .= '</h3>';
         $output .= '</div>';
         
         // Slider container
-        $output .= '<div class="mm-slider-container">';
+        $nav_btn_style = 'position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:10;transition:all 0.2s;';
+        $output .= '<div class="mm-slider-container" style="position:relative;padding:0 24px;">';
         
         // Navigation arrows
-        $output .= '<button class="mm-slider-nav mm-slider-nav--prev" aria-label="Previous">';
-        $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>';
+        $output .= '<button class="mm-slider-nav mm-slider-nav--prev" aria-label="Previous" style="' . $nav_btn_style . 'left:8px;">';
+        $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#0f0f0f;"><polyline points="15 18 9 12 15 6"></polyline></svg>';
         $output .= '</button>';
-        $output .= '<button class="mm-slider-nav mm-slider-nav--next" aria-label="Next">';
-        $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+        $output .= '<button class="mm-slider-nav mm-slider-nav--next" aria-label="Next" style="' . $nav_btn_style . 'right:8px;">';
+        $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#0f0f0f;"><polyline points="9 18 15 12 9 6"></polyline></svg>';
         $output .= '</button>';
         
         // Slider track with term cards
-        $output .= '<div class="mm-slider-track">';
+        $output .= '<div class="mm-slider-track" style="display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;padding:4px 0;">';
         
         foreach ($terms as $term) {
             $term_link = get_term_link($term);
@@ -1742,31 +1747,31 @@ class MindfulMedia_Shortcodes {
                 $term_image = wp_get_attachment_image_url($thumbnail_id, 'medium');
             }
             
-            $output .= '<a href="' . esc_url($term_link) . '" class="mm-slider-item mindful-media-browse-card">';
+            $output .= '<a href="' . esc_url($term_link) . '" class="mm-slider-item mindful-media-browse-card" style="flex:0 0 auto;width:180px;scroll-snap-align:start;text-decoration:none;color:inherit;display:block;border-radius:12px;overflow:hidden;background:#f2f2f2;">';
             
             // Card image or placeholder
-            $output .= '<div class="mindful-media-browse-card-image">';
+            $output .= '<div class="mindful-media-browse-card-image" style="aspect-ratio:1/1;overflow:hidden;background:#e5e5e5;">';
             if ($term_image) {
-                $output .= '<img src="' . esc_url($term_image) . '" alt="' . esc_attr($term->name) . '" loading="lazy">';
+                $output .= '<img src="' . esc_url($term_image) . '" alt="' . esc_attr($term->name) . '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;">';
             } else {
                 // Check for category-specific icons
                 $category_icon = $this->get_category_icon($term->slug, $taxonomy);
                 if ($category_icon) {
-                    $output .= '<div class="mindful-media-browse-card-placeholder mindful-media-browse-card-icon">' . $category_icon . '</div>';
+                    $output .= '<div class="mindful-media-browse-card-placeholder mindful-media-browse-card-icon" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#e5e5e5;color:#606060;">' . $category_icon . '</div>';
                 } else {
                     // Generate a placeholder with first letter
                     $first_letter = strtoupper(substr($term->name, 0, 1));
-                    $output .= '<div class="mindful-media-browse-card-placeholder">' . esc_html($first_letter) . '</div>';
+                    $output .= '<div class="mindful-media-browse-card-placeholder" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#e5e5e5;font-size:48px;font-weight:300;color:#606060;">' . esc_html($first_letter) . '</div>';
                 }
             }
             $output .= '</div>';
             
             // Card content
-            $output .= '<div class="mindful-media-browse-card-content">';
-            $output .= '<h4 class="mindful-media-browse-card-title">' . esc_html($term->name) . '</h4>';
+            $output .= '<div class="mindful-media-browse-card-content" style="padding:12px;background:#fff;">';
+            $output .= '<h4 class="mindful-media-browse-card-title" style="margin:0 0 4px;padding:0;font-size:14px;font-weight:500;color:#0f0f0f;line-height:1.3;">' . esc_html($term->name) . '</h4>';
             
             if ($show_counts) {
-                $output .= '<span class="mindful-media-browse-card-count">';
+                $output .= '<span class="mindful-media-browse-card-count" style="font-size:12px;color:#606060;">';
                 $output .= sprintf(_n('%d item', '%d items', $term->count, 'mindful-media'), $term->count);
                 $output .= '</span>';
             }
@@ -1849,32 +1854,33 @@ class MindfulMedia_Shortcodes {
                 $term_link = '#';
             }
             
-            // Output row for this term
-            $output .= '<section class="mm-slider-row" data-term="' . esc_attr($term->slug) . '">';
+            // Output row for this term - with inline styles
+            $output .= '<section class="mm-slider-row" data-term="' . esc_attr($term->slug) . '" style="margin-bottom:32px;">';
             
             // Header with term name
-            $output .= '<div class="mm-slider-header">';
-            $output .= '<h3 class="mm-slider-title">';
-            $output .= '<a href="' . esc_url($term_link) . '">';
+            $output .= '<div class="mm-slider-header" style="display:flex;align-items:center;justify-content:space-between;padding:0 24px 12px;margin-bottom:8px;">';
+            $output .= '<h3 class="mm-slider-title" style="margin:0;padding:0;font-size:20px;font-weight:600;color:#0f0f0f;line-height:1.3;">';
+            $output .= '<a href="' . esc_url($term_link) . '" style="color:#0f0f0f;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">';
             $output .= esc_html($term->name);
-            $output .= '<svg class="mm-slider-title-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+            $output .= '<svg class="mm-slider-title-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;opacity:0;transition:opacity 0.2s;"><polyline points="9 18 15 12 9 6"></polyline></svg>';
             $output .= '</a>';
             $output .= '</h3>';
             $output .= '</div>';
             
             // Slider container
-            $output .= '<div class="mm-slider-container">';
+            $nav_btn_style = 'position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:10;transition:all 0.2s;';
+            $output .= '<div class="mm-slider-container" style="position:relative;padding:0 24px;">';
             
             // Navigation arrows
-            $output .= '<button class="mm-slider-nav mm-slider-nav--prev" aria-label="Previous">';
-            $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>';
+            $output .= '<button class="mm-slider-nav mm-slider-nav--prev" aria-label="Previous" style="' . $nav_btn_style . 'left:8px;">';
+            $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#0f0f0f;"><polyline points="15 18 9 12 15 6"></polyline></svg>';
             $output .= '</button>';
-            $output .= '<button class="mm-slider-nav mm-slider-nav--next" aria-label="Next">';
-            $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+            $output .= '<button class="mm-slider-nav mm-slider-nav--next" aria-label="Next" style="' . $nav_btn_style . 'right:8px;">';
+            $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#0f0f0f;"><polyline points="9 18 15 12 9 6"></polyline></svg>';
             $output .= '</button>';
             
             // Slider track with video cards
-            $output .= '<div class="mm-slider-track">';
+            $output .= '<div class="mm-slider-track" style="display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;padding:4px 0;">';
             
             while ($query->have_posts()) {
                 $query->the_post();
@@ -2011,28 +2017,28 @@ class MindfulMedia_Shortcodes {
                 $term_link = '#';
             }
             
-            // Output row for this playlist
-            $output .= '<section class="mm-slider-row" data-term="' . esc_attr($term->slug) . '">';
+            // Output row for this playlist - with inline styles
+            $output .= '<section class="mm-slider-row" data-term="' . esc_attr($term->slug) . '" style="margin-bottom:32px;">';
             
             // Header with playlist name
-            $output .= '<div class="mm-slider-header">';
-            $output .= '<h3 class="mm-slider-title">';
-            $output .= '<a href="' . esc_url($term_link) . '">';
+            $output .= '<div class="mm-slider-header" style="display:flex;align-items:center;justify-content:space-between;padding:0 24px 12px;margin-bottom:8px;">';
+            $output .= '<h3 class="mm-slider-title" style="margin:0;padding:0;font-size:20px;font-weight:600;color:#0f0f0f;line-height:1.3;">';
+            $output .= '<a href="' . esc_url($term_link) . '" style="color:#0f0f0f;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">';
             $output .= esc_html($term->name);
             if ($is_protected) {
-                $output .= ' <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; opacity: 0.7;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
+                $output .= ' <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;vertical-align:middle;opacity:0.7;color:#606060;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
             }
-            $output .= '<svg class="mm-slider-title-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+            $output .= '<svg class="mm-slider-title-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;opacity:0;transition:opacity 0.2s;"><polyline points="9 18 15 12 9 6"></polyline></svg>';
             $output .= '</a>';
             $output .= '</h3>';
             $output .= '</div>';
             
-            // If protected and no access, show lock placeholder (compact version)
+            // If protected and no access, show lock placeholder (compact version) - with inline styles
             if ($is_protected && !$has_access) {
-                $output .= '<div class="mm-playlist-locked">';
-                $output .= '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
-                $output .= '<p class="mm-playlist-locked-text">' . __('This playlist is password protected.', 'mindful-media') . '</p>';
-                $output .= '<a href="' . esc_url($term_link) . '" class="mm-playlist-locked-link">' . __('Enter password to view', 'mindful-media') . '</a>';
+                $output .= '<div class="mm-playlist-locked" style="background:linear-gradient(135deg,#f8f8f8 0%,#efefef 100%);border-radius:12px;padding:20px 24px;margin:0 24px 16px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;">';
+                $output .= '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;color:#606060;flex-shrink:0;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
+                $output .= '<p class="mm-playlist-locked-text" style="margin:0;padding:0;color:#606060;font-size:14px;flex:1;">' . __('This playlist is password protected.', 'mindful-media') . '</p>';
+                $output .= '<a href="' . esc_url($term_link) . '" class="mm-playlist-locked-link" style="display:inline-block;background:#0f0f0f;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap;">' . __('Enter password to view', 'mindful-media') . '</a>';
                 $output .= '</div>';
                 $output .= '</section>';
                 continue;
@@ -2059,24 +2065,25 @@ class MindfulMedia_Shortcodes {
             
             if (!$query->have_posts()) {
                 wp_reset_postdata();
-                $output .= '<p class="mm-no-items">' . __('No items in this playlist yet.', 'mindful-media') . '</p>';
+                $output .= '<p class="mm-no-items" style="padding:0 24px;color:#606060;font-size:14px;">' . __('No items in this playlist yet.', 'mindful-media') . '</p>';
                 $output .= '</section>';
                 continue;
             }
             
-            // Slider container
-            $output .= '<div class="mm-slider-container">';
+            // Slider container - with inline styles
+            $nav_btn_style = 'position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:10;transition:all 0.2s;';
+            $output .= '<div class="mm-slider-container" style="position:relative;padding:0 24px;">';
             
             // Navigation arrows
-            $output .= '<button class="mm-slider-nav mm-slider-nav--prev" aria-label="Previous">';
-            $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>';
+            $output .= '<button class="mm-slider-nav mm-slider-nav--prev" aria-label="Previous" style="' . $nav_btn_style . 'left:8px;">';
+            $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#0f0f0f;"><polyline points="15 18 9 12 15 6"></polyline></svg>';
             $output .= '</button>';
-            $output .= '<button class="mm-slider-nav mm-slider-nav--next" aria-label="Next">';
-            $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+            $output .= '<button class="mm-slider-nav mm-slider-nav--next" aria-label="Next" style="' . $nav_btn_style . 'right:8px;">';
+            $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#0f0f0f;"><polyline points="9 18 15 12 9 6"></polyline></svg>';
             $output .= '</button>';
             
             // Slider track with video cards
-            $output .= '<div class="mm-slider-track">';
+            $output .= '<div class="mm-slider-track" style="display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;padding:4px 0;">';
             
             while ($query->have_posts()) {
                 $query->the_post();
@@ -2164,32 +2171,33 @@ class MindfulMedia_Shortcodes {
         // Get archive link for playlists
         $archive_link = get_post_type_archive_link('mindful_media');
         
-        // Netflix-style slider row with playlist cards (consistent with other sections)
-        $output = '<section class="mindful-media-browse-section mm-slider-row" data-taxonomy="media_series">';
+        // Netflix-style slider row with playlist cards (consistent with other sections) - with inline styles
+        $output = '<section class="mindful-media-browse-section mm-slider-row" data-taxonomy="media_series" style="margin-bottom:32px;">';
         
         // Section header with clickable title
-        $output .= '<div class="mm-slider-header">';
-        $output .= '<h3 class="mm-slider-title">';
-        $output .= '<a href="' . esc_url($archive_link) . '?browse=media_series">';
+        $output .= '<div class="mm-slider-header" style="display:flex;align-items:center;justify-content:space-between;padding:0 24px 12px;margin-bottom:8px;">';
+        $output .= '<h3 class="mm-slider-title" style="margin:0;padding:0;font-size:20px;font-weight:600;color:#0f0f0f;line-height:1.3;">';
+        $output .= '<a href="' . esc_url($archive_link) . '?browse=media_series" style="color:#0f0f0f;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">';
         $output .= esc_html__('Playlists', 'mindful-media');
-        $output .= '<svg class="mm-slider-title-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+        $output .= '<svg class="mm-slider-title-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;opacity:0;transition:opacity 0.2s;"><polyline points="9 18 15 12 9 6"></polyline></svg>';
         $output .= '</a>';
         $output .= '</h3>';
         $output .= '</div>';
         
         // Slider container
-        $output .= '<div class="mm-slider-container">';
+        $nav_btn_style = 'position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:10;transition:all 0.2s;';
+        $output .= '<div class="mm-slider-container" style="position:relative;padding:0 24px;">';
         
         // Navigation arrows
-        $output .= '<button class="mm-slider-nav mm-slider-nav--prev" aria-label="Previous">';
-        $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>';
+        $output .= '<button class="mm-slider-nav mm-slider-nav--prev" aria-label="Previous" style="' . $nav_btn_style . 'left:8px;">';
+        $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#0f0f0f;"><polyline points="15 18 9 12 15 6"></polyline></svg>';
         $output .= '</button>';
-        $output .= '<button class="mm-slider-nav mm-slider-nav--next" aria-label="Next">';
-        $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+        $output .= '<button class="mm-slider-nav mm-slider-nav--next" aria-label="Next" style="' . $nav_btn_style . 'right:8px;">';
+        $output .= '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#0f0f0f;"><polyline points="9 18 15 12 9 6"></polyline></svg>';
         $output .= '</button>';
         
         // Slider track with playlist cards
-        $output .= '<div class="mm-slider-track">';
+        $output .= '<div class="mm-slider-track" style="display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;padding:4px 0;">';
         
         foreach ($terms as $term) {
             // Skip hidden playlists
@@ -2310,12 +2318,12 @@ class MindfulMedia_Shortcodes {
             return '';
         }
         
-        $output = '<section class="mindful-media-featured-section mm-slider-row">';
+        $output = '<section class="mindful-media-featured-section mm-slider-row" style="margin-bottom:32px;">';
         
         // Section header
-        $output .= '<div class="mm-slider-header">';
-        $output .= '<h3 class="mm-slider-title">';
-        $output .= '<span class="mindful-media-featured-badge-inline">' . __('Featured', 'mindful-media') . '</span>';
+        $output .= '<div class="mm-slider-header" style="display:flex;align-items:center;justify-content:space-between;padding:0 24px 12px;margin-bottom:8px;">';
+        $output .= '<h3 class="mm-slider-title" style="margin:0;padding:0;font-size:20px;font-weight:600;color:#0f0f0f;line-height:1.3;">';
+        $output .= '<span class="mindful-media-featured-badge-inline" style="color:#0f0f0f;">' . __('Featured', 'mindful-media') . '</span>';
         $output .= '</h3>';
         $output .= '</div>';
         

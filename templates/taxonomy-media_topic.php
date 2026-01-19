@@ -667,9 +667,6 @@ body.tax-media_topic .site-main {
     <!-- Topic Header Section -->
     <header class="mindful-media-topic-header">
         <div class="mindful-media-topic-header-inner">
-            <div class="mindful-media-topic-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            </div>
             <div class="mindful-media-topic-info">
                 <h1><?php echo esc_html($term->name); ?></h1>
                 <span class="mindful-media-topic-meta"><?php echo $item_count; ?> <?php echo $item_count === 1 ? 'item' : 'items'; ?></span>

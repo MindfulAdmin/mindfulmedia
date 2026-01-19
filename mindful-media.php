@@ -3,7 +3,7 @@
  * Plugin Name: MindfulMedia
  * Plugin URI: https://mindfuldesign.me/plugins/mindful-media
  * Description: A comprehensive media management system for organizing and displaying audio, video, and multimedia content with advanced filtering, playlists, password protection, and customizable archives.
- * Version: 2.7.0
+ * Version: 2.8.1
  * Author: Mindful Design
  * Author URI: https://mindfuldesign.me
  * License: GPL v2 or later
@@ -27,7 +27,7 @@ class MindfulMedia {
     /**
      * Plugin version
      */
-    public $version = '2.7.0';
+    public $version = '2.8.1';
     
     /**
      * Constructor
@@ -153,6 +153,16 @@ class MindfulMedia {
      * Plugin activation
      */
     public function activate() {
+        // Check PHP version compatibility
+        if (version_compare(PHP_VERSION, '7.4', '<')) {
+            deactivate_plugins(plugin_basename(__FILE__));
+            wp_die(
+                esc_html__('MindfulMedia requires PHP 7.4 or higher. Your server is running PHP ', 'mindful-media') . PHP_VERSION . '.',
+                esc_html__('Plugin Activation Error', 'mindful-media'),
+                array('back_link' => true)
+            );
+        }
+        
         // Load the taxonomies class first to register them
         require_once MINDFUL_MEDIA_PLUGIN_DIR . 'includes/class-post-types.php';
         require_once MINDFUL_MEDIA_PLUGIN_DIR . 'includes/class-taxonomies.php';

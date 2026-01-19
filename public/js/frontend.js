@@ -1163,6 +1163,16 @@
         });
         
         $('.mindful-media-inline-close').on('click', function() {
+            // Clear player intervals to prevent memory leaks
+            if (window.progressCheckInterval) {
+                clearInterval(window.progressCheckInterval);
+                window.progressCheckInterval = null;
+            }
+            if (window.playerUpdateInterval) {
+                clearInterval(window.playerUpdateInterval);
+                window.playerUpdateInterval = null;
+            }
+            
             // Clear all "Now playing" indicators and reset card states
             $('.mindful-media-play-inline').each(function() {
                 var $btn = $(this);
@@ -1899,7 +1909,11 @@
         
         // Start continuous progress checking regardless of events
         // This ensures progress updates even if event binding has issues
-        var progressCheckInterval = setInterval(function() {
+        // Store on window for cleanup when modal closes (memory leak fix)
+        if (window.progressCheckInterval) {
+            clearInterval(window.progressCheckInterval);
+        }
+        window.progressCheckInterval = setInterval(function() {
             // Always update progress if player exists
             updateProgress();
             
@@ -1908,6 +1922,9 @@
                 updateInterval = setInterval(updateProgress, 500);
             }
         }, 1000);
+        
+        // Store updateInterval reference on window for cleanup
+        window.playerUpdateInterval = updateInterval;
         
         // Click on player area (not controls) to toggle play/pause
         $player.on('click', function(e) {

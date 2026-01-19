@@ -448,6 +448,15 @@ class MindfulMedia_Shortcodes {
             )
         );
 
+        /**
+         * Filter the archive query arguments.
+         *
+         * @since 2.8.0
+         * @param array $query_args The WP_Query arguments.
+         * @param array $atts       The shortcode attributes.
+         */
+        $query_args = apply_filters('mindful_media_archive_query_args', $query_args, $atts);
+
         // Execute query
         $mindful_query = new WP_Query($query_args);
         
@@ -1404,7 +1413,7 @@ class MindfulMedia_Shortcodes {
             echo '<div class="mm-slider-header" style="display:flex;align-items:center;justify-content:space-between;padding:0 24px 12px;margin-bottom:8px;">';
             echo '<h3 class="mm-slider-title" style="margin:0;padding:0;font-size:20px;font-weight:600;color:#0f0f0f;line-height:1.3;">';
             if (!is_wp_error($term_link)) {
-                echo '<a href="' . esc_url($term_link) . '" style="color:#0f0f0f;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">';
+                echo '<a href="' . esc_url($term_link) . '" style="color:#0f0f0f !important;text-decoration:none !important;display:inline-flex;align-items:center;gap:4px;">';
                 if ($is_protected) {
                     echo '<svg class="mm-lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;margin-right:6px;vertical-align:middle;color:#606060;"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>';
                 }
@@ -1747,31 +1756,31 @@ class MindfulMedia_Shortcodes {
                 $term_image = wp_get_attachment_image_url($thumbnail_id, 'medium');
             }
             
-            $output .= '<a href="' . esc_url($term_link) . '" class="mm-slider-item mindful-media-browse-card" style="flex:0 0 auto;width:180px;scroll-snap-align:start;text-decoration:none;color:inherit;display:block;border-radius:12px;overflow:hidden;background:#f2f2f2;">';
+            $output .= '<a href="' . esc_url($term_link) . '" class="mm-slider-item mindful-media-browse-card">';
             
             // Card image or placeholder
-            $output .= '<div class="mindful-media-browse-card-image" style="aspect-ratio:1/1;overflow:hidden;background:#e5e5e5;">';
+            $output .= '<div class="mindful-media-browse-card-image">';
             if ($term_image) {
-                $output .= '<img src="' . esc_url($term_image) . '" alt="' . esc_attr($term->name) . '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;">';
+                $output .= '<img src="' . esc_url($term_image) . '" alt="' . esc_attr($term->name) . '" loading="lazy">';
             } else {
                 // Check for category-specific icons
                 $category_icon = $this->get_category_icon($term->slug, $taxonomy);
                 if ($category_icon) {
-                    $output .= '<div class="mindful-media-browse-card-placeholder mindful-media-browse-card-icon" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#e5e5e5;color:#606060;">' . $category_icon . '</div>';
+                    $output .= '<div class="mindful-media-browse-card-placeholder mindful-media-browse-card-icon">' . $category_icon . '</div>';
                 } else {
                     // Generate a placeholder with first letter
                     $first_letter = strtoupper(substr($term->name, 0, 1));
-                    $output .= '<div class="mindful-media-browse-card-placeholder" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#e5e5e5;font-size:48px;font-weight:300;color:#606060;">' . esc_html($first_letter) . '</div>';
+                    $output .= '<div class="mindful-media-browse-card-placeholder">' . esc_html($first_letter) . '</div>';
                 }
             }
             $output .= '</div>';
             
             // Card content
-            $output .= '<div class="mindful-media-browse-card-content" style="padding:12px;background:#fff;">';
-            $output .= '<h4 class="mindful-media-browse-card-title" style="margin:0 0 4px;padding:0;font-size:14px;font-weight:500;color:#0f0f0f;line-height:1.3;">' . esc_html($term->name) . '</h4>';
+            $output .= '<div class="mindful-media-browse-card-content">';
+            $output .= '<h4 class="mindful-media-browse-card-title">' . esc_html($term->name) . '</h4>';
             
             if ($show_counts) {
-                $output .= '<span class="mindful-media-browse-card-count" style="font-size:12px;color:#606060;">';
+                $output .= '<span class="mindful-media-browse-card-count">';
                 $output .= sprintf(_n('%d item', '%d items', $term->count, 'mindful-media'), $term->count);
                 $output .= '</span>';
             }
@@ -2567,7 +2576,15 @@ class MindfulMedia_Shortcodes {
         
         $output .= '</article>'; // End card
         
-        return $output;
+        /**
+         * Filter the media card HTML output.
+         *
+         * @since 2.8.0
+         * @param string $output  The card HTML.
+         * @param int    $post_id The media post ID.
+         * @param array  $atts    The shortcode attributes.
+         */
+        return apply_filters('mindful_media_card_html', $output, $post_id, $atts);
     }
     
     /**
@@ -3133,12 +3150,20 @@ class MindfulMedia_Shortcodes {
     public function enqueue_frontend_assets() {
         // Always enqueue our assets when the class is loaded
         // This ensures they're available when shortcodes are used
+        // Priority 9999 ensures CSS loads after theme styles for proper override
         wp_enqueue_style(
             'mindful-media-frontend',
             MINDFUL_MEDIA_PLUGIN_URL . 'public/css/frontend.css',
             array(),
             MINDFUL_MEDIA_VERSION
         );
+        
+        // Re-enqueue at high priority to load after theme styles
+        // This ensures our styles take precedence over theme CSS
+        add_action('wp_enqueue_scripts', function() {
+            wp_dequeue_style('mindful-media-frontend');
+            wp_enqueue_style('mindful-media-frontend');
+        }, 9999);
         wp_enqueue_script(
             'mindful-media-frontend',
             MINDFUL_MEDIA_PLUGIN_URL . 'public/js/frontend.js',

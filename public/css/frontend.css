@@ -66,6 +66,24 @@
     /* Color-Coded Media Types */
     --mindful-media-audio-color: #9333EA;
     --mindful-media-video-color: #DC2626;
+    
+    /* Z-index Scale - Documented layering system
+       Use these variables for consistent stacking context:
+       - base: Default elements, cards
+       - dropdown: Dropdowns, menus
+       - sticky: Sticky headers, navigation
+       - overlay: Overlays, backdrops
+       - modal: Modal dialogs, full-screen players
+       - modal-content: Content above modal (close buttons, sidebars)
+       - toast: Toast notifications, alerts (always on top)
+    */
+    --mm-z-base: 1;
+    --mm-z-dropdown: 100;
+    --mm-z-sticky: 500;
+    --mm-z-overlay: 1000;
+    --mm-z-modal: 10000;
+    --mm-z-modal-content: 10001;
+    --mm-z-toast: 99999;
 }
 
 /* ====== SCOPED CSS RESET - Theme Isolation ====== */
@@ -108,11 +126,31 @@
     cursor: pointer !important;
 }
 
-/* Reset link styles */
+/* Reset link styles - Use inherit to respect parent context */
 .mindful-media-container a,
 .mindful-media-inline-player a {
     text-decoration: none !important;
     color: inherit !important;
+}
+
+/* Card title links - Explicit colors to prevent theme override */
+.mindful-media-container .mindful-media-card-title a,
+.mindful-media-container .mindful-media-card-title a:link,
+.mindful-media-container .mindful-media-card-title a:visited,
+.mindful-media-container .mindful-media-card-title button {
+    color: var(--mm-text-primary) !important;
+}
+
+.mindful-media-container .mindful-media-card-title a:hover,
+.mindful-media-container .mindful-media-card-title a:focus {
+    color: var(--mm-accent-secondary) !important;
+}
+
+/* Playlist link in cards - should be accent color */
+.mindful-media-container .mindful-media-playlist-link,
+.mindful-media-container .mindful-media-playlist-link:link,
+.mindful-media-container .mindful-media-playlist-link:visited {
+    color: var(--mm-accent-secondary) !important;
 }
 
 /* Reset list styles */
@@ -350,6 +388,70 @@ body.single-mindful_media .mindful-media-container {
     color: var(--mm-text-secondary) !important;
     pointer-events: none !important;
     z-index: 1 !important;
+}
+
+/* Taxonomy filter bar search - used on teacher/topic/category pages */
+.mm-filter-search {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.mm-filter-search .mm-search-icon {
+    position: absolute !important;
+    left: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 16px !important;
+    height: 16px !important;
+    color: var(--mm-text-secondary) !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+}
+
+.mm-filter-search .mindful-media-search-input {
+    width: 200px !important;
+    padding: 10px 32px 10px 40px !important;
+    border: 1px solid var(--mm-border) !important;
+    border-radius: var(--mm-radius-full) !important;
+    font-size: var(--mm-font-size-sm) !important;
+    color: var(--mm-text-primary) !important;
+    background: var(--mm-bg-primary) !important;
+    outline: none !important;
+}
+
+.mm-filter-search .mindful-media-search-input:focus {
+    border-color: var(--mm-accent-secondary) !important;
+    box-shadow: 0 0 0 2px rgba(6, 95, 212, 0.15) !important;
+}
+
+.mm-filter-search .mm-search-clear {
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 18px !important;
+    height: 18px !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 50% !important;
+    background: var(--mm-bg-secondary) !important;
+    color: var(--mm-text-secondary) !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.mm-filter-search .mm-search-clear:hover {
+    background: var(--mm-text-secondary) !important;
+    color: var(--mm-bg-primary) !important;
+}
+
+.mm-filter-search.has-value .mm-search-clear {
+    display: flex !important;
 }
 
 /* v2.6.1 - Search input padding fix */
@@ -4063,8 +4165,7 @@ body.modal-open {
 }
 
 .mindful-media-modal-close:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: rotate(90deg);
+    background: rgba(255, 255, 255, 0.4);
 }
 
 @media (max-width: 768px) {
@@ -4421,10 +4522,46 @@ body.modal-open {
 /* Search in navigation bar */
 .mm-browse-nav-search {
     flex-shrink: 0 !important;
+    position: relative !important;
 }
 
 .mm-browse-nav-search .mindful-media-search-input {
     width: 200px !important;
+}
+
+/* Browse nav search clear button - explicit styling to override theme */
+.mm-browse-nav-search .mm-search-clear,
+.mindful-media-browse .mm-search-clear {
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 20px !important;
+    height: 20px !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 50% !important;
+    background: var(--mm-bg-secondary) !important;
+    color: var(--mm-text-secondary) !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    box-shadow: none !important;
+}
+
+.mm-browse-nav-search .mm-search-clear:hover,
+.mindful-media-browse .mm-search-clear:hover {
+    background: var(--mm-text-secondary) !important;
+    color: var(--mm-bg-primary) !important;
+}
+
+.mm-browse-nav-search.has-value .mm-search-clear,
+.mm-browse-nav-search .mindful-media-search-input:not(:placeholder-shown) + .mm-search-clear {
+    display: flex !important;
 }
 
 /* Browse nav items - high specificity for theme isolation */
@@ -4601,7 +4738,6 @@ a.mindful-media-browse-nav-item.active {
     background: var(--mm-bg-secondary);
     position: relative;
     border-radius: var(--mm-radius-lg);
-    margin-bottom: var(--mm-spacing-md);
 }
 
 .mindful-media-browse-card-image img {
@@ -4676,7 +4812,7 @@ a.mindful-media-browse-nav-item.active {
 
 /* Card Content */
 .mindful-media-browse-card-content {
-    padding: 0 !important;
+    padding: var(--mm-spacing-md) 0 0 0 !important;
 }
 
 /* Browse card title - YouTube style, prevent theme overrides */
@@ -4917,6 +5053,24 @@ a.mindful-media-browse-nav-item.active {
 
 /* ====== TAXONOMY ARCHIVE SHORTCODE ====== */
 
+/* Taxonomy page containers - ensure full width layout */
+.mindful-media-teacher-page,
+.mindful-media-topic-page,
+.mindful-media-category-page,
+.mindful-media-series-page {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* Taxonomy page content areas */
+.mindful-media-teacher-content,
+.mindful-media-topic-content,
+.mindful-media-category-content {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    padding: 32px 40px 80px !important;
+}
+
 .mindful-media-taxonomy-archive {
     padding: var(--mm-spacing-lg) 0;
 }
@@ -5145,11 +5299,19 @@ a.mindful-media-browse-nav-item.active {
 }
 
 .mm-slider-title a:hover,
+.mm-slider-title a:focus,
+.mm-slider-header h3 a:hover,
+.mm-slider-header h3 a:focus {
+    color: var(--mm-accent-secondary) !important;
+    text-decoration: none !important;
+}
+
+/* Visited links should stay black, not blue */
 .mm-slider-title a:visited,
 .mm-slider-title a:active,
-.mm-slider-header h3 a:hover,
-.mm-slider-header h3 a:visited {
-    color: var(--mm-accent-secondary) !important;
+.mm-slider-header h3 a:visited,
+.mm-slider-header h3 a:active {
+    color: var(--mm-text-primary) !important;
     text-decoration: none !important;
 }
 
@@ -5557,7 +5719,7 @@ a.mindful-media-browse-nav-item.active {
 }
 
 .mindful-media-card:hover {
-    transform: scale(1.02);
+    /* Hover effect applied to thumbnail only - see .mindful-media-card-thumb img */
 }
 
 .mindful-media-card-thumb {
@@ -5762,4 +5924,142 @@ a.mindful-media-browse-nav-item.active {
     padding: var(--mm-spacing-lg);
     color: var(--mm-text-secondary);
     font-style: italic;
+}
+
+/* =====================================================
+   PRINT STYLES
+   Clean output for printing media listings
+   ===================================================== */
+@media print {
+    /* Hide interactive elements that don't make sense in print */
+    .mindful-media-inline-player,
+    .mindful-media-modal,
+    .mm-slider-nav,
+    .mm-slider-arrow,
+    .mindful-media-filter-chips,
+    .mindful-media-browse-nav,
+    .mindful-media-search,
+    .mindful-media-play-overlay,
+    .mindful-media-card-play-overlay,
+    .mindful-media-big-play-btn,
+    .mindful-media-custom-controls,
+    .mindful-media-unified-player,
+    .mindful-media-thumb-trigger,
+    .mindful-media-title-trigger {
+        display: none !important;
+    }
+    
+    /* Prevent page breaks inside cards */
+    .mindful-media-card,
+    .mindful-media-browse-card,
+    .mm-slider-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    
+    /* Reset backgrounds for better print output */
+    .mindful-media-container,
+    .mindful-media-card,
+    .mindful-media-browse-card {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+    }
+    
+    /* Ensure text is readable */
+    .mindful-media-card-title,
+    .mindful-media-card-meta,
+    .mindful-media-browse-card-title,
+    .mm-slider-title {
+        color: black !important;
+    }
+    
+    /* Show URLs for links (accessibility) */
+    .mindful-media-card a[href]::after,
+    .mindful-media-browse-card a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 10px;
+        color: #666;
+    }
+    
+    /* Simple grid layout for print */
+    .mindful-media-archive {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 20px !important;
+    }
+    
+    /* Hide horizontal scrolling sliders - show as grid */
+    .mm-slider-track {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 15px !important;
+        overflow: visible !important;
+    }
+}
+
+/* =====================================================
+   SYSTEM DARK MODE SUPPORT
+   Respects OS-level dark mode preference
+   Applied to containers with .mm-auto-dark-mode class
+   ===================================================== */
+@media (prefers-color-scheme: dark) {
+    /* Auto dark mode - apply dark theme variables when OS dark mode is enabled */
+    /* Note: This only affects elements with the .mm-auto-dark-mode class */
+    /* Add this class to containers that should respect system dark mode */
+    .mindful-media-container.mm-auto-dark-mode {
+        --mm-bg-primary: var(--mm-dark-bg-primary);
+        --mm-bg-secondary: var(--mm-dark-bg-secondary);
+        --mm-bg-elevated: var(--mm-dark-bg-elevated);
+        --mm-bg-hover: var(--mm-dark-bg-hover);
+        --mm-text-primary: var(--mm-dark-text-primary);
+        --mm-text-secondary: var(--mm-dark-text-secondary);
+        --mm-text-muted: var(--mm-dark-text-muted);
+        --mm-border: var(--mm-dark-border);
+    }
+    
+    /* Dark mode specific styles for auto-dark containers */
+    .mindful-media-container.mm-auto-dark-mode {
+        background: var(--mm-dark-bg-primary) !important;
+        color: var(--mm-dark-text-primary) !important;
+    }
+    
+    .mindful-media-container.mm-auto-dark-mode .mindful-media-card {
+        background: var(--mm-dark-bg-secondary);
+    }
+    
+    .mindful-media-container.mm-auto-dark-mode .mindful-media-card-title,
+    .mindful-media-container.mm-auto-dark-mode .mindful-media-card-title a,
+    .mindful-media-container.mm-auto-dark-mode .mindful-media-card-title button {
+        color: var(--mm-dark-text-primary) !important;
+    }
+    
+    .mindful-media-container.mm-auto-dark-mode .mindful-media-card-meta,
+    .mindful-media-container.mm-auto-dark-mode .mindful-media-card-teacher {
+        color: var(--mm-dark-text-secondary) !important;
+    }
+    
+    .mindful-media-container.mm-auto-dark-mode .mm-chip {
+        background: var(--mm-dark-bg-secondary);
+        color: var(--mm-dark-text-primary);
+        border-color: var(--mm-dark-border);
+    }
+    
+    .mindful-media-container.mm-auto-dark-mode .mm-chip:hover,
+    .mindful-media-container.mm-auto-dark-mode .mm-chip.active {
+        background: var(--mm-dark-bg-hover);
+    }
+    
+    .mindful-media-container.mm-auto-dark-mode .mm-slider-title,
+    .mindful-media-container.mm-auto-dark-mode .mm-slider-title a {
+        color: var(--mm-dark-text-primary) !important;
+    }
+    
+    .mindful-media-container.mm-auto-dark-mode .mindful-media-browse-card {
+        background: var(--mm-dark-bg-secondary);
+    }
+    
+    .mindful-media-container.mm-auto-dark-mode .mindful-media-browse-card-title {
+        color: var(--mm-dark-text-primary) !important;
+    }
 }

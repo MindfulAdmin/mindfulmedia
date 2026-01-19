@@ -1,6 +1,6 @@
 # MindfulMedia Plugin - Development Guide
 
-**Version:** 2.7.0  
+**Version:** 2.8.1  
 **Last Updated:** January 19, 2026
 
 ---
@@ -194,7 +194,17 @@ Found under **MindfulMedia** category in Elementor panel (search "mindful"):
 
 ## CSS Architecture
 
+### Theme Compatibility
+
+The plugin CSS is designed to isolate styles from theme interference:
+
+- **High-priority loading**: CSS enqueued at priority 9999 to load after theme styles
+- **Explicit colors**: Links use explicit colors (not `inherit`) to prevent theme overrides
+- **Scoped reset**: CSS reset applied only within plugin containers
+- **CSS containment**: Uses `contain: layout style` for performance and isolation
+
 ### CSS Variables (`:root`)
+
 ```css
 /* Light theme (browse/archive) */
 --mm-bg-primary: #ffffff;
@@ -207,7 +217,34 @@ Found under **MindfulMedia** category in Elementor panel (search "mindful"):
 --mm-dark-bg-secondary: #212121;
 --mm-dark-text-primary: #f1f1f1;
 --mm-dark-text-secondary: #aaaaaa;
+
+/* Z-index Scale (documented layering system) */
+--mm-z-base: 1;        /* Default elements, cards */
+--mm-z-dropdown: 100;  /* Dropdowns, menus */
+--mm-z-sticky: 500;    /* Sticky headers, navigation */
+--mm-z-overlay: 1000;  /* Overlays, backdrops */
+--mm-z-modal: 10000;   /* Modal dialogs, full-screen players */
+--mm-z-modal-content: 10001;  /* Content above modal (close buttons, sidebars) */
+--mm-z-toast: 99999;   /* Toast notifications, alerts (always on top) */
 ```
+
+### System Dark Mode Support
+
+Add the class `mm-auto-dark-mode` to any `.mindful-media-container` to enable automatic dark mode when the user's OS is set to dark mode:
+
+```html
+<div class="mindful-media-container mm-auto-dark-mode">
+    <!-- Content will automatically use dark theme when OS prefers dark -->
+</div>
+```
+
+### Print Styles
+
+The plugin includes print-optimized styles that:
+- Hide interactive elements (players, controls, modals)
+- Convert sliders to printable grids
+- Prevent page breaks inside cards
+- Show clean, readable output
 
 ### Key Classes
 | Class | Description |
@@ -219,6 +256,7 @@ Found under **MindfulMedia** category in Elementor panel (search "mindful"):
 | `.mm-chip` | Filter chip |
 | `.mindful-media-filter-chips` | Filter chips container |
 | `.mindful-media-single` | Single page wrapper |
+| `.mm-auto-dark-mode` | Enables system dark mode support |
 
 ---
 
@@ -258,6 +296,64 @@ mindfulmedia/
 └── assets/
     └── default-thumbnail.jpg
 ```
+
+---
+
+## Extensibility Hooks
+
+The plugin provides filters for customization by themes and other plugins:
+
+### Available Filters
+
+#### `mindful_media_archive_query_args`
+Modify the WP_Query arguments for archive listings.
+
+```php
+add_filter('mindful_media_archive_query_args', function($query_args, $atts) {
+    // Example: Only show featured items
+    $query_args['meta_query'][] = array(
+        'key' => '_mindful_media_featured',
+        'value' => '1'
+    );
+    return $query_args;
+}, 10, 2);
+```
+
+**Parameters:**
+- `$query_args` (array) - The WP_Query arguments
+- `$atts` (array) - The shortcode attributes
+
+#### `mindful_media_card_html`
+Modify the HTML output for individual media cards.
+
+```php
+add_filter('mindful_media_card_html', function($html, $post_id, $atts) {
+    // Example: Add custom data attribute
+    return str_replace('class="mindful-media-card"', 
+        'class="mindful-media-card" data-custom="value"', $html);
+}, 10, 3);
+```
+
+**Parameters:**
+- `$html` (string) - The card HTML
+- `$post_id` (int) - The media post ID
+- `$atts` (array) - The shortcode attributes
+
+#### `mindful_media_player_html`
+Modify the HTML output for media players.
+
+```php
+add_filter('mindful_media_player_html', function($html, $url, $source, $atts) {
+    // Example: Wrap player in custom container
+    return '<div class="my-player-wrapper">' . $html . '</div>';
+}, 10, 4);
+```
+
+**Parameters:**
+- `$html` (string) - The player HTML
+- `$url` (string) - The media URL
+- `$source` (string) - The detected source type (youtube, vimeo, etc.)
+- `$atts` (array) - The player attributes
 
 ---
 
@@ -471,6 +567,62 @@ Ideas for future development:
 ---
 
 ## Version History
+
+- **2.8.1** - Bug Fixes
+  - **Taxonomy Page Search Icon Fix**
+    - Fixed giant search icon on teacher/topic/category pages
+    - Added CSS rules for `.mm-filter-search` class (was incorrectly targeting `.mm-taxonomy-search`)
+    - Search icon now properly sized at 16px
+  - **Taxonomy Page Layout Fix**
+    - Added explicit width rules for taxonomy page containers
+    - Ensures full-width layout regardless of theme constraints
+  - **Embed Card Hover Fix**
+    - Removed whole-card scale transform on hover
+    - Hover effect now only applies to thumbnail image, not title/description
+  - **Password Modal Close Button**
+    - Removed 90-degree rotation on hover (was disorienting)
+  - **Browse Card Aspect Ratio**
+    - Fixed browse cards on Home tab to use 16:9 aspect ratio
+    - Removed conflicting inline styles from PHP
+
+- **2.8.0** - Comprehensive Plugin Optimization
+  - **CSS Theme Isolation**
+    - CSS now loads at priority 9999 (after theme styles) for reliable override
+    - Fixed link colors - card titles use explicit colors, other links use inherit
+    - Fixed visited link styles - section titles stay black, not blue when visited
+    - Added explicit styling for browse search clear button
+    - Prevents theme styles from overriding plugin colors
+  - **JavaScript Memory Leak Fix**
+    - Fixed `progressCheckInterval` not being cleared when modal closes
+    - Added proper cleanup for player intervals on modal close
+    - Prevents memory accumulation during extended use
+  - **Z-index System**
+    - Added documented z-index CSS variable scale
+    - Variables: `--mm-z-base` through `--mm-z-toast`
+    - Provides consistent layering for modals, overlays, dropdowns
+  - **PHP Version Check**
+    - Added activation check requiring PHP 7.4+
+    - Displays helpful error message if PHP version is too old
+    - Prevents activation on incompatible servers
+  - **Extensibility Hooks**
+    - Added `mindful_media_archive_query_args` filter for query customization
+    - Added `mindful_media_card_html` filter for card output customization
+    - Added `mindful_media_player_html` filter for player output customization
+    - Enables theme/plugin developers to extend functionality
+  - **Print Styles**
+    - Added `@media print` rules for clean print output
+    - Hides interactive elements (players, controls, modals)
+    - Converts sliders to printable grids
+    - Prevents page breaks inside cards
+  - **System Dark Mode Support**
+    - Added `prefers-color-scheme: dark` media query support
+    - Add `.mm-auto-dark-mode` class to enable automatic dark mode
+    - Respects OS-level dark mode preference
+  - **Documentation**
+    - Added CSS architecture and theme compatibility section
+    - Added z-index system documentation
+    - Added extensibility hooks reference with examples
+    - Updated version history
 
 - **2.7.0** - Getting Started Page - WooCommerce Style Redesign
   - **Clean Design Matching MindfulSEO**

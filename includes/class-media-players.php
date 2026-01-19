@@ -147,28 +147,46 @@ class MindfulMedia_Players {
         $atts['secondary_color'] = $secondary_color;
         
         // Route to appropriate renderer
+        $player_html = '';
         switch ($source) {
             case 'youtube':
-                return $this->render_youtube_player($url, $atts);
+                $player_html = $this->render_youtube_player($url, $atts);
+                break;
                 
             case 'vimeo':
-                return $this->render_vimeo_player($url, $atts);
+                $player_html = $this->render_vimeo_player($url, $atts);
+                break;
                 
             case 'soundcloud':
-                return $this->render_soundcloud_player($url, $atts);
+                $player_html = $this->render_soundcloud_player($url, $atts);
+                break;
                 
             case 'archive':
-                return $this->render_archive_player($url, $atts);
+                $player_html = $this->render_archive_player($url, $atts);
+                break;
                 
             case 'video':
-                return $this->render_native_video($url, $atts);
+                $player_html = $this->render_native_video($url, $atts);
+                break;
                 
             case 'audio':
-                return $this->render_native_audio($url, $atts);
+                $player_html = $this->render_native_audio($url, $atts);
+                break;
                 
             default:
-                return $this->render_fallback($url, $atts);
+                $player_html = $this->render_fallback($url, $atts);
         }
+        
+        /**
+         * Filter the player HTML output.
+         *
+         * @since 2.8.0
+         * @param string $player_html The player HTML.
+         * @param string $url         The media URL.
+         * @param string $source      The detected media source type.
+         * @param array  $atts        The player attributes.
+         */
+        return apply_filters('mindful_media_player_html', $player_html, $url, $source, $atts);
     }
     
     /**

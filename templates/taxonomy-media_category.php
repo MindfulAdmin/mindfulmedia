@@ -270,7 +270,7 @@ body.tax-media_category .site-main {
     width: 60px;
     height: 60px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #065fd4 0%, #0a85ed 100%);
+    background: linear-gradient(135deg, #8B0000 0%, #a01010 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -638,9 +638,6 @@ body.tax-media_category .site-main {
     <!-- Category Header Section -->
     <header class="mindful-media-category-header">
         <div class="mindful-media-category-header-inner">
-            <div class="mindful-media-category-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            </div>
             <div class="mindful-media-category-info">
                 <h1><?php echo esc_html($term->name); ?></h1>
                 <span class="mindful-media-category-meta"><?php echo $item_count; ?> <?php echo $item_count === 1 ? 'item' : 'items'; ?></span>

@@ -60,6 +60,9 @@
      * Initialize YouTube-style filter chips
      */
     function initFilterChips() {
+        // Inline styles for theme isolation (must match PHP output)
+        var chipStyleInactive = 'display:inline-flex;align-items:center;gap:4px;padding:8px 12px;background:#f2f2f2;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:500;color:#0f0f0f;cursor:pointer;white-space:nowrap;transition:all 0.2s;text-decoration:none;text-transform:none;letter-spacing:normal;line-height:1.4;box-shadow:none;outline:none;margin:0;';
+        var chipStyleActive = 'display:inline-flex;align-items:center;gap:4px;padding:8px 12px;background:#0f0f0f;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:500;color:#ffffff;cursor:pointer;white-space:nowrap;transition:all 0.2s;text-decoration:none;text-transform:none;letter-spacing:normal;line-height:1.4;box-shadow:none;outline:none;margin:0;';
         
         $(document).on('click', '.mm-chip', function(e) {
             e.preventDefault();
@@ -72,9 +75,11 @@
                 return;
             }
             
-            // Update active state
-            $('.mm-chip').removeClass('active');
-            $chip.addClass('active');
+            // Update active state and inline styles for all chips
+            $('.mm-chip').each(function() {
+                $(this).removeClass('active').attr('style', chipStyleInactive);
+            });
+            $chip.addClass('active').attr('style', chipStyleActive);
             
             // Get filter data
             var filterType = $chip.data('filter-type');

@@ -2724,6 +2724,10 @@ class MindfulMedia_Shortcodes {
         $show_type = isset($settings['archive_show_type_filter']) ? $settings['archive_show_type_filter'] === '1' : true;
         $show_filter_counts = isset($settings['archive_show_filter_counts']) ? $settings['archive_show_filter_counts'] === '1' : true;
         
+        // Inline styles for chips to override aggressive theme styles (like Hello Elementor)
+        $chip_style = 'display:inline-flex;align-items:center;gap:4px;padding:8px 12px;background:#f2f2f2;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:500;color:#0f0f0f;cursor:pointer;white-space:nowrap;transition:all 0.2s;text-decoration:none;text-transform:none;letter-spacing:normal;line-height:1.4;box-shadow:none;outline:none;margin:0;';
+        $chip_style_active = 'display:inline-flex;align-items:center;gap:4px;padding:8px 12px;background:#0f0f0f;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:500;color:#ffffff;cursor:pointer;white-space:nowrap;transition:all 0.2s;text-decoration:none;text-transform:none;letter-spacing:normal;line-height:1.4;box-shadow:none;outline:none;margin:0;';
+        
         $output = '<div class="mindful-media-filter-chips">';
         
         // Inner wrapper for chips (allows search to be positioned on the right)
@@ -2751,8 +2755,8 @@ class MindfulMedia_Shortcodes {
         }
         $playlist_item_ids = array_unique($playlist_item_ids);
         
-        // "All" chip - always first
-        $output .= '<button type="button" class="mm-chip active" data-filter-type="all" data-filter-value="">';
+        // "All" chip - always first (active by default)
+        $output .= '<button type="button" class="mm-chip active" style="' . $chip_style_active . '" data-filter-type="all" data-filter-value="">';
         $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>';
         $output .= __('All', 'mindful-media');
         $output .= '</button>';
@@ -2791,7 +2795,7 @@ class MindfulMedia_Shortcodes {
                     ));
                     $type_count = $type_count_query->found_posts;
                     
-                    $output .= '<button type="button" class="mm-chip" data-filter-type="media_type" data-filter-value="' . esc_attr($type->slug) . '">';
+                    $output .= '<button type="button" class="mm-chip" style="' . $chip_style . '" data-filter-type="media_type" data-filter-value="' . esc_attr($type->slug) . '">';
                     $output .= $icon;
                     $output .= esc_html($type->name);
                     if ($show_filter_counts && $type_count > 0) {
@@ -2811,7 +2815,7 @@ class MindfulMedia_Shortcodes {
         $playlist_count = !empty($playlists) && !is_wp_error($playlists) ? count($playlists) : 0;
         
         if ($playlist_count > 0) {
-            $output .= '<button type="button" class="mm-chip" data-filter-type="playlists" data-filter-value="all">';
+            $output .= '<button type="button" class="mm-chip" style="' . $chip_style . '" data-filter-type="playlists" data-filter-value="all">';
             $output .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
             $output .= __('Playlists', 'mindful-media');
             if ($show_filter_counts) {
@@ -2832,7 +2836,7 @@ class MindfulMedia_Shortcodes {
         if (!empty($teachers) && !is_wp_error($teachers)) {
             $teacher_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
             foreach ($teachers as $teacher) {
-                $output .= '<button type="button" class="mm-chip" data-filter-type="media_teacher" data-filter-value="' . esc_attr($teacher->slug) . '">';
+                $output .= '<button type="button" class="mm-chip" style="' . $chip_style . '" data-filter-type="media_teacher" data-filter-value="' . esc_attr($teacher->slug) . '">';
                 $output .= $teacher_icon;
                 $output .= '<span>' . esc_html($teacher->name) . '</span>';
                 $output .= '</button>';
@@ -2851,7 +2855,7 @@ class MindfulMedia_Shortcodes {
         if (!empty($topics) && !is_wp_error($topics)) {
             $topic_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>';
             foreach ($topics as $topic) {
-                $output .= '<button type="button" class="mm-chip" data-filter-type="media_topic" data-filter-value="' . esc_attr($topic->slug) . '">';
+                $output .= '<button type="button" class="mm-chip" style="' . $chip_style . '" data-filter-type="media_topic" data-filter-value="' . esc_attr($topic->slug) . '">';
                 $output .= $topic_icon;
                 $output .= '<span>' . esc_html($topic->name) . '</span>';
                 $output .= '</button>';
@@ -2870,7 +2874,7 @@ class MindfulMedia_Shortcodes {
             if (!empty($durations) && !is_wp_error($durations)) {
                 $duration_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
                 foreach ($durations as $duration) {
-                    $output .= '<button type="button" class="mm-chip" data-filter-type="media_duration" data-filter-value="' . esc_attr($duration->slug) . '">';
+                    $output .= '<button type="button" class="mm-chip" style="' . $chip_style . '" data-filter-type="media_duration" data-filter-value="' . esc_attr($duration->slug) . '">';
                     $output .= $duration_icon;
                     $output .= '<span>' . esc_html($duration->name) . '</span>';
                     $output .= '</button>';
@@ -2891,7 +2895,7 @@ class MindfulMedia_Shortcodes {
             if (!empty($years) && !is_wp_error($years)) {
                 $year_icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
                 foreach ($years as $year) {
-                    $output .= '<button type="button" class="mm-chip" data-filter-type="media_year" data-filter-value="' . esc_attr($year->slug) . '">';
+                    $output .= '<button type="button" class="mm-chip" style="' . $chip_style . '" data-filter-type="media_year" data-filter-value="' . esc_attr($year->slug) . '">';
                     $output .= $year_icon;
                     $output .= '<span>' . esc_html($year->name) . '</span>';
                     $output .= '</button>';

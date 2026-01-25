@@ -4,12 +4,13 @@
 
 (function($) {
     'use strict';
-    
+
     // Initialize when document is ready
     $(document).ready(function() {
         initFilterChips();
         initSearch();
         initSinglePagePlayer();
+        initSingleScrollIndicator();
         initCustomAudioPlayer();
         initInlinePlayer();
         initCardClicks();
@@ -17,6 +18,7 @@
         initLazyLoading();
         initKeyboardNavigation();
         initHashNavigation();
+        initPlaylistPageHeaderOffset();
     });
     
     /**
@@ -54,6 +56,38 @@
                 }
             }
         }, 100);
+    }
+
+    function initPlaylistPageHeaderOffset() {
+        var $playlistHeader = $('.mindful-media-playlist-page-header');
+        if (!$playlistHeader.length) {
+            return;
+        }
+
+        function updateOffset() {
+            var offset = 0;
+            var $adminBar = $('#wpadminbar');
+            if ($adminBar.length) {
+                offset += $adminBar.outerHeight() || 0;
+            }
+
+            var headerEl = document.querySelector('header#masthead, .site-header');
+            if (headerEl) {
+                var headerStyle = window.getComputedStyle(headerEl);
+                if (headerStyle.position === 'fixed' || headerStyle.position === 'sticky') {
+                    offset += headerEl.getBoundingClientRect().height || 0;
+                }
+            }
+
+            document.documentElement.style.setProperty('--mm-playlist-header-offset', offset + 'px');
+        }
+
+        updateOffset();
+        $(window).on('resize', updateOffset);
+    }
+
+    function shouldHideYouTubeEndScreen() {
+        return typeof mindfulMediaAjax !== 'undefined' && mindfulMediaAjax.youtubeHideEndScreen === '1';
     }
     
     /**
@@ -264,6 +298,60 @@
             }, 300);
         });
     }
+
+    function getSearchText($element) {
+        if (!$element || !$element.length) {
+            return '';
+        }
+
+        var $searchEl = $element;
+        if (!$searchEl.attr('data-search')) {
+            var $searchChild = $element.find('[data-search]').first();
+            if ($searchChild.length) {
+                $searchEl = $searchChild;
+            }
+        }
+
+        var dataSearch = $searchEl.attr('data-search') || '';
+        if (dataSearch) {
+            return dataSearch.toLowerCase();
+        }
+
+        var pieces = [];
+        var titleText = $element.find('.mindful-media-card-title, .mindful-media-browse-card-title, .mindful-media-teacher-card-title, .mindful-media-topic-card-title, .mindful-media-category-card-title, h3, h4').text();
+        if (titleText) {
+            pieces.push(titleText);
+        }
+
+        var dataTitle = $element.attr('data-title') ||
+            $element.find('.mindful-media-thumb-trigger').attr('data-title') ||
+            $element.find('.mindful-media-thumb-trigger').data('title');
+        if (dataTitle) {
+            pieces.push(dataTitle);
+        }
+
+        var teacherText = $element.find('.mindful-media-card-teacher, .mindful-media-category-card-teacher').text();
+        if (teacherText) {
+            pieces.push(teacherText);
+        }
+
+        var playlistText = $element.find('.mindful-media-card-playlist-badge').text();
+        if (playlistText) {
+            pieces.push(playlistText);
+        }
+
+        var termName = $element.attr('data-term-name') || $element.data('termName');
+        if (termName) {
+            pieces.push(termName);
+        }
+
+        var termSlug = $element.attr('data-term-slug') || $element.data('termSlug');
+        if (termSlug) {
+            pieces.push(termSlug);
+        }
+
+        return $.trim(pieces.join(' ')).toLowerCase();
+    }
     
     /**
      * Apply search to browse page content
@@ -292,9 +380,9 @@
             // Search in cards view (taxonomy term cards)
             $section.find('.mm-browse-cards-view .mindful-media-browse-card').each(function() {
                 var $card = $(this);
-                var cardTitle = ($card.find('.mindful-media-browse-card-title').text() || '').toLowerCase();
+                var cardText = getSearchText($card);
                 
-                if (cardTitle.indexOf(searchTerm) !== -1) {
+                if (cardText.indexOf(searchTerm) !== -1) {
                     $card.show();
                     sectionMatches++;
                 } else {
@@ -309,11 +397,9 @@
                 
                 $row.find('.mindful-media-card').each(function() {
                     var $card = $(this);
-                    var cardTitle = ($card.find('.mindful-media-card-title').text() || 
-                                    $card.attr('data-title') || 
-                                    $card.find('.mindful-media-thumb-trigger').attr('data-title') || '').toLowerCase();
+                    var cardText = getSearchText($card);
                     
-                    if (cardTitle.indexOf(searchTerm) !== -1) {
+                    if (cardText.indexOf(searchTerm) !== -1) {
                         $card.show();
                         rowMatches++;
                     } else {
@@ -405,10 +491,9 @@
             
             $row.find('.mm-slider-item').each(function() {
                 var $item = $(this);
-                var $card = $item.find('.mindful-media-card');
-                var title = $card.find('.mindful-media-card-title').text().toLowerCase();
+                var searchText = getSearchText($item);
                 
-                if (title.indexOf(searchTerm) !== -1) {
+                if (searchText.indexOf(searchTerm) !== -1) {
                     $item.show();
                     rowVisible++;
                 } else {
@@ -471,22 +556,9 @@
         // Filter cards by title
         $cards.each(function() {
             var $card = $(this);
-            var cardTitle = '';
+            var cardText = getSearchText($card);
             
-            // Get title from various possible sources
-            var $titleEl = $card.find('.mindful-media-teacher-card-title, .mindful-media-card-title, h3, h4');
-            if ($titleEl.length) {
-                cardTitle = $titleEl.text().toLowerCase();
-            }
-            
-            // Also check data attributes
-            var dataTitle = $card.attr('data-title') || 
-                           $card.find('.mindful-media-thumb-trigger').attr('data-title') || '';
-            if (dataTitle) {
-                cardTitle += ' ' + dataTitle.toLowerCase();
-            }
-            
-            if (cardTitle.indexOf(searchTerm) !== -1) {
+            if (cardText.indexOf(searchTerm) !== -1) {
                 $card.show();
                 visibleCount++;
             } else {
@@ -558,6 +630,23 @@
     function initSinglePagePlayer() {
         // Video embeds now display directly without play button interaction
     }
+
+    /**
+     * Hide single-page scroll indicator after user scrolls
+     */
+    function initSingleScrollIndicator() {
+        var $single = $('.mindful-media-single-fullscreen');
+        if (!$single.length) {
+            return;
+        }
+        var $indicator = $single.find('.mindful-media-single-scroll-indicator');
+        if (!$indicator.length) {
+            return;
+        }
+        $(window).on('scroll', function() {
+            $single.toggleClass('scrolled', $(window).scrollTop() > 80);
+        });
+    }
     
     /**
      * Initialize Archive.org embeds
@@ -583,8 +672,13 @@
     function formatTime(seconds) {
         if (isNaN(seconds)) return '0:00';
         
-        var minutes = Math.floor(seconds / 60);
+        var hours = Math.floor(seconds / 3600);
+        var minutes = Math.floor((seconds % 3600) / 60);
         var secs = Math.floor(seconds % 60);
+        
+        if (hours > 0) {
+            return hours + ':' + (minutes < 10 ? '0' : '') + minutes + ':' + (secs < 10 ? '0' : '') + secs;
+        }
         return minutes + ':' + (secs < 10 ? '0' : '') + secs;
     }
     
@@ -615,6 +709,37 @@
         return null;
     }
     
+    /**
+     * Clean up embedded player instances before swapping content
+     */
+    function destroyPlayerInstances($container) {
+        if (!$container || !$container.length) {
+            return;
+        }
+
+        $container.find('.mindful-media-unified-player').each(function() {
+            var $player = $(this);
+            var updateInterval = $player.data('mm-update-interval');
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                $player.removeData('mm-update-interval');
+            }
+            var progressInterval = $player.data('mm-progress-interval');
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                $player.removeData('mm-progress-interval');
+            }
+
+            var instance = $player.data('player-instance');
+            if (instance && typeof instance.destroy === 'function') {
+                try {
+                    instance.destroy();
+                } catch (error) {
+                }
+            }
+        });
+    }
+
     /**
      * Render playlist sidebar - supports both simple playlists and hierarchical with modules
      */
@@ -789,7 +914,9 @@
                     if (response.success) {
                         
                         // Update player content
-                        $('.mindful-media-inline-player-content').html(response.data.player);
+                        var $inlineContent = $('.mindful-media-inline-player-content');
+                        destroyPlayerInstances($inlineContent);
+                        $inlineContent.html(response.data.player);
                         
                         // Update header
                         $('.mindful-media-inline-player-header h3').html(response.data.title);
@@ -844,6 +971,18 @@
         var $playerContent = $('.mindful-media-inline-player-content');
         var $playerTitle = $('.mindful-media-inline-player-title');
         
+        // Apply modal player theme from settings
+        if (typeof mindfulMediaAjax !== 'undefined' && mindfulMediaAjax.modalPlayerTheme === 'light') {
+            $inlinePlayer.addClass('light-theme');
+        }
+
+        // Hide scroll indicator once user scrolls the modal
+        if ($inlinePlayer.length) {
+            $inlinePlayer.on('scroll', function() {
+                $inlinePlayer.toggleClass('scrolled', $inlinePlayer.scrollTop() > 40);
+            });
+        }
+        
         // Helper function to load media into modal player
         function loadMediaIntoModal(postId, callback) {
             $.ajax({
@@ -858,22 +997,26 @@
                     if (response.success) {
                         var titleHtml = response.data.title;
                         if (response.data.teacher) {
-                            titleHtml += ' <span style="font-weight:normal;font-style:italic;color:rgba(255,255,255,0.8)">by ' + response.data.teacher + '</span>';
+                            titleHtml += ' <span class="mindful-media-inline-player-teacher">by ' + response.data.teacher + '</span>';
                         }
                         $playerTitle.html(titleHtml);
-                        $('.mindful-media-inline-view-full').attr('href', response.data.permalink).show();
+                        // Set share button permalink
+                        $('.mindful-media-inline-share').data('permalink', response.data.permalink);
+                        destroyPlayerInstances($playerContent);
                         $playerContent.html(response.data.player);
                         
                         // Render playlist sidebar if playlist data exists
                         if (response.data.playlist) {
                             renderPlaylistSidebar(response.data.playlist);
                             $inlinePlayer.addClass('has-playlist');
+                            // For playlist items, show collapsible More Info section
+                            renderModalContentSection(response.data, true);
                         } else {
                             $('.mindful-media-playlist-sidebar').remove();
                             $inlinePlayer.removeClass('has-playlist');
                             
-                            // For non-playlist items, add description/tags section below player
-                            renderModalContentSection(response.data);
+                            // For non-playlist items, add description/tags section below player (expanded)
+                            renderModalContentSection(response.data, false);
                         }
                         
                         // Initialize unified players after AJAX load
@@ -881,13 +1024,21 @@
                             initUnifiedPlayers();
                         }, 100);
                         
+                        // Clear any existing browse section before deciding to show it
+                        $('.mindful-media-browse-below').remove();
+                        var allowMoreMedia = true;
+                        if (typeof mindfulMediaAjax !== 'undefined' && typeof mindfulMediaAjax.modalShowMoreMedia !== 'undefined') {
+                            allowMoreMedia = mindfulMediaAjax.modalShowMoreMedia === '1';
+                        }
+                        
                         // Only load browse content if NOT a playlist (playlist has sidebar instead)
-                        if (!response.data.playlist) {
+                        if (!response.data.playlist && allowMoreMedia) {
                             loadBrowseContent(postId);
                         }
                         
                         $inlinePlayer.addClass('active');
                         $('body').addClass('modal-open');
+                        $inlinePlayer.removeClass('scrolled').scrollTop(0);
                         
                         if (callback) callback(true, response);
                     } else {
@@ -901,12 +1052,14 @@
         }
         
         // Render description, meta, and tags section in modal (matches single page layout)
-        function renderModalContentSection(data) {
+        // isPlaylist: if true, show as collapsible section with More Info button
+        function renderModalContentSection(data, isPlaylist) {
             // Remove existing content section
             $('.mindful-media-modal-content-section').remove();
+            $('.mindful-media-more-info-toggle').remove();
             
-            var html = '<div class="mindful-media-modal-content-section">';
-            html += '<div class="mindful-media-modal-content-inner">';
+            // Build content HTML
+            var contentHtml = '';
             
             // Meta line (date, duration, type) - styled like single page
             var metaParts = [];
@@ -915,45 +1068,91 @@
             if (data.media_type) metaParts.push('<span>' + data.media_type + '</span>');
             
             if (metaParts.length > 0) {
-                html += '<div class="mindful-media-modal-meta">' + metaParts.join(' ') + '</div>';
+                contentHtml += '<div class="mindful-media-modal-meta">' + metaParts.join(' ') + '</div>';
             }
             
             // Description
             if (data.description) {
-                html += '<div class="mindful-media-modal-description">' + data.description + '</div>';
+                contentHtml += '<div class="mindful-media-modal-description">' + data.description + '</div>';
             }
             
             // Categories and Topics chips
             var hasChips = (data.categories && data.categories.length > 0) || (data.topics && data.topics.length > 0);
             if (hasChips) {
-                html += '<div class="mindful-media-modal-taxonomies">';
+                contentHtml += '<div class="mindful-media-modal-taxonomies">';
                 
                 if (data.categories && data.categories.length > 0) {
-                    html += '<div class="mindful-media-modal-tax-group">';
-                    html += '<span class="mindful-media-modal-tax-label">Categories:</span>';
+                    contentHtml += '<div class="mindful-media-modal-tax-group">';
+                    contentHtml += '<span class="mindful-media-modal-tax-label">Categories:</span>';
                     for (var i = 0; i < data.categories.length; i++) {
-                        html += '<span class="mindful-media-modal-chip">' + data.categories[i] + '</span>';
+                        contentHtml += '<span class="mindful-media-modal-chip">' + data.categories[i] + '</span>';
                     }
-                    html += '</div>';
+                    contentHtml += '</div>';
                 }
                 
                 if (data.topics && data.topics.length > 0) {
-                    html += '<div class="mindful-media-modal-tax-group">';
-                    html += '<span class="mindful-media-modal-tax-label">Topics:</span>';
+                    contentHtml += '<div class="mindful-media-modal-tax-group">';
+                    contentHtml += '<span class="mindful-media-modal-tax-label">Topics:</span>';
                     for (var j = 0; j < data.topics.length; j++) {
-                        html += '<span class="mindful-media-modal-chip">' + data.topics[j] + '</span>';
+                        contentHtml += '<span class="mindful-media-modal-chip">' + data.topics[j] + '</span>';
                     }
-                    html += '</div>';
+                    contentHtml += '</div>';
                 }
                 
-                html += '</div>';
+                contentHtml += '</div>';
+            }
+
+            // Only show if there's content
+            if (!contentHtml) {
+                return;
             }
             
+            var html = '';
+            
+            if (isPlaylist) {
+                // For playlists, add a toggle button and collapsible wrapper
+                html += '<button class="mindful-media-more-info-toggle" type="button">';
+                html += '<span class="toggle-text">More Info</span>';
+                html += '<svg class="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+                html += '</button>';
+                html += '<div class="mindful-media-modal-content-section collapsed">';
+            } else {
+                html += '<div class="mindful-media-modal-content-section">';
+            }
+            
+            html += '<div class="mindful-media-modal-content-inner">';
+            html += contentHtml;
             html += '</div>'; // close inner
             html += '</div>'; // close section
             
             // Insert after player content
             $playerContent.after(html);
+
+            var $taxContainer = $('.mindful-media-modal-taxonomies');
+            var $chips = $taxContainer.find('.mindful-media-modal-chip');
+            var taxColor = $taxContainer.length ? window.getComputedStyle($taxContainer[0]).color : null;
+            var chipColor = $chips.length ? window.getComputedStyle($chips[0]).color : null;
+            var section = $('.mindful-media-modal-content-section');
+            var sectionBg = section.length ? window.getComputedStyle(section[0]).backgroundColor : null;
+            
+            // Bind toggle event for playlists
+            if (isPlaylist) {
+                $('.mindful-media-more-info-toggle').on('click', function() {
+                    var $btn = $(this);
+                    var $section = $('.mindful-media-modal-content-section');
+                    var isCollapsed = $section.hasClass('collapsed');
+                    
+                    if (isCollapsed) {
+                        $section.removeClass('collapsed').addClass('expanded');
+                        $btn.find('.toggle-text').text('Less Info');
+                        $btn.addClass('expanded');
+                    } else {
+                        $section.removeClass('expanded').addClass('collapsed');
+                        $btn.find('.toggle-text').text('More Info');
+                        $btn.removeClass('expanded');
+                    }
+                });
+            }
         }
         
         // Thumbnail trigger - opens modal without changing button content
@@ -1111,10 +1310,11 @@
                     if (response.success) {
                         var titleHtml = response.data.title;
                         if (response.data.teacher) {
-                            titleHtml += ' <span style="font-weight:normal;font-style:italic;color:rgba(255,255,255,0.8)">by ' + response.data.teacher + '</span>';
+                            titleHtml += ' <span class="mindful-media-inline-player-teacher">by ' + response.data.teacher + '</span>';
                         }
                         $playerTitle.html(titleHtml);
-                        $('.mindful-media-inline-view-full').attr('href', response.data.permalink).show();
+                        // Set share button permalink
+                        $('.mindful-media-inline-share').data('permalink', response.data.permalink);
                         $playerContent.html(response.data.player);
                         
                         // Render playlist sidebar - it should always exist for playlist items
@@ -1131,6 +1331,7 @@
                         // Show player and scroll to top
                         $inlinePlayer.addClass('active');
                         $('body').addClass('modal-open');
+                        $inlinePlayer.removeClass('scrolled').scrollTop(0);
                         
                         // Remove loading state (don't use .text() - preserves thumbnail)
                         $btn.removeClass('loading').prop('disabled', false);
@@ -1163,15 +1364,7 @@
         });
         
         $('.mindful-media-inline-close').on('click', function() {
-            // Clear player intervals to prevent memory leaks
-            if (window.progressCheckInterval) {
-                clearInterval(window.progressCheckInterval);
-                window.progressCheckInterval = null;
-            }
-            if (window.playerUpdateInterval) {
-                clearInterval(window.playerUpdateInterval);
-                window.playerUpdateInterval = null;
-            }
+            destroyPlayerInstances($playerContent);
             
             // Clear all "Now playing" indicators and reset card states
             $('.mindful-media-play-inline').each(function() {
@@ -1222,6 +1415,67 @@
             $inlinePlayer.toggleClass('minimized');
             $(this).html($inlinePlayer.hasClass('minimized') ? '+' : '−');
         });
+        
+        // Back to Browse button handler
+        $('.mindful-media-inline-back').on('click', function() {
+            // Close the modal first
+            $('.mindful-media-inline-close').trigger('click');
+            
+            // Navigate to browse/archive page
+            var archiveLink = $inlinePlayer.data('archive-link') || '/media';
+            window.location.href = archiveLink;
+        });
+        
+        // Share button handler - copy permalink to clipboard
+        $('.mindful-media-inline-share').on('click', function() {
+            var $btn = $(this);
+            var permalink = $btn.data('permalink');
+            
+            if (!permalink) {
+                return;
+            }
+            
+            // Create tooltip if it doesn't exist
+            if (!$btn.find('.share-tooltip').length) {
+                $btn.append('<span class="share-tooltip">Link copied!</span>');
+            }
+            
+            // Copy to clipboard
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(permalink).then(function() {
+                    showShareCopied($btn);
+                }).catch(function() {
+                    fallbackCopyToClipboard(permalink, $btn);
+                });
+            } else {
+                fallbackCopyToClipboard(permalink, $btn);
+            }
+        });
+        
+        // Fallback copy method for older browsers
+        function fallbackCopyToClipboard(text, $btn) {
+            var textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showShareCopied($btn);
+            } catch (err) {
+                console.error('Failed to copy link');
+            }
+            document.body.removeChild(textArea);
+        }
+        
+        // Show "copied" state on share button
+        function showShareCopied($btn) {
+            $btn.addClass('copied');
+            setTimeout(function() {
+                $btn.removeClass('copied');
+            }, 2000);
+        }
     }
     
     /**
@@ -1502,7 +1756,20 @@
     
     function initYouTubePlayer($player) {
         var videoId = $player.data('video-id');
-        var playerId = 'youtube-player-' + videoId;
+        if (!videoId) {
+            return;
+        }
+
+        var $playerElement = $player.find('.mindful-media-player').first();
+        if (!$playerElement.length) {
+            return;
+        }
+
+        window.mmYouTubePlayerIndex = (window.mmYouTubePlayerIndex || 0) + 1;
+        var playerId = 'youtube-player-' + videoId + '-' + window.mmYouTubePlayerIndex;
+        $playerElement.attr('id', playerId);
+
+        $player.data('player-id', playerId);
         
         
         // Load YouTube IFrame API if not already loaded
@@ -1525,11 +1792,16 @@
     }
     
     function createYouTubePlayer($player, videoId, playerId) {
+        var playerElement = document.getElementById(playerId);
+        if (!playerElement) {
+            return;
+        }
+
         // Mark as initialized immediately to prevent duplicate initialization
         $player.attr('data-player-initialized', 'true');
         
         // Create player with videoId - this creates the iframe properly via API
-        var ytPlayer = new YT.Player(playerId, {
+        var ytPlayer = new YT.Player(playerElement, {
             videoId: videoId,
             playerVars: {
                 rel: 0,
@@ -1547,8 +1819,10 @@
                     // Store player reference
                     $player.data('player-instance', playerInstance);
                     
-                    // Add controls-active class immediately so controls are visible
-                    $player.addClass('controls-active');
+                    // NOTE: Do NOT add controls-active here - it blocks iframe pointer events
+                    // which prevents user from clicking YouTube's native play button.
+                    // The controls-active class is added in onStateChange when PLAYING fires.
+                    // This is required for browser autoplay policy compliance.
                     
                     setupUnifiedControls($player, {
                         play: function() { playerInstance.playVideo(); },
@@ -1568,18 +1842,27 @@
                         updatePlayButton($player, 'pause');
                         // Hide the big play button
                         $player.find('.mindful-media-big-play-btn').addClass('hidden').css('display', 'none');
+                        if (shouldHideYouTubeEndScreen()) {
+                            $player.removeClass('mm-youtube-endscreen-active');
+                        }
                         $player.trigger('playing'); // Trigger jQuery event for progress updates
                     } else if (event.data == YT.PlayerState.PAUSED) {
                         $player.removeClass('playing');
                         updatePlayButton($player, 'play');
                         // Show the big play button
                         $player.find('.mindful-media-big-play-btn').removeClass('hidden').css('display', 'flex');
+                        if (shouldHideYouTubeEndScreen()) {
+                            $player.removeClass('mm-youtube-endscreen-active');
+                        }
                         $player.trigger('pause'); // Trigger jQuery event
                     } else if (event.data == YT.PlayerState.ENDED) {
                         $player.removeClass('playing');
                         updatePlayButton($player, 'play');
                         // Show the big play button
                         $player.find('.mindful-media-big-play-btn').removeClass('hidden').css('display', 'flex');
+                        if (shouldHideYouTubeEndScreen()) {
+                            $player.addClass('mm-youtube-endscreen-active');
+                        }
                         $player.trigger('ended'); // Trigger jQuery event
                     }
                 }
@@ -1697,6 +1980,7 @@
         var $controls = $player.find('.mindful-media-custom-controls');
         var $playBtn = $player.find('.mindful-media-play-btn');
         var $bigPlayBtn = $player.find('.mindful-media-big-play-btn');
+        var $endScreen = $player.find('.mindful-media-youtube-endscreen');
         var $progressContainer = $player.find('.mindful-media-progress-container');
         var $progressBar = $player.find('.mindful-media-progress-bar');
         var $currentTime = $player.find('.mindful-media-current-time');
@@ -1704,7 +1988,8 @@
         var $volumeBtn = $player.find('.mindful-media-volume-btn');
         var $volumeSlider = $player.find('.mindful-media-volume-slider input');
         var $fullscreenBtn = $player.find('.mindful-media-fullscreen-btn');
-        
+        var playerType = $player.data('player-type') || 'unknown';
+
         var duration = 0;
         var updateInterval;
         var hideControlsTimeout;
@@ -1743,6 +2028,34 @@
         function isPlaying() {
             return $player.hasClass('playing');
         }
+
+        function showYouTubeEndScreen() {
+            if (playerType !== 'youtube' || !shouldHideYouTubeEndScreen() || !$endScreen.length) {
+                return;
+            }
+            $player.addClass('mm-youtube-endscreen-active');
+        }
+
+        function hideYouTubeEndScreen() {
+            if (!$endScreen.length) {
+                return;
+            }
+            $player.removeClass('mm-youtube-endscreen-active');
+        }
+
+        if ($endScreen.length && playerType === 'youtube' && shouldHideYouTubeEndScreen()) {
+            $endScreen.off('click.mmEndScreen').on('click.mmEndScreen', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                hideYouTubeEndScreen();
+                if (api.seek) {
+                    api.seek(0);
+                }
+                if (api.play) {
+                    api.play();
+                }
+            });
+        }
         
         // Play/Pause button click
         // Note: Don't update UI here - let the player's state change event handle UI updates
@@ -1778,38 +2091,115 @@
             }
         });
         
-        // Progress bar click AND drag - Full support for seeking
+        // Progress bar click AND drag - Full support for seeking (mouse + touch)
         var isDraggingProgress = false;
         
-        function seekToPosition(e) {
-            var rect = $progressContainer[0].getBoundingClientRect();
-            var percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-            var seekTime = percent * duration;
-            if (api.seek && duration > 0) {
-                api.seek(seekTime);
+        function getClientXFromEvent(e) {
+            if (e && e.originalEvent) {
+                if (e.originalEvent.touches && e.originalEvent.touches.length) {
+                    return e.originalEvent.touches[0].clientX;
+                }
+                if (e.originalEvent.changedTouches && e.originalEvent.changedTouches.length) {
+                    return e.originalEvent.changedTouches[0].clientX;
+                }
+            }
+            return typeof e.clientX === 'number' ? e.clientX : null;
+        }
+        
+        function withDuration(callback) {
+            if (duration > 0) {
+                callback(duration);
+                return;
+            }
+            
+            if (typeof api.getDuration === 'function') {
+                if (api.getDuration.length > 0) {
+                    api.getDuration(function(dur) {
+                        if (dur && dur > 0) {
+                            duration = dur;
+                            $duration.text(formatTime(dur));
+                        }
+                        callback(duration);
+                    });
+                } else {
+                    var dur = api.getDuration();
+                    if (dur && dur > 0) {
+                        duration = dur;
+                        $duration.text(formatTime(dur));
+                    }
+                    callback(duration);
+                }
+            } else {
+                callback(duration);
             }
         }
         
-        $progressContainer.on('mousedown', function(e) {
+        function seekToPosition(e) {
+            if (!$progressContainer.length) {
+                return;
+            }
+            var clientX = getClientXFromEvent(e);
+            if (clientX === null) {
+                return;
+            }
+            var rect = $progressContainer[0].getBoundingClientRect();
+            if (!rect || rect.width === 0) {
+                return;
+            }
+            var percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+            
+            withDuration(function(dur) {
+                var didSeek = false;
+                if (api.seek && dur > 0) {
+                    api.seek(percent * dur);
+                    didSeek = true;
+                }
+            });
+        }
+        
+        function startSeek(e) {
             e.preventDefault();
             e.stopPropagation();
             isDraggingProgress = true;
             seekToPosition(e);
             $progressContainer.addClass('dragging');
-        });
+
+            var rect = $progressContainer.length ? $progressContainer[0].getBoundingClientRect() : null;
+            var clientX = getClientXFromEvent(e);
+            var hit = null;
+            if (rect && clientX !== null) {
+                var hitEl = document.elementFromPoint(clientX, rect.top + (rect.height / 2));
+                hit = hitEl ? (hitEl.className || hitEl.tagName) : null;
+            }
+            var pointerEvents = $progressContainer.length ? window.getComputedStyle($progressContainer[0]).pointerEvents : null;
+        }
         
-        $(document).on('mousemove', function(e) {
+        function moveSeek(e) {
             if (isDraggingProgress) {
+                e.preventDefault();
                 seekToPosition(e);
             }
-        });
+        }
         
-        $(document).on('mouseup', function(e) {
+        function endSeek() {
             if (isDraggingProgress) {
                 isDraggingProgress = false;
                 $progressContainer.removeClass('dragging');
             }
-        });
+        }
+        
+        if (window.PointerEvent) {
+            $progressContainer.on('pointerdown', startSeek);
+            $(document).on('pointermove', moveSeek);
+            $(document).on('pointerup pointercancel', endSeek);
+        } else {
+            $progressContainer.on('mousedown', startSeek);
+            $(document).on('mousemove', moveSeek);
+            $(document).on('mouseup', endSeek);
+            $progressContainer.on('touchstart', startSeek);
+            $(document).on('touchmove', moveSeek);
+            $(document).on('touchend touchcancel', endSeek);
+        }
         
         // Volume controls
         $volumeBtn.on('click', function(e) {
@@ -1858,7 +2248,12 @@
                     });
                 } else {
                     // Sync (YouTube, HTML5)
-                    var currentTime = api.getCurrentTime();
+                    var currentTime = 0;
+                    try {
+                        currentTime = api.getCurrentTime();
+                    } catch (error) {
+                        // Ignore getCurrentTime errors
+                    }
                     updateTimeDisplay(currentTime);
                 }
             }
@@ -1897,6 +2292,7 @@
             if (!updateInterval) {
                 updateInterval = setInterval(updateProgress, 500);
                 updateProgress(); // Immediate update
+                $player.data('mm-update-interval', updateInterval);
             }
         });
         
@@ -1904,27 +2300,27 @@
             if (updateInterval) {
                 clearInterval(updateInterval);
                 updateInterval = null;
+                $player.removeData('mm-update-interval');
             }
         });
         
         // Start continuous progress checking regardless of events
         // This ensures progress updates even if event binding has issues
-        // Store on window for cleanup when modal closes (memory leak fix)
-        if (window.progressCheckInterval) {
-            clearInterval(window.progressCheckInterval);
+        var progressInterval = $player.data('mm-progress-interval');
+        if (progressInterval) {
+            clearInterval(progressInterval);
         }
-        window.progressCheckInterval = setInterval(function() {
+        progressInterval = setInterval(function() {
             // Always update progress if player exists
             updateProgress();
             
             // Start the main interval if playing but not started
             if ($player.hasClass('playing') && !updateInterval) {
                 updateInterval = setInterval(updateProgress, 500);
+                $player.data('mm-update-interval', updateInterval);
             }
         }, 1000);
-        
-        // Store updateInterval reference on window for cleanup
-        window.playerUpdateInterval = updateInterval;
+        $player.data('mm-progress-interval', progressInterval);
         
         // Click on player area (not controls) to toggle play/pause
         $player.on('click', function(e) {
@@ -2117,6 +2513,7 @@
         var isCurrentlyPlaying = false;
         var widgetReady = false;
         var widget = null;
+        var pendingPlay = false; // Queue play action if widget not ready
         
         // Create widget immediately
         try {
@@ -2129,7 +2526,11 @@
         
         // Function to toggle play/pause
         function togglePlayPause() {
-            if (!widgetReady || !widget) return;
+            if (!widgetReady || !widget) {
+                // Queue the play action for when widget is ready
+                pendingPlay = true;
+                return;
+            }
             
             if (isCurrentlyPlaying) {
                 widget.pause();
@@ -2141,6 +2542,12 @@
         // Bind all event handlers immediately
         widget.bind(SC.Widget.Events.READY, function() {
             widgetReady = true;
+            
+            // If user clicked play before widget was ready, play now
+            if (pendingPlay) {
+                pendingPlay = false;
+                widget.play();
+            }
             $player.data('player-ready', true);
             $player.data('player-instance', widget);
             
@@ -2220,6 +2627,9 @@
             e.stopPropagation();
             if (widgetReady) {
                 widget.play();
+            } else {
+                // Queue play action for when widget is ready
+                pendingPlay = true;
             }
         });
     }
@@ -2316,6 +2726,19 @@
         var $sections = $browse.find('.mindful-media-browse-sections');
         var $allWrappers = $sections.find('.mindful-media-browse-section-wrapper');
         
+        // Skip if this is the dynamic term tab (no data-section)
+        if (!section) return;
+        
+        // Hide any dynamically loaded term content and remove term tab
+        var $termContent = $browse.find('.mm-term-content-view');
+        var $termTab = $browse.find('.mm-term-tab');
+        if ($termContent.length) {
+            $termContent.hide();
+        }
+        if ($termTab.length) {
+            $termTab.remove();
+        }
+        
         // Update active state
         $browse.find('.mindful-media-browse-nav-item').removeClass('active');
         $nav.addClass('active');
@@ -2364,6 +2787,188 @@
         
     });
     
+    // Handle section title clicks - trigger corresponding tab click
+    // This ensures clicking "Teachers" title shows same view as clicking "Teachers" tab
+    $(document).on('click', '.mm-section-title-link', function(e) {
+        e.preventDefault();
+        
+        var $link = $(this);
+        var targetTab = $link.data('target-tab');
+        
+        if (!targetTab) return;
+        
+        // Find the browse container and the corresponding nav tab
+        var $browse = $link.closest('.mindful-media-browse');
+        var $navItem = $browse.find('.mindful-media-browse-nav-item[data-section="' + targetTab + '"]');
+        
+        // Trigger click on the tab to switch views
+        if ($navItem.length) {
+            $navItem.trigger('click');
+        }
+    });
+    
+    // Handle term card clicks (teacher cards, topic cards, etc.) - load content dynamically via AJAX
+    $(document).on('click', '.mm-term-card', function(e) {
+        e.preventDefault();
+        
+        var $card = $(this);
+        var taxonomy = $card.data('taxonomy');
+        var termSlug = $card.data('term-slug');
+        var termName = $card.data('term-name');
+        
+        if (!taxonomy || !termSlug) return;
+        
+        var $browse = $card.closest('.mindful-media-browse');
+        var $sections = $browse.find('.mindful-media-browse-sections');
+        var $nav = $browse.find('.mindful-media-browse-nav');
+        
+        // Show loading state
+        $sections.css('opacity', '0.5');
+        
+        // Load term content via AJAX
+        $.ajax({
+            url: mindfulMediaAjax.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'mindful_media_load_term',
+                taxonomy: taxonomy,
+                term_slug: termSlug,
+                nonce: mindfulMediaAjax.nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Hide all existing sections
+                    $sections.find('.mindful-media-browse-section-wrapper').hide();
+                    
+                    // Check if term content container already exists
+                    var $termContent = $sections.find('.mm-term-content-view');
+                    if (!$termContent.length) {
+                        $termContent = $('<div class="mm-term-content-view"></div>');
+                        $sections.append($termContent);
+                    }
+                    
+                    // Build term header HTML
+                    var headerHtml = '<div class="mm-term-header" style="display:flex;align-items:center;gap:20px;padding:0 24px 24px;border-bottom:1px solid #e5e5e5;margin-bottom:24px;">';
+                    headerHtml += '<div class="mm-term-avatar" style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:#f2f2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">';
+                    if (response.data.term_image) {
+                        headerHtml += '<img src="' + response.data.term_image + '" alt="' + response.data.term_name + '" style="width:100%;height:100%;object-fit:cover;">';
+                    } else {
+                        var firstLetter = response.data.term_name.charAt(0).toUpperCase();
+                        headerHtml += '<span style="font-size:32px;font-weight:600;color:#606060;">' + firstLetter + '</span>';
+                    }
+                    headerHtml += '</div>';
+                    headerHtml += '<div class="mm-term-info">';
+                    headerHtml += '<h1 style="margin:0 0 4px;font-size:28px;font-weight:600;color:#0f0f0f;">' + response.data.term_name + '</h1>';
+                    if (response.data.video_count !== undefined) {
+                        headerHtml += '<p style="margin:0;font-size:14px;color:#606060;">' + response.data.video_count + ' video' + (response.data.video_count !== 1 ? 's' : '') + '</p>';
+                    }
+                    headerHtml += '</div></div>';
+                    
+                    // Show term content
+                    $termContent.html(headerHtml + response.data.html).show();
+                    
+                    // Update navigation - add term as active tab
+                    $nav.find('.mindful-media-browse-nav-item').removeClass('active').css({
+                        'background': '#f2f2f2',
+                        'color': '#0f0f0f'
+                    });
+                    
+                    // Add or update term tab
+                    var $termTab = $nav.find('.mm-term-tab');
+                    if (!$termTab.length) {
+                        $termTab = $('<span class="mindful-media-browse-nav-item mm-term-tab active" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#0f0f0f;border:none;border-radius:8px;font-size:14px;font-weight:500;color:#ffffff;cursor:default;"></span>');
+                        $nav.find('.mindful-media-browse-nav-tabs').append($termTab);
+                    }
+                    $termTab.html(termName).addClass('active').css({
+                        'background': '#0f0f0f',
+                        'color': '#ffffff'
+                    });
+                    
+                    // Restore opacity
+                    $sections.css('opacity', '1');
+                    
+                    // Scroll to top of browse
+                    $('html, body').animate({
+                        scrollTop: $browse.offset().top - 100
+                    }, 300);
+                    
+                    // Reinitialize video card click handlers
+                    initTermVideoCards();
+                } else {
+                    $sections.css('opacity', '1');
+                    console.error('Failed to load term content:', response.data);
+                }
+            },
+            error: function() {
+                $sections.css('opacity', '1');
+                console.error('AJAX error loading term content');
+            }
+        });
+    });
+    
+    // Initialize click handlers for video cards in term view
+    function initTermVideoCards() {
+        // Already handled by existing .mm-media-card handler below
+    }
+    
+    // Handle locked video card clicks in term view - show message
+    $(document).on('click', '.mm-term-content-view .mm-media-card-locked, .mm-term-videos-grid .mm-media-card-locked', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var $card = $(this);
+        var playlistName = $card.data('playlist-name');
+        alert('This video is in the protected playlist "' + playlistName + '". Please access the playlist to unlock this content.');
+    });
+    
+    // Note: Unlocked video cards in term view use .mindful-media-thumb-trigger class
+    // which is handled by the existing initInlinePlayer handlers
+    
+    // Handle clicking Home tab to go back to main browse view
+    $(document).on('click', '.mindful-media-browse-nav-item[data-section="all"]', function() {
+        var $browse = $(this).closest('.mindful-media-browse');
+        var $termContent = $browse.find('.mm-term-content-view');
+        var $termTab = $browse.find('.mm-term-tab');
+        
+        // Hide term content and remove term tab
+        if ($termContent.length) {
+            $termContent.hide();
+        }
+        if ($termTab.length) {
+            $termTab.remove();
+        }
+        
+        // Show all sections again
+        $browse.find('.mindful-media-browse-section-wrapper').show();
+        $browse.find('.mm-browse-cards-view').show();
+        $browse.find('.mm-browse-videos-view').hide();
+    });
+    
+    // Auto-load term content if URL parameters are present
+    function autoLoadTermFromUrl() {
+        $('.mindful-media-browse').each(function() {
+            var $browse = $(this);
+            var taxonomy = $browse.data('auto-load-taxonomy');
+            var slug = $browse.data('auto-load-slug');
+            var name = $browse.data('auto-load-name');
+            
+            if (taxonomy && slug) {
+                // Create a fake card element to trigger the term load
+                var $fakeCard = $('<a class="mm-term-card" data-taxonomy="' + taxonomy + '" data-term-slug="' + slug + '" data-term-name="' + name + '"></a>');
+                $browse.append($fakeCard);
+                
+                // Trigger click after a short delay to let the page render
+                setTimeout(function() {
+                    $fakeCard.trigger('click');
+                    $fakeCard.remove();
+                }, 100);
+            }
+        });
+    }
+    
+    // Run auto-load on page ready
+    autoLoadTermFromUrl();
+    
     /**
      * ============================================
      * NETFLIX-STYLE HORIZONTAL SLIDERS
@@ -2378,6 +2983,23 @@
             var $nextBtn = $container.find('.mm-slider-nav--next');
             
             if (!$track.length) return;
+
+            function updateNavPosition() {
+                var $thumb = $track.find('.mindful-media-browse-card-image, .mindful-media-card-thumb, .mindful-media-card-thumbnail')
+                    .filter(':visible')
+                    .first();
+                if (!$thumb.length || !$thumb[0].getBoundingClientRect || $thumb[0].getBoundingClientRect().height === 0) {
+                    $thumb = $track.find('.mindful-media-card, .mm-slider-item').filter(':visible').first();
+                }
+                if (!$thumb.length || !$thumb[0].getBoundingClientRect) return;
+
+                var containerRect = $container[0].getBoundingClientRect();
+                var thumbRect = $thumb[0].getBoundingClientRect();
+                if (!containerRect || !thumbRect || thumbRect.height === 0) return;
+
+                var thumbCenter = (thumbRect.top - containerRect.top) + (thumbRect.height / 2);
+                $container[0].style.setProperty('--mm-slider-nav-top', thumbCenter + 'px');
+            }
             
             // Calculate scroll amount (width of visible area)
             function getScrollAmount() {
@@ -2413,6 +3035,17 @@
             
             // Initial state
             updateNavButtons();
+            updateNavPosition();
+
+            // Recalculate nav position after images load
+            $container.find('img').first().on('load', function() {
+                updateNavPosition();
+            });
+
+            // Update on resize
+            $(window).on('resize', function() {
+                updateNavPosition();
+            });
             
             // Touch/Swipe support
             var touchStartX = 0;

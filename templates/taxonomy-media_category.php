@@ -44,7 +44,9 @@ wp_enqueue_script('mindful-media-frontend', plugins_url('../../public/js/fronten
 wp_localize_script('mindful-media-frontend', 'mindfulMediaAjax', array(
     'ajaxUrl' => admin_url('admin-ajax.php'),
     'nonce' => wp_create_nonce('mindful_media_ajax_nonce'),
-    'categoryId' => $term->term_id
+    'categoryId' => $term->term_id,
+    'modalShowMoreMedia' => $settings['modal_show_more_media'] ?? '1',
+    'youtubeHideEndScreen' => $settings['youtube_hide_end_screen'] ?? '0'
 ));
 
 // Get IDs of videos in protected playlists to exclude
@@ -746,24 +748,14 @@ body.tax-media_category .site-main {
             <?php foreach ($all_posts as $post): 
                 setup_postdata($post);
                 $post_id = $post->ID;
-                $thumbnail_url = get_the_post_thumbnail_url($post_id, 'medium_large');
-                if (!$thumbnail_url) {
-                    $thumbnail_url = plugins_url('../../assets/default-thumbnail.jpg', __FILE__);
-                }
+                $thumbnail_url = MindfulMedia_Shortcodes::get_media_thumbnail_url($post_id, 'medium_large');
                 
                 // Duration
                 $duration_terms = get_the_terms($post_id, 'media_duration');
                 $duration_slug = ($duration_terms && !is_wp_error($duration_terms)) ? $duration_terms[0]->slug : '';
                 $duration_hours = get_post_meta($post_id, '_mindful_media_duration_hours', true);
                 $duration_minutes = get_post_meta($post_id, '_mindful_media_duration_minutes', true);
-                $duration_badge = '';
-                if ($duration_hours || $duration_minutes) {
-                    if ($duration_hours) {
-                        $duration_badge = $duration_hours . ':' . str_pad($duration_minutes ?: '00', 2, '0', STR_PAD_LEFT);
-                    } else {
-                        $duration_badge = $duration_minutes . ':00';
-                    }
-                }
+                $duration_badge = MindfulMedia_Shortcodes::format_duration_badge($duration_hours, $duration_minutes);
                 
                 // Year
                 $year_terms = get_the_terms($post_id, 'media_year');
@@ -790,7 +782,7 @@ body.tax-media_category .site-main {
                 $topics = get_the_terms($post_id, 'media_topic');
                 $topic_slug = ($topics && !is_wp_error($topics)) ? $topics[0]->slug : '';
             ?>
-                <article class="mindful-media-category-card mindful-media-card" data-post-id="<?php echo esc_attr($post_id); ?>" data-teacher="<?php echo esc_attr($teacher_slug); ?>" data-topic="<?php echo esc_attr($topic_slug); ?>" data-type="<?php echo esc_attr($type_slug); ?>" data-duration="<?php echo esc_attr($duration_slug); ?>" data-year="<?php echo esc_attr($year_slug); ?>">
+                <article class="mindful-media-category-card mindful-media-card" data-post-id="<?php echo esc_attr($post_id); ?>" data-search="<?php echo esc_attr(MindfulMedia_Shortcodes::build_search_text($post_id)); ?>" data-teacher="<?php echo esc_attr($teacher_slug); ?>" data-topic="<?php echo esc_attr($topic_slug); ?>" data-type="<?php echo esc_attr($type_slug); ?>" data-duration="<?php echo esc_attr($duration_slug); ?>" data-year="<?php echo esc_attr($year_slug); ?>">
                     <div class="mindful-media-category-card-thumb">
                         <button type="button" class="mindful-media-thumb-trigger" data-post-id="<?php echo esc_attr($post_id); ?>" data-title="<?php echo esc_attr($post->post_title); ?>" style="background: none; border: none; padding: 0; width: 100%; height: 100%; cursor: pointer;">
                             <img src="<?php echo esc_url($thumbnail_url); ?>" alt="<?php echo esc_attr($post->post_title); ?>" loading="lazy">
@@ -938,9 +930,11 @@ jQuery(document).ready(function($) {
             
             // Apply search filter (if passes chip filter)
             if (show && currentSearchTerm) {
+                var dataSearch = ($card.attr('data-search') || '').toLowerCase();
                 var cardTitle = $card.find('.mindful-media-category-card-title').text().toLowerCase();
                 var dataTitle = ($card.find('.mindful-media-thumb-trigger').data('title') || '').toLowerCase();
-                show = cardTitle.indexOf(currentSearchTerm) !== -1 || dataTitle.indexOf(currentSearchTerm) !== -1;
+                var combined = dataSearch || (cardTitle + ' ' + dataTitle);
+                show = combined.indexOf(currentSearchTerm) !== -1;
             }
             
             if (show) {

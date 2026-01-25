@@ -258,7 +258,10 @@ wp_enqueue_style('mindful-media-frontend', plugins_url('../../public/css/fronten
 wp_enqueue_script('mindful-media-frontend', plugins_url('../../public/js/frontend.js', __FILE__), array('jquery'), MINDFUL_MEDIA_VERSION, true);
 wp_localize_script('mindful-media-frontend', 'mindfulMediaAjax', array(
     'ajaxUrl' => admin_url('admin-ajax.php'),
-    'nonce' => wp_create_nonce('mindful_media_ajax_nonce')
+    'nonce' => wp_create_nonce('mindful_media_ajax_nonce'),
+    'modalPlayerTheme' => $settings['modal_player_theme'] ?? 'dark',
+    'modalShowMoreMedia' => $settings['modal_show_more_media'] ?? '1',
+    'youtubeHideEndScreen' => $settings['youtube_hide_end_screen'] ?? '0'
 ));
 ?>
 
@@ -358,7 +361,7 @@ body.tax-media_series .mindful-media-playlist-item-thumbnail img {
 /* Header - clean white with subtle shadow */
 .mindful-media-playlist-page-header {
     position: sticky;
-    top: 0;
+    top: var(--mm-playlist-header-offset, 0);
     left: 0;
     right: 0;
     z-index: 100;
@@ -649,6 +652,7 @@ body.tax-media_series h1.mindful-media-playlist-page-title {
     margin-top: -8px;
 }
 
+body.tax-media_series .mindful-media-module-title,
 .mindful-media-module-title {
     font-size: 20px;
     font-weight: 600;
@@ -777,81 +781,12 @@ body.tax-media_series h1.mindful-media-playlist-page-title {
     }
 }
 
-/* Slider navigation - Matching browse page style */
+/* Slider navigation - Hidden (user requested removal) */
 .mindful-media-module-nav {
-    position: absolute;
-    top: 4px;
-    height: calc(56.25% - 8px); /* Match thumbnail height (16:9 ratio) */
-    width: 60px;
-    border: none;
-    background: transparent !important;
-    color: #333;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: 10;
+    display: none !important;
 }
 
-.mindful-media-module-nav--prev {
-    left: 0;
-    justify-content: flex-start;
-    padding-left: 8px;
-}
-
-.mindful-media-module-nav--next {
-    right: 0;
-    justify-content: flex-end;
-    padding-right: 8px;
-}
-
-.mindful-media-module-slider:hover .mindful-media-module-nav {
-    opacity: 1;
-}
-
-.mindful-media-module-nav:hover {
-    background: transparent !important;
-}
-
-.mindful-media-module-nav:disabled {
-    opacity: 0 !important;
-    cursor: default;
-    pointer-events: none;
-}
-
-.mindful-media-module-nav svg {
-    width: 56px;
-    height: 56px;
-    transition: transform 0.2s ease;
-    stroke-width: 2.5;
-    stroke: #333;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-}
-
-.mindful-media-module-nav:hover svg {
-    transform: scale(1.15);
-}
-
-/* Touch/Mobile - always show faded arrows */
-@media (hover: none) {
-    .mindful-media-module-nav {
-        opacity: 0.7;
-        width: 50px;
-    }
-    
-    .mindful-media-module-nav svg {
-        width: 48px;
-        height: 48px;
-    }
-}
-
-/* Modal player stays dark */
-.mindful-media-inline-player {
-    --mm-modal-bg: #0f0f0f;
-    --mm-modal-text: #ffffff;
-}
+/* Modal player respects theme setting from backend */
 
 /* Search Input for Playlist Page */
 .mm-playlist-search {
@@ -1001,6 +936,113 @@ body.tax-media_series h1.mindful-media-playlist-page-title {
     <!-- Playlist Items Grid -->
     <div class="mindful-media-playlist-items-container">
         <?php if ($is_parent_series): ?>
+            <?php
+            $child_ids = wp_list_pluck($children, 'term_id');
+            $parent_items_query = new WP_Query(array(
+                'post_type' => 'mindful_media',
+                'posts_per_page' => -1,
+                'post_status' => 'publish',
+                'meta_key' => '_mindful_media_series_order',
+                'orderby' => 'meta_value_num',
+                'order' => 'ASC',
+                'tax_query' => array(
+                    array(
+                        'taxonomy' => 'media_series',
+                        'field' => 'term_id',
+                        'terms' => $term->term_id,
+                        'include_children' => false
+                    )
+                )
+            ));
+
+            $parent_items_html = '';
+            $parent_items_count = 0;
+            $parent_index = 1;
+            if ($parent_items_query->have_posts()) {
+                while ($parent_items_query->have_posts()) : $parent_items_query->the_post();
+                    $post_id = get_the_ID();
+                    if (!empty($child_ids) && has_term($child_ids, 'media_series', $post_id)) {
+                        continue;
+                    }
+
+                    $order = get_post_meta($post_id, '_mindful_media_series_order', true);
+                    $display_number = $order ? $order : $parent_index;
+
+                    $duration_hours = get_post_meta($post_id, '_mindful_media_duration_hours', true);
+                    $duration_minutes = get_post_meta($post_id, '_mindful_media_duration_minutes', true);
+                    $duration_text = '';
+                    if ($duration_hours || $duration_minutes) {
+                        if ($duration_hours) $duration_text .= $duration_hours . 'h ';
+                        if ($duration_minutes) $duration_text .= $duration_minutes . 'm';
+                        $duration_text = trim($duration_text);
+                    }
+
+                    $media_types = get_the_terms($post_id, 'media_type');
+                    $type_name = ($media_types && !is_wp_error($media_types)) ? $media_types[0]->name : '';
+
+                    $thumbnail_url = MindfulMedia_Shortcodes::get_media_thumbnail_url($post_id, 'medium_large');
+
+                    ob_start();
+                    ?>
+                    <div class="mindful-media-module-slider-item" style="flex: 0 0 280px; width: 280px; min-width: 280px;">
+                        <div class="mindful-media-playlist-grid-item" data-post-id="<?php echo esc_attr($post_id); ?>" data-search="<?php echo esc_attr(MindfulMedia_Shortcodes::build_search_text($post_id)); ?>" style="width: 100%;">
+                            <div class="mindful-media-playlist-item-thumbnail">
+                                <img src="<?php echo esc_url($thumbnail_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" loading="lazy">
+                                <div class="mindful-media-playlist-item-number"><?php echo esc_html($display_number); ?></div>
+                            </div>
+
+                            <div class="mindful-media-playlist-item-content">
+                                <h3 class="mindful-media-playlist-item-title"><?php the_title(); ?></h3>
+                                <div class="mindful-media-playlist-item-meta">
+                                    <?php if ($type_name): ?>
+                                        <span class="mindful-media-playlist-item-type"><?php echo esc_html($type_name); ?></span>
+                                    <?php endif; ?>
+                                    <?php if ($duration_text): ?>
+                                        <span class="mindful-media-playlist-item-duration">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                                            </svg>
+                                            <?php echo esc_html($duration_text); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <button class="mindful-media-play-inline" data-post-id="<?php echo esc_attr($post_id); ?>" data-original-text="Play" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; border: none; background: transparent; z-index: 5;"></button>
+                        </div>
+                    </div>
+                    <?php
+                    $parent_items_html .= ob_get_clean();
+                    $parent_items_count++;
+                    $parent_index++;
+                endwhile;
+                wp_reset_postdata();
+            }
+            ?>
+
+            <?php if ($parent_items_count > 0): ?>
+                <div class="mindful-media-module-section">
+                    <div class="mindful-media-module-header">
+                        <h2 class="mindful-media-module-title">
+                            <?php esc_html_e('Playlist items', 'mindful-media'); ?>
+                        </h2>
+                        <span class="mindful-media-module-count"><?php echo esc_html($parent_items_count); ?> <?php echo $parent_items_count === 1 ? 'item' : 'items'; ?></span>
+                    </div>
+
+                    <div class="mindful-media-module-slider" style="position: relative; width: 100%; overflow: visible;">
+                        <button class="mindful-media-module-nav mindful-media-module-nav--prev" aria-label="Previous">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <button class="mindful-media-module-nav mindful-media-module-nav--next" aria-label="Next">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+
+                        <div class="mindful-media-module-slider-track" style="display: flex; flex-wrap: nowrap; gap: 16px; overflow-x: auto;">
+                            <?php echo $parent_items_html; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
             <!-- This is a parent series - show child playlists as Netflix-style sliders -->
             <?php foreach ($children as $child_playlist): 
                 // Get items in this child playlist
@@ -1064,14 +1106,11 @@ body.tax-media_series h1.mindful-media-playlist-page-title {
                                     $media_types = get_the_terms(get_the_ID(), 'media_type');
                                     $type_name = ($media_types && !is_wp_error($media_types)) ? $media_types[0]->name : '';
                                     
-                                    $thumbnail_url = get_the_post_thumbnail_url(get_the_ID(), 'medium_large');
-                                    if (!$thumbnail_url) {
-                                        $thumbnail_url = plugins_url('../../assets/default-thumbnail.jpg', __FILE__);
-                                    }
+                                    $thumbnail_url = MindfulMedia_Shortcodes::get_media_thumbnail_url(get_the_ID(), 'medium_large');
                                     ?>
                                     
                                     <div class="mindful-media-module-slider-item" style="flex: 0 0 280px; width: 280px; min-width: 280px;">
-                                        <div class="mindful-media-playlist-grid-item" data-post-id="<?php echo get_the_ID(); ?>" style="width: 100%;">
+                                        <div class="mindful-media-playlist-grid-item" data-post-id="<?php echo get_the_ID(); ?>" data-search="<?php echo esc_attr(MindfulMedia_Shortcodes::build_search_text(get_the_ID())); ?>" style="width: 100%;">
                                             <div class="mindful-media-playlist-item-thumbnail">
                                                 <img src="<?php echo esc_url($thumbnail_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" loading="lazy">
                                                 <div class="mindful-media-playlist-item-number"><?php echo $display_number; ?></div>
@@ -1130,13 +1169,10 @@ body.tax-media_series h1.mindful-media-playlist-page-title {
                     $media_types = get_the_terms(get_the_ID(), 'media_type');
                     $type_name = ($media_types && !is_wp_error($media_types)) ? $media_types[0]->name : '';
                     
-                    $thumbnail_url = get_the_post_thumbnail_url(get_the_ID(), 'medium_large');
-                    if (!$thumbnail_url) {
-                        $thumbnail_url = plugins_url('../../assets/default-thumbnail.jpg', __FILE__);
-                    }
+                    $thumbnail_url = MindfulMedia_Shortcodes::get_media_thumbnail_url(get_the_ID(), 'medium_large');
                     ?>
                     
-                    <div class="mindful-media-playlist-grid-item" data-post-id="<?php echo get_the_ID(); ?>">
+                    <div class="mindful-media-playlist-grid-item" data-post-id="<?php echo get_the_ID(); ?>" data-search="<?php echo esc_attr(MindfulMedia_Shortcodes::build_search_text(get_the_ID())); ?>">
                         <div class="mindful-media-playlist-item-thumbnail">
                             <img src="<?php echo esc_url($thumbnail_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>">
                             <div class="mindful-media-playlist-item-number"><?php echo $display_number; ?></div>
@@ -1244,6 +1280,18 @@ jQuery(document).ready(function($) {
         applyPlaylistSearch('');
         $searchInput.focus();
     });
+
+    function getPlaylistSearchText($item) {
+        if (!$item.length) {
+            return '';
+        }
+        var dataSearch = $item.attr('data-search') || '';
+        if (dataSearch) {
+            return dataSearch.toLowerCase();
+        }
+        var title = $item.find('.mindful-media-playlist-item-title').text();
+        return (title || '').toLowerCase();
+    }
     
     function applyPlaylistSearch(searchTerm) {
         var $container = $('.mindful-media-playlist-items-container');
@@ -1264,9 +1312,9 @@ jQuery(document).ready(function($) {
         // Filter grid items (regular playlist)
         $gridItems.each(function() {
             var $item = $(this);
-            var title = $item.find('.mindful-media-playlist-item-title').text().toLowerCase();
+            var text = getPlaylistSearchText($item);
             
-            if (title.indexOf(searchTerm) !== -1) {
+            if (text.indexOf(searchTerm) !== -1) {
                 $item.show();
                 visibleCount++;
             } else {
@@ -1281,9 +1329,10 @@ jQuery(document).ready(function($) {
             
             $section.find('.mindful-media-module-slider-item').each(function() {
                 var $item = $(this);
-                var title = $item.find('.mindful-media-playlist-item-title').text().toLowerCase();
+                var $gridItem = $item.find('.mindful-media-playlist-grid-item').first();
+                var text = getPlaylistSearchText($gridItem.length ? $gridItem : $item);
                 
-                if (title.indexOf(searchTerm) !== -1) {
+                if (text.indexOf(searchTerm) !== -1) {
                     $item.show();
                     sectionMatches++;
                 } else {

@@ -280,6 +280,11 @@ class MindfulMedia_Players {
         
         // Add big play button
         $output .= '<div class="mindful-media-big-play-btn"></div>';
+
+        // YouTube end-screen cover (optional via settings)
+        $output .= '<div class="mindful-media-youtube-endscreen" aria-hidden="true">';
+        $output .= '<button type="button" class="mindful-media-youtube-endscreen-btn">' . esc_html__('Replay', 'mindful-media') . '</button>';
+        $output .= '</div>';
         
         // Add loading spinner
         $output .= '<div class="mindful-media-loading-spinner" style="display: none;"></div>';
@@ -549,8 +554,7 @@ class MindfulMedia_Players {
         $output .= '<video class="mindful-media-player native-player" ';
         $output .= 'playsinline ';
         $output .= 'preload="metadata" ';
-        $output .= 'webkit-playsinline ';
-        $output .= 'crossorigin="anonymous">';
+        $output .= 'webkit-playsinline>';
         $output .= '<source src="' . esc_url($url) . '" type="' . esc_attr($mime_type) . '">';
         $output .= __('Your browser does not support the video tag.', 'mindful-media');
         $output .= '</video>';
@@ -602,8 +606,7 @@ class MindfulMedia_Players {
         }
         
         $output .= '<audio class="mindful-media-player native-player" ';
-        $output .= 'preload="metadata" ';
-        $output .= 'crossorigin="anonymous">';
+        $output .= 'preload="metadata">';
         $output .= '<source src="' . esc_url($url) . '" type="' . esc_attr($mime_type) . '">';
         $output .= __('Your browser does not support the audio tag.', 'mindful-media');
         $output .= '</audio>';

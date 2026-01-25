@@ -1080,6 +1080,40 @@ class MindfulMedia_Admin {
                             <p class="description"><?php _e('Uncheck to hide controls (not recommended for most uses)', 'mindful-media'); ?></p>
                         </td>
                     </tr>
+                    <tr>
+                        <th scope="row"><?php _e('Modal Player Theme', 'mindful-media'); ?></th>
+                        <td>
+                            <select name="modal_player_theme">
+                                <option value="dark" <?php selected($settings['modal_player_theme'] ?? 'dark', 'dark'); ?>>
+                                    <?php _e('Dark (Black background)', 'mindful-media'); ?>
+                                </option>
+                                <option value="light" <?php selected($settings['modal_player_theme'] ?? 'dark', 'light'); ?>>
+                                    <?php _e('Light (White background)', 'mindful-media'); ?>
+                                </option>
+                            </select>
+                            <p class="description"><?php _e('Choose the background color scheme for the modal (popup) player', 'mindful-media'); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php _e('Show "More Media" Recommendations', 'mindful-media'); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="modal_show_more_media" value="1" <?php checked($settings['modal_show_more_media'] ?? '1', '1'); ?> />
+                                <?php _e('Display the "More Media" section below the modal player', 'mindful-media'); ?>
+                            </label>
+                            <p class="description"><?php _e('Turn off to hide related recommendations under the modal player.', 'mindful-media'); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php _e('Hide YouTube End Screen', 'mindful-media'); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="youtube_hide_end_screen" value="1" <?php checked($settings['youtube_hide_end_screen'] ?? '0', '1'); ?> />
+                                <?php _e('Cover YouTube\'s "More videos" overlay at the end of playback', 'mindful-media'); ?>
+                            </label>
+                            <p class="description"><?php _e('YouTube does not allow disabling end screens; this option hides them with a custom overlay.', 'mindful-media'); ?></p>
+                        </td>
+                    </tr>
                     </table>
                 </div>
                 
@@ -1475,6 +1509,9 @@ class MindfulMedia_Admin {
             'player_volume' => intval($_POST['player_volume'] ?? 80),
             'player_size' => sanitize_text_field($_POST['player_size'] ?? 'normal'),
             'player_controls' => isset($_POST['player_controls']) ? '1' : '0',
+            'modal_player_theme' => sanitize_text_field($_POST['modal_player_theme'] ?? 'dark'),
+            'modal_show_more_media' => isset($_POST['modal_show_more_media']) ? '1' : '0',
+            'youtube_hide_end_screen' => isset($_POST['youtube_hide_end_screen']) ? '1' : '0',
             'soundcloud_client_id' => sanitize_text_field($_POST['soundcloud_client_id'] ?? ''),
             'vimeo_access_token' => sanitize_text_field($_POST['vimeo_access_token'] ?? ''),
             // Archive Display settings

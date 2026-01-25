@@ -3,7 +3,7 @@
  * Plugin Name: MindfulMedia
  * Plugin URI: https://mindfuldesign.me/plugins/mindful-media
  * Description: A comprehensive media management system for organizing and displaying audio, video, and multimedia content with advanced filtering, playlists, password protection, and customizable archives.
- * Version: 2.8.1
+ * Version: 2.8.4
  * Author: Mindful Design
  * Author URI: https://mindfuldesign.me
  * License: GPL v2 or later
@@ -27,7 +27,7 @@ class MindfulMedia {
     /**
      * Plugin version
      */
-    public $version = '2.8.1';
+    public $version = '2.8.4';
     
     /**
      * Constructor

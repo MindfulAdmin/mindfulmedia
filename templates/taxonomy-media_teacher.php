@@ -46,7 +46,9 @@ wp_enqueue_script('mindful-media-frontend', plugins_url('../../public/js/fronten
 wp_localize_script('mindful-media-frontend', 'mindfulMediaAjax', array(
     'ajaxUrl' => admin_url('admin-ajax.php'),
     'nonce' => wp_create_nonce('mindful_media_ajax_nonce'),
-    'teacherId' => $term->term_id
+    'teacherId' => $term->term_id,
+    'modalShowMoreMedia' => $settings['modal_show_more_media'] ?? '1',
+    'youtubeHideEndScreen' => $settings['youtube_hide_end_screen'] ?? '0'
 ));
 
 // Get IDs of videos in protected playlists to exclude
@@ -856,22 +858,12 @@ body.tax-media_teacher .site-main {
                     <?php foreach ($topic_posts as $post): 
                         setup_postdata($post);
                         $post_id = $post->ID;
-                        $thumbnail_url = get_the_post_thumbnail_url($post_id, 'medium_large');
-                        if (!$thumbnail_url) {
-                            $thumbnail_url = plugins_url('../../assets/default-thumbnail.jpg', __FILE__);
-                        }
+                        $thumbnail_url = MindfulMedia_Shortcodes::get_media_thumbnail_url($post_id, 'medium_large');
                         
                         // Duration
                         $duration_hours = get_post_meta($post_id, '_mindful_media_duration_hours', true);
                         $duration_minutes = get_post_meta($post_id, '_mindful_media_duration_minutes', true);
-                        $duration_badge = '';
-                        if ($duration_hours || $duration_minutes) {
-                            if ($duration_hours) {
-                                $duration_badge = $duration_hours . ':' . str_pad($duration_minutes ?: '00', 2, '0', STR_PAD_LEFT);
-                            } else {
-                                $duration_badge = $duration_minutes . ':00';
-                            }
-                        }
+                        $duration_badge = MindfulMedia_Shortcodes::format_duration_badge($duration_hours, $duration_minutes);
                         
                         // Media type
                         $media_types = get_the_terms($post_id, 'media_type');
@@ -915,6 +907,7 @@ body.tax-media_teacher .site-main {
                     ?>
                         <article class="mindful-media-teacher-card mindful-media-card" 
                                  data-post-id="<?php echo esc_attr($post_id); ?>"
+                                 data-search="<?php echo esc_attr(MindfulMedia_Shortcodes::build_search_text($post_id)); ?>"
                                  data-topics="<?php echo esc_attr(implode(',', $post_topic_slugs)); ?>"
                                  data-durations="<?php echo esc_attr(implode(',', $post_duration_slugs)); ?>"
                                  data-years="<?php echo esc_attr(implode(',', $post_year_slugs)); ?>"
@@ -995,22 +988,12 @@ body.tax-media_teacher .site-main {
                     <?php foreach ($uncategorized_posts as $post): 
                         setup_postdata($post);
                         $post_id = $post->ID;
-                        $thumbnail_url = get_the_post_thumbnail_url($post_id, 'medium_large');
-                        if (!$thumbnail_url) {
-                            $thumbnail_url = plugins_url('../../assets/default-thumbnail.jpg', __FILE__);
-                        }
+                        $thumbnail_url = MindfulMedia_Shortcodes::get_media_thumbnail_url($post_id, 'medium_large');
                         
                         // Duration
                         $duration_hours = get_post_meta($post_id, '_mindful_media_duration_hours', true);
                         $duration_minutes = get_post_meta($post_id, '_mindful_media_duration_minutes', true);
-                        $duration_badge = '';
-                        if ($duration_hours || $duration_minutes) {
-                            if ($duration_hours) {
-                                $duration_badge = $duration_hours . ':' . str_pad($duration_minutes ?: '00', 2, '0', STR_PAD_LEFT);
-                            } else {
-                                $duration_badge = $duration_minutes . ':00';
-                            }
-                        }
+                        $duration_badge = MindfulMedia_Shortcodes::format_duration_badge($duration_hours, $duration_minutes);
                         
                         // Media type
                         $media_types = get_the_terms($post_id, 'media_type');
@@ -1045,6 +1028,7 @@ body.tax-media_teacher .site-main {
                     ?>
                         <article class="mindful-media-teacher-card mindful-media-card" 
                                  data-post-id="<?php echo esc_attr($post_id); ?>"
+                                 data-search="<?php echo esc_attr(MindfulMedia_Shortcodes::build_search_text($post_id)); ?>"
                                  data-topics=""
                                  data-durations="<?php echo esc_attr(implode(',', $post_duration_slugs)); ?>"
                                  data-years="<?php echo esc_attr(implode(',', $post_year_slugs)); ?>"
@@ -1215,9 +1199,11 @@ echo $shortcodes->get_modal_player_html_public();
                 
                 // Apply search filter (if passes chip filter)
                 if (show && currentSearchTerm) {
+                    var dataSearch = ($card.attr('data-search') || '').toLowerCase();
                     var cardTitle = $card.find('.mindful-media-teacher-card-title').text().toLowerCase();
                     var dataTitle = ($card.find('.mindful-media-thumb-trigger').data('title') || '').toLowerCase();
-                    show = cardTitle.indexOf(currentSearchTerm) !== -1 || dataTitle.indexOf(currentSearchTerm) !== -1;
+                    var combined = dataSearch || (cardTitle + ' ' + dataTitle);
+                    show = combined.indexOf(currentSearchTerm) !== -1;
                 }
                 
                 if (show) {

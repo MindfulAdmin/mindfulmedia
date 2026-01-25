@@ -27,8 +27,18 @@
     --mm-dark-text-muted: #717171;
     --mm-dark-border: #3f3f3f;
     
-    /* Accent colors */
-    --mm-accent-primary: #ff0000;
+    /* Light theme for modal player (alternative) */
+    --mm-light-modal-bg-primary: #ffffff;
+    --mm-light-modal-bg-secondary: #f9f9f9;
+    --mm-light-modal-bg-elevated: #ffffff;
+    --mm-light-modal-bg-hover: #f2f2f2;
+    --mm-light-modal-text-primary: #0f0f0f;
+    --mm-light-modal-text-secondary: #606060;
+    --mm-light-modal-text-muted: #909090;
+    --mm-light-modal-border: #e5e5e5;
+    
+    /* Accent colors - using neutral gold/white instead of red */
+    --mm-accent-primary: #ffffff;
     --mm-accent-secondary: #065fd4;
     --mm-accent-success: #2ba640;
     
@@ -810,7 +820,10 @@ body.single-mindful_media .mindful-media-container {
 }
 
 /* Thumbnail container - 16:9 with rounded corners */
-.mindful-media-container .mindful-media-card-thumbnail {
+/* Apply to both cards inside container AND standalone embed cards */
+.mindful-media-container .mindful-media-card-thumbnail,
+.mindful-media-card .mindful-media-card-thumbnail,
+article.mindful-media-card .mindful-media-card-thumbnail {
     position: relative !important;
     aspect-ratio: 16 / 9 !important;
     background: var(--mm-bg-secondary) !important;
@@ -897,13 +910,15 @@ body.single-mindful_media .mindful-media-container {
     display: block;
 }
 
-/* Play overlay on hover */
+/* Play overlay on hover - contained within thumbnail parent */
 .mindful-media-card-play-overlay {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -911,6 +926,7 @@ body.single-mindful_media .mindful-media-container {
     opacity: 0;
     transition: opacity 0.2s ease;
     pointer-events: none;
+    z-index: 1;
 }
 
 .mindful-media-card-play-overlay svg {
@@ -1666,10 +1682,17 @@ body.single-mindful_media header#masthead {
     z-index: 1000;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     padding: 20px 24px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 70%, transparent 100%);
-    pointer-events: none;
+    background: rgba(0, 0, 0, 0.7) !important;
+    backdrop-filter: blur(10px);
+    pointer-events: auto;
+    transition: background 0.3s ease;
+}
+
+.mindful-media-single-header:hover {
+    background: rgba(0, 0, 0, 0.85) !important;
+    backdrop-filter: blur(12px);
 }
 
 /* Account for WordPress admin bar when logged in */
@@ -1700,35 +1723,56 @@ body.single-mindful_media header#masthead {
 }
 
 .mindful-media-single-header-info {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 2px;
+    align-items: center;
+    text-align: center;
+    padding: 0 16px;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .mindful-media-single-header-title {
     margin: 0;
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 500;
     color: #fff;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .mindful-media-single-header-teacher {
     font-weight: 400;
     font-style: italic;
     color: rgba(255,255,255,0.8);
+    margin-left: 6px;
 }
 
 .mindful-media-single-back {
-    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-decoration: none;
-    font-size: 13px;
-    transition: color 0.2s ease;
 }
 
 .mindful-media-single-back:hover {
-    color: #fff;
+    text-decoration: none;
+}
+
+.mindful-media-single-header-actions {
+    display: flex;
+    justify-content: flex-end;
+    min-width: 44px;
+}
+
+.mindful-media-single-header-spacer {
+    width: 44px;
+    height: 44px;
+    display: inline-block;
 }
 
 /* Full width player area */
@@ -1945,6 +1989,118 @@ body.single-mindful_media header#masthead {
 
 .mindful-media-single-custom-field span {
     color: var(--mm-text-secondary);
+}
+
+/* Light theme for single media pages */
+.mindful-media-single-fullscreen.light-theme {
+    background: #ffffff;
+    color: #0f0f0f;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-header {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-bottom: 1px solid var(--mm-light-modal-border);
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-header-title {
+    color: #0f0f0f;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-header-teacher {
+    color: #606060;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-inline-back {
+    background: #e5e5e5 !important;
+    color: #0f0f0f !important;
+    border: 1px solid #ccc;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-inline-back:hover {
+    background: #d5d5d5 !important;
+    color: #0f0f0f !important;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-player-area,
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-image-container {
+    background: #f5f5f5;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-scroll-indicator {
+    color: #606060;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-content-section {
+    background: #ffffff;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-meta-row {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-meta-item {
+    color: #606060;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-meta-item a {
+    color: #065fd4;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-description {
+    color: #0f0f0f;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-chip {
+    background: #f2f2f2;
+    color: #0f0f0f;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-chip:hover {
+    background: #e5e5e5;
+    color: #0f0f0f;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-chip.chip-category {
+    background: rgba(6, 95, 212, 0.1);
+    color: #065fd4;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-chip.chip-topic {
+    background: #f2f2f2;
+    color: #606060;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-custom-fields {
+    border-top: 1px solid #e5e5e5;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-single-custom-field span {
+    color: #606060;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-more-section h3 {
+    color: #0f0f0f;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-more-card {
+    background: #f9f9f9;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-more-card:hover {
+    background: #f1f1f1;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-more-card-title {
+    color: #0f0f0f;
+}
+
+.mindful-media-single-fullscreen.light-theme .mindful-media-more-card-meta {
+    color: #606060;
+}
+
+/* Hide scroll indicator once user scrolls */
+.mindful-media-single-fullscreen.scrolled .mindful-media-single-scroll-indicator {
+    display: none;
 }
 
 /* More Media Section (Related Items) */
@@ -2260,12 +2416,13 @@ body.single-mindful_media header#masthead {
 
 .mindful-media-player-aspect-ratio iframe,
 .mindful-media-player-aspect-ratio video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    display: block !important;
 }
 
 /* Native HTML5 Players */
@@ -2496,6 +2653,272 @@ body.single-mindful_media header#masthead {
     visibility: visible;
 }
 
+/* ====== LIGHT THEME FOR MODAL PLAYER ====== */
+.mindful-media-inline-player.light-theme {
+    background: var(--mm-light-modal-bg-primary);
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-modal-content {
+    background: var(--mm-light-modal-bg-primary);
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-inline-player-header {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-bottom: 1px solid var(--mm-light-modal-border);
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-inline-player-title,
+.mindful-media-inline-player.light-theme .mindful-media-inline-player-info h3 {
+    color: #0f0f0f !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-inline-player-teacher {
+    color: var(--mm-light-modal-text-secondary) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-inline-view-full {
+    color: var(--mm-light-modal-text-secondary);
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-inline-close {
+    background: #e5e5e5 !important;
+    color: #0f0f0f !important;
+    border: 1px solid #ccc;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-inline-close:hover {
+    background: #d5d5d5 !important;
+}
+
+/* Light theme - Back and Share buttons */
+.mindful-media-inline-player.light-theme .mindful-media-inline-back,
+.mindful-media-inline-player.light-theme .mindful-media-inline-share {
+    background: #e5e5e5 !important;
+    color: #0f0f0f !important;
+    border: 1px solid #ccc;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-inline-back:hover,
+.mindful-media-inline-player.light-theme .mindful-media-inline-share:hover {
+    background: #d5d5d5 !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-inline-back svg,
+.mindful-media-inline-player.light-theme .mindful-media-inline-share svg {
+    fill: #0f0f0f !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-inline-player-content {
+    background: var(--mm-light-modal-bg-primary);
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-modal-content-section {
+    background: var(--mm-light-modal-bg-primary);
+    color: var(--mm-light-modal-text-primary);
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-modal-meta,
+.mindful-media-inline-player.light-theme .mindful-media-modal-description,
+.mindful-media-inline-player.light-theme .mindful-media-modal-tags {
+    color: var(--mm-light-modal-text-secondary) !important;
+}
+
+/* Light theme for modal taxonomies (chips + labels) */
+.mindful-media-inline-player.light-theme .mindful-media-modal-taxonomies {
+    border-top-color: var(--mm-light-modal-border) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-modal-tax-label {
+    color: var(--mm-light-modal-text-secondary) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-modal-chip {
+    background: var(--mm-light-modal-bg-secondary) !important;
+    color: var(--mm-light-modal-text-primary) !important;
+    border: 1px solid var(--mm-light-modal-border) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-modal-chip:hover {
+    background: var(--mm-light-modal-bg-hover) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-browse-below {
+    background: var(--mm-light-modal-bg-primary) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-browse-below h3,
+.mindful-media-inline-player.light-theme .mindful-media-browse-below h3 *,
+.mindful-media-inline-player.light-theme .mindful-media-browse-below h3 span {
+    color: var(--mm-light-modal-text-primary) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-more-card {
+    background: var(--mm-light-modal-bg-secondary) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-more-card h4,
+.mindful-media-inline-player.light-theme .mindful-media-more-card-title {
+    color: var(--mm-light-modal-text-primary) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-more-card-meta {
+    color: var(--mm-light-modal-text-secondary) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-more-card-thumbnail {
+    background: var(--mm-light-modal-bg-hover) !important;
+}
+
+/* Light theme for "More Media" section title */
+.mindful-media-inline-player.light-theme .mindful-media-more-section h3 {
+    color: var(--mm-light-modal-text-primary) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-more-section {
+    border-top-color: var(--mm-light-modal-border) !important;
+}
+
+/* Light theme for "Browse Below" / "More Media" items in modal player */
+.mindful-media-inline-player.light-theme .mindful-media-browse-item {
+    background: var(--mm-light-modal-bg-secondary) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-browse-item:hover {
+    background: var(--mm-light-modal-bg-hover) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-browse-item-image {
+    background: var(--mm-light-modal-bg-hover) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-browse-item-title,
+.mindful-media-inline-player.light-theme .mindful-media-browse-item-title *,
+.mindful-media-inline-player.light-theme .mindful-media-browse-item-title span {
+    color: var(--mm-light-modal-text-primary) !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-browse-item-meta {
+    color: var(--mm-light-modal-text-secondary) !important;
+}
+
+/* Light theme playlist sidebar */
+.mindful-media-inline-player.light-theme .mindful-media-playlist-sidebar {
+    background: #f9f9f9;
+    border-left: 1px solid #e5e5e5;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-header {
+    background: #fff;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-header h3 {
+    color: #0f0f0f !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-title {
+    color: #0f0f0f;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-count {
+    color: #606060;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-description {
+    color: #606060;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item:hover {
+    background: var(--mm-light-modal-bg-hover);
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item.active {
+    background: var(--mm-light-modal-bg-hover);
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item-title {
+    color: #0f0f0f !important;
+    font-weight: 400;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item-title *,
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item-title span {
+    color: inherit !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item-meta {
+    color: var(--mm-light-modal-text-secondary);
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-toggle {
+    background: rgba(15, 15, 15, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-toggle:hover {
+    background: rgba(15, 15, 15, 0.95);
+    color: #fff;
+}
+
+/* Light theme - Playlist modules */
+.mindful-media-inline-player.light-theme .mindful-media-playlist-module {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-module-header {
+    background: transparent;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-module-header:hover {
+    background: #f2f2f2;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-module.active .mindful-media-module-header {
+    background: #f2f2f2;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-module-name {
+    color: #0f0f0f !important;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-module-chevron {
+    color: #606060;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-module-count {
+    color: #909090;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item-number {
+    color: #909090;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item.active .mindful-media-playlist-item-number {
+    color: #0f0f0f;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item:hover {
+    background: #f2f2f2;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item.active {
+    background: #e8f0fe;
+    border-left: 3px solid #065fd4;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item-playing {
+    color: #065fd4;
+}
+
+.mindful-media-inline-player.light-theme .mindful-media-playlist-item-duration {
+    color: #909090;
+}
+
 /* Modal Content Container */
 .mindful-media-modal-content {
     background: transparent;
@@ -2511,19 +2934,20 @@ body.single-mindful_media header#masthead {
 .mindful-media-inline-player.has-playlist .mindful-media-inline-player-content {
     flex: 1 1 auto;
     min-width: 600px;
-    max-width: calc(100vw - 420px); /* Sidebar is 402px + buffer */
-    padding-right: 20px;
+    max-width: none;
+    width: 100%;
+    padding-right: 420px; /* Sidebar is 402px + buffer */
 }
 
 /* Ensure browse section is also not overlapped by sidebar */
 .mindful-media-inline-player.has-playlist .mindful-media-browse-below {
-    max-width: calc(100vw - 420px); /* Match player content width */
+    max-width: calc(100% - 420px); /* Match player content width */
     padding-right: 20px;
 }
 
 /* Ensure modal content section (description, meta) is not overlapped by sidebar */
 .mindful-media-inline-player.has-playlist .mindful-media-modal-content-section {
-    max-width: calc(100vw - 420px); /* Match player content width */
+    max-width: calc(100% - 420px); /* Match player content width */
     padding-right: 20px;
 }
 
@@ -2559,18 +2983,19 @@ body.single-mindful_media header#masthead {
 }
 
 .mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-inline-player-content {
-    max-width: 100vw;
-    padding-right: 60px;
+    max-width: 100%;
+    padding-right: 0;
+    width: 100%;
 }
 
 .mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-browse-below {
-    max-width: 100vw;
-    padding-right: 60px;
+    max-width: 100%;
+    padding-right: 40px;
 }
 
 .mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-modal-content-section {
-    max-width: 100vw;
-    padding-right: 60px;
+    max-width: 100%;
+    padding-right: 40px;
 }
 
 /* Playlist header - YouTube style */
@@ -2589,27 +3014,29 @@ body.single-mindful_media header#masthead {
     gap: var(--mm-spacing-xs);
 }
 
-/* Playlist toggle button */
+/* Playlist toggle button - centered vertically with video */
 .mindful-media-playlist-toggle {
-    background: var(--mm-dark-bg-elevated);
-    border: 1px solid var(--mm-dark-border);
-    color: var(--mm-dark-text-secondary);
+    background: rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
     cursor: pointer;
     padding: var(--mm-spacing-md) var(--mm-spacing-sm);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    position: fixed;
+    position: fixed !important;
     right: 402px;
-    top: 90px;
+    top: 30% !important;
+    transform: translateY(-50%) !important;
     z-index: 100003;
     border-radius: var(--mm-radius-sm) 0 0 var(--mm-radius-sm);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 }
 
 .mindful-media-playlist-toggle:hover {
-    color: var(--mm-dark-text-primary);
-    background: var(--mm-dark-bg-hover);
+    color: #fff;
+    background: rgba(0, 0, 0, 0.85);
 }
 
 .mindful-media-playlist-toggle svg {
@@ -2628,7 +3055,7 @@ body.single-mindful_media header#masthead {
     margin: 0;
     font-size: var(--mm-font-size-lg);
     font-weight: 600;
-    color: var(--mm-dark-text-primary);
+    color: var(--mm-dark-text-primary) !important;
     line-height: 1.3;
 }
 
@@ -2704,19 +3131,21 @@ body.single-mindful_media header#masthead {
 }
 
 .mindful-media-playlist-item-title {
-    font-size: var(--mm-font-size-sm);
-    color: var(--mm-dark-text-primary);
+    font-size: 13px;
+    color: var(--mm-dark-text-primary) !important;
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     line-height: 1.3;
+    font-weight: 400;
 }
 
 .mindful-media-playlist-item-title *,
 .mindful-media-playlist-item-title span {
     color: inherit;
+    font-weight: inherit;
 }
 
 .mindful-media-playlist-item.active .mindful-media-playlist-item-title {
@@ -2737,8 +3166,8 @@ body.single-mindful_media header#masthead {
 }
 
 /* Adjust player content width when playlist is shown */
-.mindful-media-inline-player.has-playlist .mindful-media-inline-player-content {
-    padding-right: 0;
+.mindful-media-inline-player.has-playlist:not(.playlist-collapsed) .mindful-media-inline-player-content {
+    padding-right: 420px;
 }
 
 /* Playlist description */
@@ -2780,7 +3209,7 @@ body.single-mindful_media header#masthead {
 }
 
 .mindful-media-playlist-module.active .mindful-media-module-header {
-    background: rgba(139, 0, 0, 0.2);
+    background: var(--mm-dark-bg-elevated);
 }
 
 .mindful-media-module-chevron {
@@ -2796,7 +3225,7 @@ body.single-mindful_media header#masthead {
 .mindful-media-module-name {
     font-size: var(--mm-font-size-sm);
     font-weight: 600;
-    color: var(--mm-dark-text-primary);
+    color: var(--mm-dark-text-primary) !important;
     flex: 1;
 }
 
@@ -2898,43 +3327,53 @@ body.single-mindful_media header#masthead {
     backdrop-filter: blur(12px);
 }
 
+/* Light theme header hover - use light background */
+.mindful-media-inline-player.light-theme:hover .mindful-media-inline-player-header,
+.mindful-media-inline-player.light-theme .mindful-media-inline-player-header:hover {
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
 .mindful-media-inline-player-info {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+    padding: 0 16px;
+    min-width: 0; /* Allow text truncation */
+    overflow: hidden;
 }
 
 .mindful-media-inline-player-info h3,
 .mindful-media-inline-player-title {
     margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #fff !important;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
-    opacity: 0.85;
-    transition: opacity 0.3s ease, text-shadow 0.3s ease;
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
-/* Ensure title spans are also white */
-.mindful-media-inline-player-title span,
-.mindful-media-inline-player-info h3 span {
-    color: inherit !important;
+/* Match modal title teacher styling with single header */
+.mindful-media-inline-player-teacher {
+    font-weight: 400;
+    font-style: italic;
+    color: rgba(255,255,255,0.8);
+    margin-left: 6px;
 }
 
-.mindful-media-inline-player:hover .mindful-media-inline-player-title,
-.mindful-media-inline-player:hover .mindful-media-inline-player-info h3 {
-    opacity: 1;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-}
+/* Title hover state removed - cleaner look */
 
 .mindful-media-inline-view-full {
     color: rgba(255,255,255,0.7);
     text-decoration: none;
     font-size: 13px;
     font-weight: 400;
-    transition: all 0.3s ease;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+    transition: color 0.2s ease;
 }
 
 /* Hide "View Full" link when playlist is present (has its own navigation) */
@@ -2988,6 +3427,109 @@ body.single-mindful_media header#masthead {
     background: rgba(255, 255, 255, 0.2) !important;
     color: #fff !important;
     transform: scale(1.05);
+}
+
+/* Back to Browse Button */
+.mindful-media-inline-back {
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(5px);
+    border: none !important;
+    color: #fff !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    z-index: 100010 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.mindful-media-inline-back:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    transform: scale(1.05);
+}
+
+.mindful-media-inline-back svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Share Button */
+.mindful-media-inline-share {
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(5px);
+    border: none !important;
+    color: #fff !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    z-index: 100010 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: relative;
+}
+
+.mindful-media-inline-share:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    transform: scale(1.05);
+}
+
+.mindful-media-inline-share svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Share button "copied" state */
+.mindful-media-inline-share.copied {
+    background: rgba(34, 197, 94, 0.8) !important;
+}
+
+/* Tooltip for share button */
+.mindful-media-inline-share .share-tooltip {
+    position: absolute;
+    bottom: -32px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+}
+
+.mindful-media-inline-share.copied .share-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Actions container (right side buttons) */
+.mindful-media-inline-player-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
 }
 
 .mindful-media-inline-minimize {
@@ -3087,6 +3629,52 @@ body.single-mindful_media header#masthead {
     padding: 40px 20px 40px;
     color: #fff;
     width: 100%;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.3s ease;
+}
+
+/* Collapsed state for playlist More Info section */
+.mindful-media-modal-content-section.collapsed {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+}
+
+/* Expanded state */
+.mindful-media-modal-content-section.expanded {
+    max-height: 1000px; /* Large enough to show all content */
+    opacity: 1;
+}
+
+/* More Info Toggle Button */
+.mindful-media-more-info-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px 20px;
+    background: #181818;
+    border: none;
+    border-top: 1px solid #272727;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.mindful-media-more-info-toggle:hover {
+    background: #222;
+}
+
+.mindful-media-more-info-toggle .toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.mindful-media-more-info-toggle.expanded .toggle-icon {
+    transform: rotate(180deg);
 }
 
 .mindful-media-modal-content-inner {
@@ -3291,7 +3879,19 @@ body.single-mindful_media header#masthead {
 .mindful-media-inline-player.has-playlist .mindful-media-inline-player-content .youtube-player,
 .mindful-media-inline-player.has-playlist .mindful-media-inline-player-content .vimeo-player,
 .mindful-media-inline-player.has-playlist .mindful-media-inline-player-content .mindful-media-inline-embed {
-    max-width: calc(100vw - 420px) !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* When playlist sidebar is COLLAPSED, video should be full width */
+.mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-inline-player-content .youtube-player,
+.mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-inline-player-content .vimeo-player,
+.mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-inline-player-content .mindful-media-inline-embed,
+.mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-inline-player-content .soundcloud-player,
+.mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-inline-player-content .archive-player,
+.mindful-media-inline-player.has-playlist.playlist-collapsed .mindful-media-inline-player-content .mindful-media-image-container {
+    max-width: 100% !important;
+    width: 100% !important;
 }
 
 /* Regular page players - full width */
@@ -3421,7 +4021,7 @@ body.modal-open {
     z-index: 1; /* Below controls */
 }
 
-/* Allow pointer events on iframe only for big play button click (before controls are active) */
+/* Allow pointer events on iframe only before controls are active */
 .mindful-media-unified-player:not(.controls-active) iframe {
     pointer-events: auto;
 }
@@ -3882,9 +4482,50 @@ body.modal-open {
     pointer-events: auto !important;
 }
 
+/* YouTube end-screen cover (optional) */
+.mindful-media-youtube-endscreen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 180;
+    transition: opacity 0.2s ease;
+}
+
+.mindful-media-unified-player.youtube-player.mm-youtube-endscreen-active .mindful-media-youtube-endscreen {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.mindful-media-youtube-endscreen-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.mindful-media-youtube-endscreen-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
 /* YouTube player - show big play button (user expects to click to play) */
 .mindful-media-unified-player.youtube-player .mindful-media-big-play-btn {
     display: flex !important;
+}
+
+/* YouTube player - allow native iframe click before controls are active */
+.mindful-media-unified-player.youtube-player:not(.controls-active) .mindful-media-big-play-btn {
+    pointer-events: none !important;
 }
 
 /* YouTube player - show custom controls (opacity still controlled by hover/playing state) */
@@ -3913,6 +4554,13 @@ body.modal-open {
     width: 100%;
     height: 100%;
     border: none;
+    pointer-events: auto !important;
+}
+
+/* Keep Vimeo native controls clickable even when playing */
+.mindful-media-unified-player.vimeo-native.playing iframe,
+.mindful-media-unified-player.vimeo-native.controls-active iframe {
+    pointer-events: auto !important;
 }
 
 .mindful-media-big-play-btn:hover {
@@ -4249,9 +4897,22 @@ body.modal-open {
     background: transparent;
 }
 
+/* Ensure embed thumbnails fully fill 16:9 container */
+.mindful-media-embed .mindful-media-card-thumbnail,
+.mindful-media-embed .mindful-media-card-thumbnail img {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.mindful-media-embed .mindful-media-card-thumbnail img {
+    display: block !important;
+    object-fit: cover !important;
+    object-position: center;
+}
+
 /* Embed thumbnail (playlist & single) */
 .mindful-media-embed-thumbnail {
-    margin: 20px 0;
+    margin: 16px 0;
     cursor: pointer;
 }
 
@@ -4275,19 +4936,24 @@ body.modal-open {
 .mindful-media-embed-thumbnail-wrapper {
     position: relative;
     overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
+    border-radius: 12px;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    transition: transform 0.3s ease;
 }
 
 .mindful-media-embed-thumbnail-wrapper:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    transform: scale(1.02);
 }
 
 .mindful-media-embed-thumbnail-wrapper img {
-    width: 100%;
-    height: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center;
     display: block;
 }
 
@@ -4415,14 +5081,14 @@ body.modal-open {
     color: inherit !important;
 }
 
-/* Playlist grid item titles */
-.mindful-media-playlist-item-title {
-    color: #fff !important;
+/* Playlist sidebar item titles - only in dark mode */
+.mindful-media-inline-player:not(.light-theme) .mindful-media-playlist-item-title {
+    color: #fff;
 }
 
-.mindful-media-playlist-item-title *,
-.mindful-media-playlist-item-title span {
-    color: inherit !important;
+.mindful-media-inline-player:not(.light-theme) .mindful-media-playlist-item-title *,
+.mindful-media-inline-player:not(.light-theme) .mindful-media-playlist-item-title span {
+    color: inherit;
 }
 
 /* Override any theme colors that might leak through */
@@ -5403,17 +6069,15 @@ a.mindful-media-browse-nav-item.active {
     }
 }
 
-/* Navigation Arrows - Clean Simple Style */
-/* Arrows overlay ONLY the thumbnail area, not the title/text below */
+/* Navigation Arrows - Big Chevrons Only, No Background */
 .mm-slider-nav {
     position: absolute;
-    top: 4px;
-    /* Height covers thumbnail area only (16:9 ratio = ~56% of card height) */
-    height: calc(56.25% - 8px);
-    width: 60px;
-    border: none;
+    top: var(--mm-slider-nav-top, 50%);
+    transform: translateY(-50%);
+    width: 56px;
+    height: 56px;
+    border: none !important;
     background: transparent !important;
-    color: #333;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -5421,29 +6085,25 @@ a.mindful-media-browse-nav-item.active {
     opacity: 0;
     transition: opacity 0.3s ease;
     z-index: 10;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
 }
 
 .mm-slider-nav--prev {
     left: 0;
-    justify-content: flex-start;
-    padding-left: 8px;
 }
 
 .mm-slider-nav--next {
     right: 0;
-    justify-content: flex-end;
-    padding-right: 8px;
 }
 
 .mm-slider-container:hover .mm-slider-nav {
-    opacity: 1;
+    opacity: 0.7;
 }
 
 .mm-slider-nav:hover {
-    background: transparent !important;
-}
-
-.mm-slider-nav--next:hover {
+    opacity: 1 !important;
     background: transparent !important;
 }
 
@@ -5454,28 +6114,22 @@ a.mindful-media-browse-nav-item.active {
 }
 
 .mm-slider-nav svg {
-    width: 56px;
-    height: 56px;
+    width: 48px !important;
+    height: 48px !important;
     transition: transform 0.2s ease;
     stroke-width: 2.5;
     stroke: #333;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
 }
 
 .mm-slider-nav:hover svg {
-    transform: scale(1.15);
+    transform: scale(1.1);
 }
 
 /* Touch/Mobile - always show faded arrows */
 @media (hover: none) {
     .mm-slider-nav {
-        opacity: 0.7;
-        width: 50px;
-    }
-    
-    .mm-slider-nav svg {
-        width: 48px;
-        height: 48px;
+        opacity: 0.5;
     }
 }
 
@@ -5741,29 +6395,7 @@ a.mindful-media-browse-nav-item.active {
     transform: scale(1.05);
 }
 
-.mindful-media-card-play-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.mindful-media-card:hover .mindful-media-card-play-overlay {
-    opacity: 1;
-}
-
-.mindful-media-card-play-overlay svg {
-    width: 56px;
-    height: 56px;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-}
+/* Note: .mindful-media-card-play-overlay is defined once earlier in the file (around line 904) */
 
 .mindful-media-card-content {
     padding: var(--mm-spacing-md) var(--mm-spacing-xs);

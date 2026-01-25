@@ -124,6 +124,10 @@ class MindfulMedia_Settings {
             'vimeo_access_token' => '',
             'player_size' => 'normal',
             'player_controls' => '1',
+            'modal_player_theme' => 'dark', // dark or light
+            'modal_share_button' => '1', // Show share button in modal player
+            'modal_show_more_media' => '1', // Show "More Media" recommendations in modal
+            'youtube_hide_end_screen' => '0', // Cover YouTube end-screen overlay
             'custom_fields' => array(),
             // Browse page section visibility
             'browse_show_teachers' => '1',

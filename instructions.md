@@ -1,7 +1,7 @@
 # MindfulMedia Plugin - Development Guide
 
-**Version:** 2.8.1  
-**Last Updated:** January 19, 2026
+**Version:** 2.8.4  
+**Last Updated:** January 23, 2026
 
 ---
 
@@ -294,7 +294,9 @@ mindfulmedia/
 │   ├── css/blocks-editor.css
 │   └── js/blocks.js
 └── assets/
-    └── default-thumbnail.jpg
+    ├── icon-gold.svg
+    ├── icon-white.svg
+    └── logo-white.svg
 ```
 
 ---
@@ -567,6 +569,72 @@ Ideas for future development:
 ---
 
 ## Version History
+
+- **2.8.4** - Navigation Arrows & Modal Styling Fix
+  - **Browse Slider Navigation Arrows**
+    - Removed circular white background from navigation arrows
+    - Made chevrons big (48px instead of 20px)
+    - Arrows are now just clean chevrons with subtle drop-shadow
+    - Updated all 6 slider instances in shortcodes
+    - Arrows only show on hover when there are items to scroll
+  - **Modal Header Title**
+    - Fixed weird centering of title
+    - Removed text shadows from title
+    - Made title more compact (16px font)
+  - **Modal Buttons (Light Mode)**
+    - Fixed close/share/back button backgrounds not visible
+    - Changed to gray background (#e5e5e5) with border
+  - **Playlist Sidebar (Light Mode)**
+    - Fixed conflicting CSS rule forcing white text
+    - Active item now uses subtle blue background (#e8f0fe)
+    - Module names and item titles properly dark
+
+- **2.8.3** - Single Page Video Fix & Styling Improvements
+  - **Single Page Video Display Fix**
+    - Fixed video not showing on single media pages (only showing black screen)
+    - Added `!important` rules to iframe styles in `.mindful-media-player-aspect-ratio`
+    - Ensures iframe is properly positioned (absolute) and sized (100% width/height)
+  - **Light Mode Modal Styling**
+    - Fixed dark header appearing on light mode modals
+    - Added light theme hover styles for modal header
+    - Added light theme styles for Back and Share buttons
+    - Added comprehensive light theme styles for playlist modules
+  - **Playlist Sidebar Color Fix**
+    - Removed red accent color (`#ff0000`) - changed to neutral white
+    - Fixed active module header background (was red-tinted)
+    - Added proper light theme styles for playlist items and modules
+  - **Bulk Upload Improvements**
+    - Made form more compact with new grid layout
+    - Added featured image upload capability (uses WordPress media library)
+    - Added duration fields (hours/minutes)
+    - Added recording date field
+    - Session rows now show number badge, title, URL, image, duration, and date in compact view
+
+- **2.8.2** - Bug Fixes & UX Improvements
+  - **Bulk Video Upload Fix**
+    - Restored `ajax_batch_create_sessions` AJAX handler (was removed in 2.1.25)
+    - "Add Multiple Sessions" modal in playlist admin now works correctly
+    - Auto-detects media source (YouTube, Vimeo, SoundCloud, Archive.org)
+    - Auto-sets media type (Audio/Video) based on URL
+  - **Duration Display Fix**
+    - Videos over 1 hour now display correctly as H:MM:SS (e.g., "1:58:10" instead of "118:10")
+    - Updated `formatTime()` JavaScript function to handle hours
+    - Updated all PHP duration badge formatting to use new `format_duration_badge()` helper
+    - Fixed in: shortcodes, templates (archive, teacher, topic, category pages)
+  - **Playlist Title Encoding Fix**
+    - Fixed HTML entity double-encoding (e.g., `&#8211;` showing as literal text)
+    - Titles now properly decoded before sending to JavaScript
+  - **Modal Player UX Improvements**
+    - Replaced "View Full Page" link with "Back to Browse" button (top left)
+    - Back button navigates to archive page (configurable via `archive_link` setting)
+    - Added Share button (top right) - copies media permalink to clipboard
+    - Share button shows "Link copied!" tooltip on success
+    - Share button can be enabled/disabled via `modal_share_button` setting
+  - **Playlist More Info Section**
+    - Added collapsible "More Info" section below video player for playlist items
+    - Shows description, date, duration, media type, categories, and topics
+    - Initially collapsed, expands with smooth animation when clicked
+    - Button text toggles between "More Info" and "Less Info"
 
 - **2.8.1** - Bug Fixes
   - **Taxonomy Page Search Icon Fix**

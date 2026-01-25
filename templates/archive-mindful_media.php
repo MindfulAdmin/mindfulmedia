@@ -18,6 +18,8 @@ wp_enqueue_script('mindful-media-frontend', plugins_url('../public/js/frontend.j
 wp_localize_script('mindful-media-frontend', 'mindfulMediaAjax', array(
     'ajaxUrl' => admin_url('admin-ajax.php'),
     'nonce' => wp_create_nonce('mindful_media_ajax'),
+    'modalShowMoreMedia' => $settings['modal_show_more_media'] ?? '1',
+    'youtubeHideEndScreen' => $settings['youtube_hide_end_screen'] ?? '0'
 ));
 ?>
 
@@ -292,25 +294,15 @@ wp_localize_script('mindful-media-frontend', 'mindfulMediaAjax', array(
                         <div class="mm-slider-track">
                             <?php while ($query->have_posts()): $query->the_post(); 
                                 $post_id = get_the_ID();
-                                $thumbnail_url = get_the_post_thumbnail_url($post_id, 'medium_large');
-                                if (!$thumbnail_url) {
-                                    $thumbnail_url = MINDFUL_MEDIA_PLUGIN_URL . 'assets/default-thumbnail.jpg';
-                                }
+                                $thumbnail_url = MindfulMedia_Shortcodes::get_media_thumbnail_url($post_id, 'medium_large');
                                 
                                 // Duration
                                 $duration_hours = get_post_meta($post_id, '_mindful_media_duration_hours', true);
                                 $duration_minutes = get_post_meta($post_id, '_mindful_media_duration_minutes', true);
-                                $duration_badge = '';
-                                if ($duration_hours || $duration_minutes) {
-                                    if ($duration_hours) {
-                                        $duration_badge = $duration_hours . ':' . str_pad($duration_minutes ?: '0', 2, '0', STR_PAD_LEFT);
-                                    } else {
-                                        $duration_badge = $duration_minutes . ':00';
-                                    }
-                                }
+                                $duration_badge = MindfulMedia_Shortcodes::format_duration_badge($duration_hours, $duration_minutes);
                             ?>
                             <div class="mm-slider-item">
-                                <div class="mindful-media-card mindful-media-thumb-trigger" data-post-id="<?php echo $post_id; ?>">
+                                <div class="mindful-media-card mindful-media-thumb-trigger" data-post-id="<?php echo $post_id; ?>" data-search="<?php echo esc_attr(MindfulMedia_Shortcodes::build_search_text($post_id)); ?>">
                                     <div class="mindful-media-card-thumb">
                                         <img src="<?php echo esc_url($thumbnail_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" loading="lazy">
                                         <div class="mindful-media-card-play-overlay">
@@ -366,24 +358,14 @@ wp_localize_script('mindful-media-frontend', 'mindfulMediaAjax', array(
                 <div class="mm-slider-track">
                     <?php while ($uncategorized_query->have_posts()): $uncategorized_query->the_post(); 
                         $post_id = get_the_ID();
-                        $thumbnail_url = get_the_post_thumbnail_url($post_id, 'medium_large');
-                        if (!$thumbnail_url) {
-                            $thumbnail_url = MINDFUL_MEDIA_PLUGIN_URL . 'assets/default-thumbnail.jpg';
-                        }
+                        $thumbnail_url = MindfulMedia_Shortcodes::get_media_thumbnail_url($post_id, 'medium_large');
                         
                         $duration_hours = get_post_meta($post_id, '_mindful_media_duration_hours', true);
                         $duration_minutes = get_post_meta($post_id, '_mindful_media_duration_minutes', true);
-                        $duration_badge = '';
-                        if ($duration_hours || $duration_minutes) {
-                            if ($duration_hours) {
-                                $duration_badge = $duration_hours . ':' . str_pad($duration_minutes ?: '0', 2, '0', STR_PAD_LEFT);
-                            } else {
-                                $duration_badge = $duration_minutes . ':00';
-                            }
-                        }
+                        $duration_badge = MindfulMedia_Shortcodes::format_duration_badge($duration_hours, $duration_minutes);
                     ?>
                     <div class="mm-slider-item">
-                        <div class="mindful-media-card mindful-media-thumb-trigger" data-post-id="<?php echo $post_id; ?>">
+                        <div class="mindful-media-card mindful-media-thumb-trigger" data-post-id="<?php echo $post_id; ?>" data-search="<?php echo esc_attr(MindfulMedia_Shortcodes::build_search_text($post_id)); ?>">
                             <div class="mindful-media-card-thumb">
                                 <img src="<?php echo esc_url($thumbnail_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" loading="lazy">
                                 <div class="mindful-media-card-play-overlay">
@@ -455,9 +437,12 @@ jQuery(document).ready(function($) {
             
             $row.find('.mm-slider-item').each(function() {
                 var $item = $(this);
-                var title = $item.find('.mindful-media-card-title').text().toLowerCase();
+                var $card = $item.find('.mindful-media-card');
+                var dataSearch = ($card.attr('data-search') || '').toLowerCase();
+                var title = $card.find('.mindful-media-card-title').text().toLowerCase();
+                var combined = dataSearch || title;
                 
-                if (title.indexOf(searchTerm) !== -1) {
+                if (combined.indexOf(searchTerm) !== -1) {
                     $item.show();
                     rowVisible++;
                 } else {

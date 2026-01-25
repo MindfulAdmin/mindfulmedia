@@ -284,7 +284,7 @@ class MindfulMedia_Post_Types {
                 'autoplay' => false,
                 'class' => '',
                 'post_id' => $post->ID,  // Pass post ID for featured image access
-                'featured_image' => has_post_thumbnail($post->ID) ? get_the_post_thumbnail_url($post->ID, $image_size) : '',
+                'featured_image' => MindfulMedia_Shortcodes::get_media_thumbnail_url($post->ID, $image_size),
                 'source' => $media_source,
                 'custom_embed' => $custom_embed,
                 'post_title' => $post->post_title
@@ -294,9 +294,10 @@ class MindfulMedia_Post_Types {
         // Get custom fields
         $custom_fields = get_post_meta($post->ID, '_mindful_media_custom_fields', true);
         
-        // Get settings for archive link
+        // Get settings for archive link + theme
         $settings = MindfulMedia_Settings::get_settings();
         $archive_link = $settings['archive_link'];
+        $single_theme_class = (!empty($settings['modal_player_theme']) && $settings['modal_player_theme'] === 'light') ? ' light-theme' : '';
         
         // Build the enhanced content - MODAL STYLE LAYOUT
         ob_start();
@@ -309,10 +310,15 @@ class MindfulMedia_Post_Types {
         ?>
         
         <!-- Full Screen Single Page - Modal Style -->
-        <div class="mindful-media-single-fullscreen">
+        <div class="mindful-media-single-fullscreen<?php echo esc_attr($single_theme_class); ?>">
             
             <!-- Header Overlay (like modal) -->
             <div class="mindful-media-single-header">
+                <a href="<?php echo esc_url($archive_link); ?>" class="mindful-media-single-back mindful-media-inline-back" aria-label="<?php echo esc_attr__('Back to Media', 'mindful-media'); ?>" title="<?php echo esc_attr__('Back to Media', 'mindful-media'); ?>">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                </a>
                 <div class="mindful-media-single-header-info">
                     <h1 class="mindful-media-single-header-title">
                         <?php echo esc_html($post->post_title); ?>
@@ -320,7 +326,9 @@ class MindfulMedia_Post_Types {
                             <span class="mindful-media-single-header-teacher">by <?php echo esc_html($teacher_name); ?></span>
                         <?php endif; ?>
                     </h1>
-                    <a href="<?php echo esc_url($archive_link); ?>" class="mindful-media-single-back">← Back to Media</a>
+                </div>
+                <div class="mindful-media-single-header-actions" aria-hidden="true">
+                    <span class="mindful-media-single-header-spacer"></span>
                 </div>
             </div>
             
@@ -626,9 +634,12 @@ class MindfulMedia_Post_Types {
         // Enqueue frontend scripts for inline player functionality
         wp_enqueue_style('mindful-media-frontend', MINDFUL_MEDIA_PLUGIN_URL . 'public/css/frontend.css', array(), MINDFUL_MEDIA_VERSION);
         wp_enqueue_script('mindful-media-frontend', MINDFUL_MEDIA_PLUGIN_URL . 'public/js/frontend.js', array('jquery'), MINDFUL_MEDIA_VERSION, true);
+        $settings = MindfulMedia_Settings::get_settings();
         wp_localize_script('mindful-media-frontend', 'mindfulMediaAjax', array(
             'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('mindful_media_ajax_nonce')
+            'nonce' => wp_create_nonce('mindful_media_ajax_nonce'),
+            'modalShowMoreMedia' => $settings['modal_show_more_media'] ?? '1',
+            'youtubeHideEndScreen' => $settings['youtube_hide_end_screen'] ?? '0'
         ));
         
         $enhanced_content = ob_get_clean();

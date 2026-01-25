@@ -41,6 +41,9 @@ class MindfulMedia_Taxonomies {
         
         // Order playlist items by series_order ASC (oldest/first items first)
         add_action('pre_get_posts', array($this, 'order_playlist_items'));
+        
+        // AJAX handler for batch creating sessions
+        add_action('wp_ajax_mindful_media_batch_create_sessions', array($this, 'ajax_batch_create_sessions'));
     }
     
     /**
@@ -744,55 +747,95 @@ class MindfulMedia_Taxonomies {
             border-top: 1px solid #ddd;
             text-align: right;
         }
+        /* Compact batch session row styling */
         .batch-session-row {
-            display: grid;
-            grid-template-columns: 50px 1fr auto;
-            gap: 10px;
-            margin-bottom: 15px;
-            padding: 15px;
+            margin-bottom: 10px;
+            padding: 10px 12px;
             background: #f9f9f9;
             border-radius: 4px;
-            align-items: start;
+            border-left: 3px solid #b8a064;
         }
-        .batch-session-row label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 5px;
-            font-size: 12px;
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .session-header .session-number {
+            font-weight: 600;
+            font-size: 14px;
+            color: #b8a064;
+            background: #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .session-header .remove-session-btn {
+            color: #a00;
+            font-size: 18px;
+            padding: 0 5px;
+            text-decoration: none;
+        }
+        .session-header .remove-session-btn:hover {
+            color: #dc3232;
+        }
+        .batch-session-fields-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .batch-session-fields-compact .field-row {
+            display: flex;
+            gap: 8px;
+        }
+        .batch-session-fields-compact .field-title {
+            flex: 2;
+        }
+        .batch-session-fields-compact .field-url {
+            flex: 3;
+        }
+        .batch-session-fields-compact .field-row-extras {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .batch-session-fields-compact .field-image {
+            display: flex;
+            align-items: center;
+        }
+        .batch-session-fields-compact .field-duration {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .batch-session-fields-compact .field-duration span {
             color: #666;
         }
-        .batch-session-row input,
-        .batch-session-row textarea {
-            width: 100%;
+        .batch-session-fields-compact .field-date input {
+            width: 130px;
         }
-        .batch-session-row textarea {
-            resize: vertical;
-            min-height: 60px;
+        .batch-session-fields-compact input {
+            padding: 5px 8px;
+            font-size: 13px;
         }
-        .batch-session-fields {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .batch-session-fields .field-full {
-            grid-column: span 2;
-        }
-        .batch-session-row .session-number {
-            font-weight: 600;
-            font-size: 18px;
-            color: #b8a064;
-            padding-top: 24px;
+        .batch-session-fields-compact .small-input {
+            width: 50px !important;
             text-align: center;
         }
-        .batch-session-row .remove-session {
-            padding-top: 24px;
-        }
-        .batch-session-row .remove-session button {
-            color: #a00;
-            cursor: pointer;
+        .batch-session-fields-compact .select-image-btn {
+            font-size: 11px;
+            padding: 2px 8px;
         }
         #add-session-row {
             margin-top: 10px;
+        }
+        #batch-sessions-container {
+            max-height: 45vh;
+            overflow-y: auto;
+            padding-right: 5px;
         }
         </style>
         
@@ -831,28 +874,40 @@ class MindfulMedia_Taxonomies {
                 $('#batch-create-modal').hide();
             });
             
-            // Add session row
+            // Add session row - compact layout with more fields
             function addSessionRow() {
                 sessionCount++;
                 var orderNum = existingCount + sessionCount;
-                var html = '<div class="batch-session-row" data-index="' + sessionCount + '">' +
-                    '<div class="session-number">' + orderNum + '</div>' +
-                    '<div class="batch-session-fields">' +
-                        '<div>' +
-                            '<label><?php _e('Title', 'mindful-media'); ?> *</label>' +
-                            '<input type="text" name="session_title[]" placeholder="<?php _e('Session title...', 'mindful-media'); ?>" required>' +
-                        '</div>' +
-                        '<div>' +
-                            '<label><?php _e('Media URL', 'mindful-media'); ?></label>' +
-                            '<input type="url" name="session_url[]" placeholder="<?php _e('YouTube, Vimeo, etc...', 'mindful-media'); ?>">' +
-                        '</div>' +
-                        '<div class="field-full">' +
-                            '<label><?php _e('Description', 'mindful-media'); ?></label>' +
-                            '<textarea name="session_description[]" placeholder="<?php _e('Optional description...', 'mindful-media'); ?>" rows="2"></textarea>' +
-                        '</div>' +
+                var rowId = 'session-row-' + sessionCount;
+                var html = '<div class="batch-session-row" data-index="' + sessionCount + '" id="' + rowId + '">' +
+                    '<div class="session-header">' +
+                        '<span class="session-number">' + orderNum + '</span>' +
+                        '<button type="button" class="button-link remove-session-btn" title="<?php _e('Remove', 'mindful-media'); ?>">&times;</button>' +
                     '</div>' +
-                    '<div class="remove-session">' +
-                        '<button type="button" class="button remove-session-btn" title="<?php _e('Remove', 'mindful-media'); ?>">&times;</button>' +
+                    '<div class="batch-session-fields-compact">' +
+                        '<div class="field-row">' +
+                            '<div class="field-title">' +
+                                '<input type="text" name="session_title[]" placeholder="<?php _e('Session title *', 'mindful-media'); ?>" required>' +
+                            '</div>' +
+                            '<div class="field-url">' +
+                                '<input type="url" name="session_url[]" placeholder="<?php _e('Media URL (YouTube, Vimeo...)', 'mindful-media'); ?>">' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="field-row field-row-extras">' +
+                            '<div class="field-image">' +
+                                '<input type="hidden" name="session_image[]" class="session-image-id">' +
+                                '<button type="button" class="button button-small select-image-btn"><?php _e('+ Image', 'mindful-media'); ?></button>' +
+                                '<span class="image-preview"></span>' +
+                            '</div>' +
+                            '<div class="field-duration">' +
+                                '<input type="number" name="session_hours[]" placeholder="Hr" min="0" max="99" class="small-input">' +
+                                '<span>:</span>' +
+                                '<input type="number" name="session_minutes[]" placeholder="Min" min="0" max="59" class="small-input">' +
+                            '</div>' +
+                            '<div class="field-date">' +
+                                '<input type="date" name="session_date[]" placeholder="<?php _e('Date', 'mindful-media'); ?>">' +
+                            '</div>' +
+                        '</div>' +
                     '</div>' +
                 '</div>';
                 $('#batch-sessions-container').append(html);
@@ -881,6 +936,30 @@ class MindfulMedia_Taxonomies {
                 updateSessionNumbers();
             });
             
+            // Image upload handler
+            $(document).on('click', '.select-image-btn', function(e) {
+                e.preventDefault();
+                var $btn = $(this);
+                var $row = $btn.closest('.batch-session-row');
+                var $input = $row.find('.session-image-id');
+                var $preview = $row.find('.image-preview');
+                
+                var mediaUploader = wp.media({
+                    title: '<?php _e('Select Image', 'mindful-media'); ?>',
+                    button: { text: '<?php _e('Use this image', 'mindful-media'); ?>' },
+                    multiple: false
+                });
+                
+                mediaUploader.on('select', function() {
+                    var attachment = mediaUploader.state().get('selection').first().toJSON();
+                    $input.val(attachment.id);
+                    $btn.text('<?php _e('Change', 'mindful-media'); ?>');
+                    $preview.html('<img src="' + (attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url) + '" style="width:30px;height:30px;object-fit:cover;border-radius:3px;margin-left:5px;vertical-align:middle;">');
+                });
+                
+                mediaUploader.open();
+            });
+            
             // Submit batch create
             $('#submit-batch-create').on('click', function() {
                 var sessions = [];
@@ -889,10 +968,13 @@ class MindfulMedia_Taxonomies {
                 $('#batch-sessions-container .batch-session-row').each(function() {
                     var title = $(this).find('input[name="session_title[]"]').val();
                     var url = $(this).find('input[name="session_url[]"]').val();
-                    var description = $(this).find('textarea[name="session_description[]"]').val();
+                    var imageId = $(this).find('input[name="session_image[]"]').val();
+                    var hours = $(this).find('input[name="session_hours[]"]').val();
+                    var minutes = $(this).find('input[name="session_minutes[]"]').val();
+                    var date = $(this).find('input[name="session_date[]"]').val();
                     
                     if (!title) {
-                        $(this).find('input[name="session_title[]"]').css('border-color', 'red');
+                        $(this).find('input[name="session_title[]"]').css('border-color', '#dc3232');
                         hasError = true;
                         return;
                     }
@@ -900,7 +982,10 @@ class MindfulMedia_Taxonomies {
                     sessions.push({
                         title: title,
                         url: url,
-                        description: description,
+                        image_id: imageId,
+                        hours: hours,
+                        minutes: minutes,
+                        date: date,
                         order: parseInt($(this).find('.session-number').text())
                     });
                 });
@@ -1221,6 +1306,201 @@ class MindfulMedia_Taxonomies {
             }
         }
         return $content;
+    }
+    
+    /**
+     * AJAX handler for batch creating sessions in a playlist
+     */
+    public function ajax_batch_create_sessions() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'mindful_media_batch_create')) {
+            wp_send_json_error(__('Security check failed.', 'mindful-media'));
+        }
+        
+        // Check permissions
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(__('You do not have permission to create posts.', 'mindful-media'));
+        }
+        
+        $playlist_id = isset($_POST['playlist_id']) ? intval($_POST['playlist_id']) : 0;
+        $teacher_id = isset($_POST['teacher_id']) ? intval($_POST['teacher_id']) : 0;
+        $media_type_id = isset($_POST['media_type_id']) ? intval($_POST['media_type_id']) : 0;
+        $sessions = isset($_POST['sessions']) ? $_POST['sessions'] : array();
+        
+        if (!$playlist_id) {
+            wp_send_json_error(__('Invalid playlist ID.', 'mindful-media'));
+        }
+        
+        if (empty($sessions)) {
+            wp_send_json_error(__('No sessions provided.', 'mindful-media'));
+        }
+        
+        // Get the playlist term
+        $playlist = get_term($playlist_id, 'media_series');
+        if (!$playlist || is_wp_error($playlist)) {
+            wp_send_json_error(__('Playlist not found.', 'mindful-media'));
+        }
+        
+        $created_count = 0;
+        $created_ids = array();
+        
+        foreach ($sessions as $session) {
+            $title = isset($session['title']) ? sanitize_text_field($session['title']) : '';
+            $url = isset($session['url']) ? esc_url_raw($session['url']) : '';
+            $image_id = isset($session['image_id']) ? intval($session['image_id']) : 0;
+            $hours = isset($session['hours']) ? intval($session['hours']) : 0;
+            $minutes = isset($session['minutes']) ? intval($session['minutes']) : 0;
+            $date = isset($session['date']) ? sanitize_text_field($session['date']) : '';
+            $order = isset($session['order']) ? intval($session['order']) : 0;
+            
+            if (empty($title)) {
+                continue;
+            }
+            
+            // Create the post
+            $post_data = array(
+                'post_title' => $title,
+                'post_type' => 'mindful_media',
+                'post_status' => 'publish',
+                'post_author' => get_current_user_id(),
+                'post_excerpt' => $description,
+                'post_content' => $description
+            );
+            
+            $post_id = wp_insert_post($post_data);
+            
+            if ($post_id && !is_wp_error($post_id)) {
+                // Assign to playlist
+                wp_set_object_terms($post_id, $playlist_id, 'media_series');
+                
+                // Assign teacher if provided
+                if ($teacher_id > 0) {
+                    wp_set_object_terms($post_id, $teacher_id, 'media_teacher');
+                }
+                
+                // Assign media type if provided (don't override auto-detection)
+                $has_manual_type = false;
+                if ($media_type_id > 0) {
+                    wp_set_object_terms($post_id, $media_type_id, 'media_type');
+                    $has_manual_type = true;
+                }
+                
+                // Set order
+                update_post_meta($post_id, '_mindful_media_series_order', $order);
+                
+                // Set media URL if provided
+                if (!empty($url)) {
+                    update_post_meta($post_id, '_mindful_media_url', $url);
+                    
+                    // Auto-detect media source
+                    $source = $this->detect_media_source($url);
+                    if ($source) {
+                        update_post_meta($post_id, '_mindful_media_source', $source);
+                    }
+                    
+                    // Auto-set media type based on source (only if not manually set)
+                    if (!$has_manual_type) {
+                        $this->auto_set_media_type($post_id, $source, $url);
+                    }
+                }
+                
+                // Set featured image if provided
+                if ($image_id > 0) {
+                    set_post_thumbnail($post_id, $image_id);
+                }
+                
+                // Set duration if provided
+                if ($hours > 0 || $minutes > 0) {
+                    update_post_meta($post_id, '_mindful_media_duration_hours', $hours);
+                    update_post_meta($post_id, '_mindful_media_duration_minutes', $minutes);
+                }
+                
+                // Set recording date if provided
+                if (!empty($date)) {
+                    update_post_meta($post_id, '_mindful_media_recording_date', $date);
+                }
+                
+                $created_count++;
+                $created_ids[] = $post_id;
+            }
+        }
+        
+        if ($created_count > 0) {
+            wp_send_json_success(array(
+                'count' => $created_count,
+                'ids' => $created_ids
+            ));
+        } else {
+            wp_send_json_error(__('Failed to create any sessions.', 'mindful-media'));
+        }
+    }
+    
+    /**
+     * Detect media source from URL
+     */
+    private function detect_media_source($url) {
+        if (empty($url)) {
+            return '';
+        }
+        
+        $url_lower = strtolower($url);
+        
+        if (strpos($url_lower, 'youtube.com') !== false || strpos($url_lower, 'youtu.be') !== false) {
+            return 'youtube';
+        }
+        if (strpos($url_lower, 'vimeo.com') !== false) {
+            return 'vimeo';
+        }
+        if (strpos($url_lower, 'soundcloud.com') !== false) {
+            return 'soundcloud';
+        }
+        if (strpos($url_lower, 'archive.org') !== false) {
+            return 'archive';
+        }
+        
+        // Check for file extensions
+        $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+        if (in_array($ext, array('mp4', 'webm', 'mov', 'avi'))) {
+            return 'video';
+        }
+        if (in_array($ext, array('mp3', 'wav', 'ogg', 'm4a'))) {
+            return 'audio';
+        }
+        
+        return '';
+    }
+    
+    /**
+     * Auto-set media type taxonomy based on source
+     */
+    private function auto_set_media_type($post_id, $source, $url) {
+        $video_sources = array('youtube', 'vimeo', 'video');
+        $audio_sources = array('soundcloud', 'audio');
+        
+        if (in_array($source, $video_sources)) {
+            $video_term = get_term_by('slug', 'video', 'media_type');
+            if ($video_term) {
+                wp_set_object_terms($post_id, $video_term->term_id, 'media_type');
+            }
+        } elseif (in_array($source, $audio_sources)) {
+            $audio_term = get_term_by('slug', 'audio', 'media_type');
+            if ($audio_term) {
+                wp_set_object_terms($post_id, $audio_term->term_id, 'media_type');
+            }
+        } elseif ($source === 'archive') {
+            // Archive.org can be either audio or video, check URL
+            if (strpos($url, '/audio/') !== false) {
+                $audio_term = get_term_by('slug', 'audio', 'media_type');
+                if ($audio_term) {
+                    wp_set_object_terms($post_id, $audio_term->term_id, 'media_type');
+                }
+            } else {
+                $video_term = get_term_by('slug', 'video', 'media_type');
+                if ($video_term) {
+                    wp_set_object_terms($post_id, $video_term->term_id, 'media_type');
+                }
+            }
+        }
     }
     
 } 

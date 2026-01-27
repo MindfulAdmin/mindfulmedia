@@ -39,11 +39,119 @@ class MindfulMedia_Taxonomies {
         add_filter('manage_edit-media_topic_columns', array($this, 'add_taxonomy_image_column'));
         add_filter('manage_media_topic_custom_column', array($this, 'taxonomy_image_column_content'), 10, 3);
         
+        // Add featured image support for categories (media_category)
+        add_action('media_category_add_form_fields', array($this, 'add_taxonomy_image_field'));
+        add_action('media_category_edit_form_fields', array($this, 'edit_taxonomy_image_field'));
+        add_action('created_media_category', array($this, 'save_taxonomy_image'));
+        add_action('edited_media_category', array($this, 'save_taxonomy_image'));
+        add_filter('manage_edit-media_category_columns', array($this, 'add_taxonomy_image_column'));
+        add_filter('manage_media_category_custom_column', array($this, 'taxonomy_image_column_content'), 10, 3);
+        
         // Order playlist items by series_order ASC (oldest/first items first)
         add_action('pre_get_posts', array($this, 'order_playlist_items'));
         
         // AJAX handler for batch creating sessions
         add_action('wp_ajax_mindful_media_batch_create_sessions', array($this, 'ajax_batch_create_sessions'));
+        
+        // MemberPress access level fields for taxonomies (only when MemberPress is active)
+        if (class_exists('MindfulMedia_Settings') && MindfulMedia_Settings::is_memberpress_active()) {
+            $taxonomies = array('media_series', 'media_teacher', 'media_topic', 'media_category');
+            foreach ($taxonomies as $tax) {
+                add_action($tax . '_add_form_fields', array($this, 'add_memberpress_fields'), 20);
+                add_action($tax . '_edit_form_fields', array($this, 'edit_memberpress_fields'), 20);
+                add_action('created_' . $tax, array($this, 'save_memberpress_fields'));
+                add_action('edited_' . $tax, array($this, 'save_memberpress_fields'));
+            }
+        }
+    }
+    
+    /**
+     * Add MemberPress access level fields to taxonomy add form
+     */
+    public function add_memberpress_fields($taxonomy) {
+        $settings = MindfulMedia_Settings::get_settings();
+        if (empty($settings['enable_memberpress_gating'])) {
+            return;
+        }
+        
+        $levels = MindfulMedia_Settings::get_memberpress_levels();
+        if (empty($levels)) {
+            return;
+        }
+        ?>
+        <div class="form-field term-memberpress-wrap">
+            <label><?php _e('Membership Access', 'mindful-media'); ?></label>
+            <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 8px; border-radius: 4px; background: #fafafa;">
+                <label style="display: block; margin-bottom: 8px; color: #666;">
+                    <input type="checkbox" name="mindful_media_memberpress_levels[]" value="" checked class="mm-level-public">
+                    <?php _e('Public (no restriction)', 'mindful-media'); ?>
+                </label>
+                <?php foreach ($levels as $level_id => $level_name): ?>
+                    <label style="display: block; margin-bottom: 5px;">
+                        <input type="checkbox" name="mindful_media_memberpress_levels[]" value="<?php echo esc_attr($level_id); ?>" class="mm-level-specific">
+                        <?php echo esc_html($level_name); ?>
+                    </label>
+                <?php endforeach; ?>
+            </div>
+            <p class="description"><?php _e('Restrict all content in this term to specific membership levels.', 'mindful-media'); ?></p>
+        </div>
+        <?php
+    }
+    
+    /**
+     * Add MemberPress access level fields to taxonomy edit form
+     */
+    public function edit_memberpress_fields($term) {
+        $settings = MindfulMedia_Settings::get_settings();
+        if (empty($settings['enable_memberpress_gating'])) {
+            return;
+        }
+        
+        $levels = MindfulMedia_Settings::get_memberpress_levels();
+        if (empty($levels)) {
+            return;
+        }
+        
+        $required_levels = get_term_meta($term->term_id, '_mindful_media_memberpress_levels', true);
+        if (!is_array($required_levels)) {
+            $required_levels = array();
+        }
+        ?>
+        <tr class="form-field term-memberpress-wrap">
+            <th scope="row">
+                <label><?php _e('Membership Access', 'mindful-media'); ?></label>
+            </th>
+            <td>
+                <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 8px; border-radius: 4px; background: #fafafa;">
+                    <label style="display: block; margin-bottom: 8px; color: #666;">
+                        <input type="checkbox" name="mindful_media_memberpress_levels[]" value="" <?php checked(empty($required_levels)); ?> class="mm-level-public">
+                        <?php _e('Public (no restriction)', 'mindful-media'); ?>
+                    </label>
+                    <?php foreach ($levels as $level_id => $level_name): ?>
+                        <label style="display: block; margin-bottom: 5px;">
+                            <input type="checkbox" name="mindful_media_memberpress_levels[]" value="<?php echo esc_attr($level_id); ?>" <?php checked(in_array($level_id, $required_levels)); ?> class="mm-level-specific">
+                            <?php echo esc_html($level_name); ?>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+                <p class="description"><?php _e('Restrict all content in this term to specific membership levels.', 'mindful-media'); ?></p>
+            </td>
+        </tr>
+        <?php
+    }
+    
+    /**
+     * Save MemberPress access level fields
+     */
+    public function save_memberpress_fields($term_id) {
+        if (isset($_POST['mindful_media_memberpress_levels'])) {
+            $levels = array_filter(array_map('intval', $_POST['mindful_media_memberpress_levels']));
+            if (empty($levels)) {
+                delete_term_meta($term_id, '_mindful_media_memberpress_levels');
+            } else {
+                update_term_meta($term_id, '_mindful_media_memberpress_levels', $levels);
+            }
+        }
     }
     
     /**
@@ -1087,7 +1195,7 @@ class MindfulMedia_Taxonomies {
         }
         
         // Only load on MindfulMedia taxonomy pages
-        $allowed_taxonomies = array('media_series', 'media_teacher', 'media_topic');
+        $allowed_taxonomies = array('media_series', 'media_teacher', 'media_topic', 'media_category');
         if (!isset($_GET['taxonomy']) || !in_array($_GET['taxonomy'], $allowed_taxonomies)) {
             return;
         }

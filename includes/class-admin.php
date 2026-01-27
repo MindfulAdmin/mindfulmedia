@@ -25,6 +25,9 @@ class MindfulMedia_Admin {
         // Classic Editor - Add Media button
         add_action('media_buttons', array($this, 'add_shortcode_generator_button'), 15);
         add_action('admin_footer', array($this, 'shortcode_generator_modal'));
+        
+        // AJAX handlers
+        add_action('wp_ajax_mindful_media_send_test_email', array($this, 'ajax_send_test_email'));
     }
     
     /**
@@ -572,7 +575,269 @@ class MindfulMedia_Admin {
                             </div>
                             <p><?php _e('Netflix-style horizontal slider row for any taxonomy (teachers, topics, categories, etc.).', 'mindful-media'); ?></p>
                         </div>
+                        <div class="mm-shortcode-item">
+                            <h4><?php _e('My Library', 'mindful-media'); ?></h4>
+                            <div class="mm-shortcode-code">
+                                <code>[mindful_media_library]</code>
+                                <button class="mm-copy-btn" onclick="navigator.clipboard.writeText('[mindful_media_library]')"><?php _e('Copy', 'mindful-media'); ?></button>
+                            </div>
+                            <p><?php _e('Personal library page showing liked videos, subscriptions, watch history, and continue watching.', 'mindful-media'); ?></p>
+                        </div>
                     </div>
+                </div>
+            </div>
+            
+            <!-- Page Builder Integration Section -->
+            <div class="mm-section">
+                <div class="mm-section-header">
+                    <svg class="mm-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                    <h2><?php _e('Page Builder Integration', 'mindful-media'); ?></h2>
+                </div>
+                <div class="mm-section-body">
+                    <p style="margin-bottom: 20px;"><?php _e('MindfulMedia integrates with popular page builders for visual editing:', 'mindful-media'); ?></p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 4px;">
+                            <h4 style="margin: 0 0 12px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                                <?php _e('Gutenberg Blocks', 'mindful-media'); ?>
+                            </h4>
+                            <p style="margin: 0 0 12px; color: #646970; font-size: 13px;"><?php _e('Add MindfulMedia blocks directly in the WordPress block editor:', 'mindful-media'); ?></p>
+                            <ul style="margin: 0; padding-left: 20px; color: #646970; font-size: 13px;">
+                                <li><?php _e('MindfulMedia Browse - Full browse page', 'mindful-media'); ?></li>
+                                <li><?php _e('MindfulMedia Archive - Filterable grid', 'mindful-media'); ?></li>
+                                <li><?php _e('MindfulMedia Embed - Single item/playlist', 'mindful-media'); ?></li>
+                                <li><?php _e('MindfulMedia Row - Category slider', 'mindful-media'); ?></li>
+                            </ul>
+                            <p style="margin: 12px 0 0; font-size: 12px; color: #999;"><?php _e('Find blocks by searching "MindfulMedia" in the block inserter.', 'mindful-media'); ?></p>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 4px;">
+                            <h4 style="margin: 0 0 12px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                                <?php _e('Elementor Widgets', 'mindful-media'); ?>
+                            </h4>
+                            <p style="margin: 0 0 12px; color: #646970; font-size: 13px;"><?php _e('Drag and drop MindfulMedia widgets in Elementor:', 'mindful-media'); ?></p>
+                            <ul style="margin: 0; padding-left: 20px; color: #646970; font-size: 13px;">
+                                <li><?php _e('MindfulMedia Browse Widget', 'mindful-media'); ?></li>
+                                <li><?php _e('MindfulMedia Archive Widget', 'mindful-media'); ?></li>
+                                <li><?php _e('MindfulMedia Embed Widget', 'mindful-media'); ?></li>
+                                <li><?php _e('MindfulMedia Row Widget', 'mindful-media'); ?></li>
+                            </ul>
+                            <p style="margin: 12px 0 0; font-size: 12px; color: #999;"><?php _e('Find widgets in the "MindfulMedia" category in Elementor.', 'mindful-media'); ?></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Engagement Section -->
+            <div class="mm-section">
+                <div class="mm-section-header">
+                    <svg class="mm-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <h2><?php _e('User Engagement', 'mindful-media'); ?></h2>
+                </div>
+                <div class="mm-section-body">
+                    <p style="margin-bottom: 20px;"><?php _e('MindfulMedia includes engagement features that allow users to interact with your content:', 'mindful-media'); ?></p>
+                    
+                    <div class="mm-feature-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 4px;">
+                            <h4 style="margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                                <?php _e('Likes', 'mindful-media'); ?>
+                            </h4>
+                            <p style="margin: 0; color: #646970; font-size: 13px;"><?php _e('Users can like videos. Liked videos appear in their My Library page.', 'mindful-media'); ?></p>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 4px;">
+                            <h4 style="margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                                <?php _e('Subscriptions', 'mindful-media'); ?>
+                            </h4>
+                            <p style="margin: 0; color: #646970; font-size: 13px;"><?php _e('Users can subscribe to teachers, playlists, topics, and categories to receive email notifications.', 'mindful-media'); ?></p>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 4px;">
+                            <h4 style="margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <?php _e('Watch History', 'mindful-media'); ?>
+                            </h4>
+                            <p style="margin: 0; color: #646970; font-size: 13px;"><?php _e('Tracks recently viewed videos so users can easily return to content.', 'mindful-media'); ?></p>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 4px;">
+                            <h4 style="margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                <?php _e('Continue Watching', 'mindful-media'); ?>
+                            </h4>
+                            <p style="margin: 0; color: #646970; font-size: 13px;"><?php _e('Saves playback position so users can resume videos where they left off.', 'mindful-media'); ?></p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 16px; background: linear-gradient(135deg, #e1ca8e22 0%, #b8a06422 100%); border-radius: 4px; border-left: 4px solid var(--mm-gold-primary);">
+                        <h4 style="margin: 0 0 8px;"><?php _e('My Library Page', 'mindful-media'); ?></h4>
+                        <p style="margin: 0 0 12px; color: #646970; font-size: 13px;"><?php _e('A "My Library" page is automatically created when the plugin is activated. Users can access it to see their:', 'mindful-media'); ?></p>
+                        <ul style="margin: 0; padding-left: 20px; color: #646970; font-size: 13px;">
+                            <li><?php _e('Liked videos', 'mindful-media'); ?></li>
+                            <li><?php _e('Subscribed playlists, teachers, topics, and categories', 'mindful-media'); ?></li>
+                            <li><?php _e('Watch history (recently viewed)', 'mindful-media'); ?></li>
+                            <li><?php _e('Continue watching (resume playback)', 'mindful-media'); ?></li>
+                        </ul>
+                        <?php 
+                        $library_settings = MindfulMedia_Settings::get_settings();
+                        $library_page_id = !empty($library_settings['library_page_id']) ? intval($library_settings['library_page_id']) : 0;
+                        if ($library_page_id && get_post($library_page_id)): 
+                        ?>
+                        <p style="margin: 12px 0 0;">
+                            <a href="<?php echo get_permalink($library_page_id); ?>" class="button" target="_blank"><?php _e('View My Library Page', 'mindful-media'); ?></a>
+                            <a href="<?php echo get_edit_post_link($library_page_id); ?>" class="button" style="margin-left: 8px;"><?php _e('Edit Page', 'mindful-media'); ?></a>
+                        </p>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <p style="margin-top: 16px;">
+                        <a href="<?php echo admin_url('edit.php?post_type=mindful_media&page=mindful-media-settings&tab=engagement'); ?>" class="button button-primary"><?php _e('Configure Engagement Settings', 'mindful-media'); ?></a>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Taxonomy Images & Display Section -->
+            <div class="mm-section">
+                <div class="mm-section-header">
+                    <svg class="mm-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <h2><?php _e('Taxonomy Images & Display', 'mindful-media'); ?></h2>
+                </div>
+                <div class="mm-section-body">
+                    <p style="margin-bottom: 20px;"><?php _e('Customize how your taxonomies appear on browse pages and archive templates:', 'mindful-media'); ?></p>
+                    
+                    <div class="mm-feature-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 4px;">
+                            <h4 style="margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <?php _e('Featured Images', 'mindful-media'); ?>
+                            </h4>
+                            <p style="margin: 0; color: #646970; font-size: 13px;"><?php _e('Teachers, Topics, Categories, and Playlists can all have featured images. Add them when editing each taxonomy term.', 'mindful-media'); ?></p>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 4px;">
+                            <h4 style="margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                                <?php _e('Aspect Ratios', 'mindful-media'); ?>
+                            </h4>
+                            <p style="margin: 0; color: #646970; font-size: 13px;"><?php _e('Control the image aspect ratio for each taxonomy independently. Great for circular teacher avatars (Square) or widescreen playlists (Landscape).', 'mindful-media'); ?></p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 16px; background: linear-gradient(135deg, #e1ca8e22 0%, #b8a06422 100%); border-radius: 4px; border-left: 4px solid var(--mm-gold-primary);">
+                        <h4 style="margin: 0 0 8px;"><?php _e('Available Aspect Ratio Options', 'mindful-media'); ?></h4>
+                        <ul style="margin: 0; padding-left: 20px; color: #646970; font-size: 13px;">
+                            <li><strong><?php _e('Square (1:1)', 'mindful-media'); ?></strong> - <?php _e('Perfect for teacher/author avatars, creates circular images', 'mindful-media'); ?></li>
+                            <li><strong><?php _e('Landscape (16:9)', 'mindful-media'); ?></strong> - <?php _e('Standard widescreen format, matches video thumbnails', 'mindful-media'); ?></li>
+                            <li><strong><?php _e('Portrait (3:4)', 'mindful-media'); ?></strong> - <?php _e('Taller images, good for book covers or portrait photos', 'mindful-media'); ?></li>
+                            <li><strong><?php _e('Custom', 'mindful-media'); ?></strong> - <?php _e('Enter any ratio like 4:3 or 21:9', 'mindful-media'); ?></li>
+                        </ul>
+                    </div>
+                    
+                    <p style="margin-top: 16px;">
+                        <a href="<?php echo admin_url('edit.php?post_type=mindful_media&page=mindful-media-settings&tab=colors'); ?>" class="button button-primary"><?php _e('Configure Appearance Settings', 'mindful-media'); ?></a>
+                        <a href="<?php echo admin_url('edit-tags.php?taxonomy=media_teacher&post_type=mindful_media'); ?>" class="button" style="margin-left: 8px;"><?php _e('Manage Teachers', 'mindful-media'); ?></a>
+                        <a href="<?php echo admin_url('edit-tags.php?taxonomy=media_category&post_type=mindful_media'); ?>" class="button" style="margin-left: 8px;"><?php _e('Manage Categories', 'mindful-media'); ?></a>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Content Protection Section -->
+            <div class="mm-section">
+                <div class="mm-section-header">
+                    <svg class="mm-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <h2><?php _e('Content Protection', 'mindful-media'); ?></h2>
+                </div>
+                <div class="mm-section-body">
+                    <p style="margin-bottom: 20px;"><?php _e('Protect your content with passwords to restrict access:', 'mindful-media'); ?></p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 4px;">
+                            <h4 style="margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                                <?php _e('Individual Media Items', 'mindful-media'); ?>
+                            </h4>
+                            <p style="margin: 0; color: #646970; font-size: 13px;"><?php _e('Password-protect single videos or audio files. Users must enter the password to view the content.', 'mindful-media'); ?></p>
+                            <p style="margin: 8px 0 0; font-size: 12px; color: #999;"><?php _e('Set via "Visibility & Protection" meta box when editing.', 'mindful-media'); ?></p>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 4px;">
+                            <h4 style="margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                                <?php _e('Entire Playlists', 'mindful-media'); ?>
+                            </h4>
+                            <p style="margin: 0; color: #646970; font-size: 13px;"><?php _e('Protect entire playlists/series with a single password. All videos in the playlist require the same password.', 'mindful-media'); ?></p>
+                            <p style="margin: 8px 0 0; font-size: 12px; color: #999;"><?php _e('Set via playlist edit screen under "Playlist Protection".', 'mindful-media'); ?></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Access Control Section -->
+            <div class="mm-section">
+                <div class="mm-section-header">
+                    <svg class="mm-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <h2><?php _e('Access Control (MemberPress)', 'mindful-media'); ?></h2>
+                </div>
+                <div class="mm-section-body">
+                    <?php if (MindfulMedia_Settings::is_memberpress_active()): ?>
+                    <p style="margin-bottom: 16px;"><?php _e('MemberPress is active. You can restrict content based on membership levels:', 'mindful-media'); ?></p>
+                    
+                    <ul style="margin: 0 0 16px; padding-left: 20px; color: #646970;">
+                        <li><strong><?php _e('Global Default Level', 'mindful-media'); ?></strong> - <?php _e('Set a default membership requirement for all content', 'mindful-media'); ?></li>
+                        <li><strong><?php _e('Per-Item Override', 'mindful-media'); ?></strong> - <?php _e('Override the default on individual media items', 'mindful-media'); ?></li>
+                        <li><strong><?php _e('Per-Taxonomy Override', 'mindful-media'); ?></strong> - <?php _e('Set requirements for entire categories, topics, or playlists', 'mindful-media'); ?></li>
+                    </ul>
+                    
+                    <p style="margin-top: 16px;">
+                        <a href="<?php echo admin_url('edit.php?post_type=mindful_media&page=mindful-media-settings&tab=access'); ?>" class="button button-primary"><?php _e('Configure Access Control', 'mindful-media'); ?></a>
+                    </p>
+                    <?php else: ?>
+                    <div style="background: #f0f6fc; border-left: 4px solid #0073aa; padding: 15px;">
+                        <p style="margin: 0;"><?php _e('Install and activate MemberPress to restrict content access based on membership levels. This allows you to create tiered content access, drip content, and more.', 'mindful-media'); ?></p>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <!-- Auto Duration Section -->
+            <div class="mm-section">
+                <div class="mm-section-header">
+                    <svg class="mm-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <h2><?php _e('Automatic Duration Detection', 'mindful-media'); ?></h2>
+                </div>
+                <div class="mm-section-body">
+                    <p style="margin-bottom: 16px;"><?php _e('MindfulMedia can automatically fetch video durations from supported platforms:', 'mindful-media'); ?></p>
+                    
+                    <ul style="margin: 0 0 16px; padding-left: 20px; color: #646970;">
+                        <li><strong><?php _e('Vimeo', 'mindful-media'); ?></strong> - <?php _e('Automatic, no API key needed', 'mindful-media'); ?></li>
+                        <li><strong><?php _e('YouTube', 'mindful-media'); ?></strong> - <?php _e('Requires a YouTube Data API key (free from Google)', 'mindful-media'); ?></li>
+                    </ul>
+                    
+                    <p style="color: #646970; font-size: 13px;"><?php _e('When editing a media item, leave the Duration fields empty and the duration will be auto-fetched when you save. You can also click the "Fetch Duration" button to get it immediately.', 'mindful-media'); ?></p>
+                </div>
+            </div>
+            
+            <!-- Import/Export Section -->
+            <div class="mm-section">
+                <div class="mm-section-header">
+                    <svg class="mm-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <h2><?php _e('Import & Export', 'mindful-media'); ?></h2>
+                </div>
+                <div class="mm-section-body">
+                    <p style="margin-bottom: 16px;"><?php _e('Backup your content or migrate to another site:', 'mindful-media'); ?></p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 4px;">
+                            <h4 style="margin: 0 0 8px;"><?php _e('Export', 'mindful-media'); ?></h4>
+                            <p style="margin: 0; color: #646970; font-size: 13px;"><?php _e('Export all media items, taxonomies, and settings to a JSON file for backup or migration.', 'mindful-media'); ?></p>
+                        </div>
+                        <div style="background: #f9f9f9; padding: 16px; border-radius: 4px;">
+                            <h4 style="margin: 0 0 8px;"><?php _e('Import', 'mindful-media'); ?></h4>
+                            <p style="margin: 0; color: #646970; font-size: 13px;"><?php _e('Import media content from a JSON export file. Great for restoring backups or migrating content.', 'mindful-media'); ?></p>
+                        </div>
+                    </div>
+                    
+                    <p style="margin-top: 16px;">
+                        <a href="<?php echo admin_url('edit.php?post_type=mindful_media&page=mindful-media-import-export'); ?>" class="button"><?php _e('Go to Import/Export', 'mindful-media'); ?></a>
+                    </p>
                 </div>
             </div>
             
@@ -632,6 +897,46 @@ class MindfulMedia_Admin {
                     <p><?php _e('For questions and support, email', 'mindful-media'); ?> <a href="mailto:support@mindfuldesign.me">support@mindfuldesign.me</a> <?php _e('or visit', 'mindful-media'); ?> <a href="https://mindfuldesign.me" target="_blank" rel="noopener">mindfuldesign.me</a> <?php _e('for documentation.', 'mindful-media'); ?></p>
                 </div>
             </div>
+            
+            <!-- What's Next Section -->
+            <div class="mm-section" style="background: linear-gradient(135deg, #e1ca8e22 0%, #b8a06422 100%); border-left: 4px solid var(--mm-gold-primary);">
+                <div class="mm-section-header">
+                    <svg class="mm-section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <h2><?php _e("What's Next?", 'mindful-media'); ?></h2>
+                </div>
+                <div class="mm-section-body">
+                    <p style="margin-bottom: 20px;"><?php _e('Suggested workflow to get the most out of MindfulMedia:', 'mindful-media'); ?></p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+                        <div style="text-align: center; padding: 16px;">
+                            <div style="width: 40px; height: 40px; background: var(--mm-gold-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: white; font-weight: 600;">1</div>
+                            <h4 style="margin: 0 0 8px; font-size: 14px;"><?php _e('Add Content', 'mindful-media'); ?></h4>
+                            <p style="margin: 0; font-size: 12px; color: #646970;"><?php _e('Create media items with your video/audio URLs', 'mindful-media'); ?></p>
+                        </div>
+                        <div style="text-align: center; padding: 16px;">
+                            <div style="width: 40px; height: 40px; background: var(--mm-gold-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: white; font-weight: 600;">2</div>
+                            <h4 style="margin: 0 0 8px; font-size: 14px;"><?php _e('Organize', 'mindful-media'); ?></h4>
+                            <p style="margin: 0; font-size: 12px; color: #646970;"><?php _e('Assign teachers, topics, categories & create playlists', 'mindful-media'); ?></p>
+                        </div>
+                        <div style="text-align: center; padding: 16px;">
+                            <div style="width: 40px; height: 40px; background: var(--mm-gold-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: white; font-weight: 600;">3</div>
+                            <h4 style="margin: 0 0 8px; font-size: 14px;"><?php _e('Customize', 'mindful-media'); ?></h4>
+                            <p style="margin: 0; font-size: 12px; color: #646970;"><?php _e('Configure colors, fonts & layout in Settings', 'mindful-media'); ?></p>
+                        </div>
+                        <div style="text-align: center; padding: 16px;">
+                            <div style="width: 40px; height: 40px; background: var(--mm-gold-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: white; font-weight: 600;">4</div>
+                            <h4 style="margin: 0 0 8px; font-size: 14px;"><?php _e('Display', 'mindful-media'); ?></h4>
+                            <p style="margin: 0; font-size: 12px; color: #646970;"><?php _e('Add shortcodes or blocks to your pages', 'mindful-media'); ?></p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.1); display: flex; gap: 12px; flex-wrap: wrap;">
+                        <a href="<?php echo admin_url('post-new.php?post_type=mindful_media'); ?>" class="button button-primary"><?php _e('Add Your First Media', 'mindful-media'); ?></a>
+                        <a href="<?php echo admin_url('edit.php?post_type=mindful_media&page=mindful-media-settings'); ?>" class="button"><?php _e('Configure Settings', 'mindful-media'); ?></a>
+                        <a href="<?php echo admin_url('edit-tags.php?taxonomy=media_series&post_type=mindful_media'); ?>" class="button"><?php _e('Create a Playlist', 'mindful-media'); ?></a>
+                    </div>
+                </div>
+            </div>
         </div>
         <?php
     }
@@ -664,12 +969,13 @@ class MindfulMedia_Admin {
             <!-- Settings Tabs -->
             <div class="mindful-media-settings-tabs">
                 <nav class="nav-tab-wrapper">
-                    <a href="#colors" class="nav-tab <?php echo $active_tab === 'colors' ? 'nav-tab-active' : ''; ?>" data-tab="colors"><?php _e('Colors & Branding', 'mindful-media'); ?></a>
-                    <a href="#typography" class="nav-tab <?php echo $active_tab === 'typography' ? 'nav-tab-active' : ''; ?>" data-tab="typography"><?php _e('Typography', 'mindful-media'); ?></a>
-                    <a href="#layout" class="nav-tab <?php echo $active_tab === 'layout' ? 'nav-tab-active' : ''; ?>" data-tab="layout"><?php _e('Layout & Grid', 'mindful-media'); ?></a>
-                    <a href="#player" class="nav-tab <?php echo $active_tab === 'player' ? 'nav-tab-active' : ''; ?>" data-tab="player"><?php _e('Player Settings', 'mindful-media'); ?></a>
-                    <a href="#api" class="nav-tab <?php echo $active_tab === 'api' ? 'nav-tab-active' : ''; ?>" data-tab="api"><?php _e('API Keys', 'mindful-media'); ?></a>
-                    <a href="#archive" class="nav-tab <?php echo $active_tab === 'archive' ? 'nav-tab-active' : ''; ?>" data-tab="archive"><?php _e('Archive Display', 'mindful-media'); ?></a>
+                    <a href="#appearance" class="nav-tab <?php echo $active_tab === 'appearance' || $active_tab === 'colors' ? 'nav-tab-active' : ''; ?>" data-tab="appearance"><?php _e('Appearance', 'mindful-media'); ?></a>
+                    <a href="#layout" class="nav-tab <?php echo $active_tab === 'layout' ? 'nav-tab-active' : ''; ?>" data-tab="layout"><?php _e('Layout', 'mindful-media'); ?></a>
+                    <a href="#player" class="nav-tab <?php echo $active_tab === 'player' ? 'nav-tab-active' : ''; ?>" data-tab="player"><?php _e('Player', 'mindful-media'); ?></a>
+                    <a href="#archive" class="nav-tab <?php echo $active_tab === 'archive' ? 'nav-tab-active' : ''; ?>" data-tab="archive"><?php _e('Archive & Browse', 'mindful-media'); ?></a>
+                    <a href="#engagement" class="nav-tab <?php echo $active_tab === 'engagement' ? 'nav-tab-active' : ''; ?>" data-tab="engagement"><?php _e('Engagement', 'mindful-media'); ?></a>
+                    <a href="#emails" class="nav-tab <?php echo $active_tab === 'emails' ? 'nav-tab-active' : ''; ?>" data-tab="emails"><?php _e('Emails', 'mindful-media'); ?></a>
+                    <a href="#access" class="nav-tab <?php echo $active_tab === 'access' ? 'nav-tab-active' : ''; ?>" data-tab="access"><?php _e('Access Control', 'mindful-media'); ?></a>
                     <a href="#advanced" class="nav-tab <?php echo $active_tab === 'advanced' ? 'nav-tab-active' : ''; ?>" data-tab="advanced"><?php _e('Advanced', 'mindful-media'); ?></a>
                 </nav>
             </div>
@@ -678,8 +984,10 @@ class MindfulMedia_Admin {
                 <?php wp_nonce_field('mindful_media_settings_nonce', 'mindful_media_settings_nonce_field'); ?>
                 <input type="hidden" name="active_tab" id="active_tab_field" value="<?php echo esc_attr($active_tab); ?>" />
                 
-                <!-- Colors & Branding Tab -->
-                <div id="colors-tab" class="mindful-media-tab-content <?php echo $active_tab === 'colors' ? 'active' : ''; ?>">
+                <!-- Appearance Tab (Colors, Typography, Image Ratios) -->
+                <div id="appearance-tab" class="mindful-media-tab-content <?php echo $active_tab === 'appearance' || $active_tab === 'colors' ? 'active' : ''; ?>">
+                    
+                    <h3 style="margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #ddd;"><?php _e('Colors & Branding', 'mindful-media'); ?></h3>
                     <table class="form-table">
                         <tr>
                             <th scope="row"><?php _e('Color Scheme', 'mindful-media'); ?></th>
@@ -766,11 +1074,57 @@ class MindfulMedia_Admin {
                                 <p class="description"><?php _e('Recommended dimensions for video media (default: 1920×1080px, 16:9 aspect ratio)', 'mindful-media'); ?></p>
                             </td>
                         </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Taxonomy Image Aspect Ratios', 'mindful-media'); ?></th>
+                            <td>
+                                <p class="description" style="margin-bottom: 15px;"><?php _e('Set the aspect ratio for images displayed on browse cards and archive headers for each taxonomy.', 'mindful-media'); ?></p>
+                                
+                                <?php 
+                                $taxonomies = array(
+                                    'teacher' => __('Teachers', 'mindful-media'),
+                                    'topic' => __('Topics', 'mindful-media'),
+                                    'category' => __('Categories', 'mindful-media'),
+                                    'series' => __('Playlists', 'mindful-media')
+                                );
+                                
+                                foreach ($taxonomies as $tax_key => $tax_label): 
+                                    $ratio_setting = $settings[$tax_key . '_image_ratio'] ?? 'landscape';
+                                    $custom_ratio = $settings[$tax_key . '_image_ratio_custom'] ?? '16:9';
+                                ?>
+                                <div style="margin-bottom: 15px; padding: 12px; background: #f9f9f9; border-radius: 4px;">
+                                    <label style="display: block; margin-bottom: 8px; font-weight: 600;"><?php echo esc_html($tax_label); ?>:</label>
+                                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                                        <select name="<?php echo esc_attr($tax_key); ?>_image_ratio" id="<?php echo esc_attr($tax_key); ?>_image_ratio" class="mm-ratio-select" data-target="<?php echo esc_attr($tax_key); ?>_image_ratio_custom_wrap">
+                                            <option value="square" <?php selected($ratio_setting, 'square'); ?>><?php _e('Square (1:1)', 'mindful-media'); ?></option>
+                                            <option value="landscape" <?php selected($ratio_setting, 'landscape'); ?>><?php _e('Landscape (16:9)', 'mindful-media'); ?></option>
+                                            <option value="portrait" <?php selected($ratio_setting, 'portrait'); ?>><?php _e('Portrait (3:4)', 'mindful-media'); ?></option>
+                                            <option value="custom" <?php selected($ratio_setting, 'custom'); ?>><?php _e('Custom', 'mindful-media'); ?></option>
+                                        </select>
+                                        <div id="<?php echo esc_attr($tax_key); ?>_image_ratio_custom_wrap" style="display: <?php echo $ratio_setting === 'custom' ? 'flex' : 'none'; ?>; gap: 5px; align-items: center;">
+                                            <input type="text" name="<?php echo esc_attr($tax_key); ?>_image_ratio_custom" value="<?php echo esc_attr($custom_ratio); ?>" style="width: 80px;" placeholder="16:9" />
+                                            <span class="description"><?php _e('(width:height)', 'mindful-media'); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                                
+                                <script>
+                                jQuery(document).ready(function($) {
+                                    $('.mm-ratio-select').on('change', function() {
+                                        var targetId = $(this).data('target');
+                                        if ($(this).val() === 'custom') {
+                                            $('#' + targetId).css('display', 'flex');
+                                        } else {
+                                            $('#' + targetId).hide();
+                                        }
+                                    });
+                                });
+                                </script>
+                            </td>
+                        </tr>
                     </table>
-                </div>
-                
-                <!-- Typography Tab -->
-                <div id="typography-tab" class="mindful-media-tab-content <?php echo $active_tab === 'typography' ? 'active' : ''; ?>">
+                    
+                    <h3 style="margin-top: 30px; padding-bottom: 10px; border-bottom: 1px solid #ddd;"><?php _e('Typography', 'mindful-media'); ?></h3>
                     <table class="form-table">
                         <tr>
                             <th scope="row"><?php _e('Font Family', 'mindful-media'); ?></th>
@@ -942,7 +1296,7 @@ class MindfulMedia_Admin {
                     </table>
                 </div>
                 
-                <!-- Layout & Grid Tab -->
+                <!-- Layout Tab -->
                 <div id="layout-tab" class="mindful-media-tab-content <?php echo $active_tab === 'layout' ? 'active' : ''; ?>">
                     <table class="form-table">
                     <tr>
@@ -1025,7 +1379,7 @@ class MindfulMedia_Admin {
                     </table>
                 </div>
                 
-                <!-- Player Settings Tab -->
+                <!-- Player Tab -->
                 <div id="player-tab" class="mindful-media-tab-content <?php echo $active_tab === 'player' ? 'active' : ''; ?>">
                     <table class="form-table">
                     <tr>
@@ -1117,62 +1471,7 @@ class MindfulMedia_Admin {
                     </table>
                 </div>
                 
-                <!-- API Keys Tab -->
-                <div id="api-tab" class="mindful-media-tab-content <?php echo $active_tab === 'api' ? 'active' : ''; ?>">
-                    <div style="background: #f0f6fc; border-left: 4px solid #0073aa; padding: 15px; margin-bottom: 20px;">
-                        <h3 style="margin-top: 0;"><?php _e('Platform API Integration', 'mindful-media'); ?></h3>
-                        <p><?php _e('Enable smart platform detection to automatically identify privacy status (Public, Private, Unlisted) for SoundCloud and Vimeo content. API keys are optional but enhance functionality.', 'mindful-media'); ?></p>
-                    </div>
-                    
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row"><?php _e('SoundCloud Client ID', 'mindful-media'); ?></th>
-                            <td>
-                                <input type="text" name="soundcloud_client_id" 
-                                       value="<?php echo esc_attr($settings['soundcloud_client_id'] ?? ''); ?>" 
-                                       class="regular-text" 
-                                       placeholder="<?php _e('Enter your SoundCloud Client ID', 'mindful-media'); ?>" />
-                                <p class="description">
-                                    <?php _e('Get your Client ID from', 'mindful-media'); ?> 
-                                    <a href="https://developers.soundcloud.com/" target="_blank">SoundCloud Developers</a>
-                                    <br><?php _e('Used to detect track privacy status and fetch metadata.', 'mindful-media'); ?>
-                                </p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row"><?php _e('Vimeo Access Token', 'mindful-media'); ?></th>
-                            <td>
-                                <input type="text" name="vimeo_access_token" 
-                                       value="<?php echo esc_attr($settings['vimeo_access_token'] ?? ''); ?>" 
-                                       class="regular-text" 
-                                       placeholder="<?php _e('Enter your Vimeo Access Token', 'mindful-media'); ?>" />
-                                <p class="description">
-                                    <?php _e('Get your Access Token from', 'mindful-media'); ?> 
-                                    <a href="https://developer.vimeo.com/" target="_blank">Vimeo Developer Portal</a>
-                                    <br><?php _e('Used to detect video privacy status (Public, Private, Unlisted).', 'mindful-media'); ?>
-                                </p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row"><?php _e('Privacy Badges', 'mindful-media'); ?></th>
-                            <td>
-                                <p style="margin-top: 0;">
-                                    <?php _e('When API keys are configured, privacy badges will automatically appear on media items:', 'mindful-media'); ?>
-                                </p>
-                                <ul style="list-style: disc; margin-left: 20px;">
-                                    <li><strong>🔒 Private</strong> - <?php _e('Content is private', 'mindful-media'); ?></li>
-                                    <li><strong>🌐 Public</strong> - <?php _e('Content is publicly accessible', 'mindful-media'); ?></li>
-                                    <li><strong>👁️ Unlisted</strong> - <?php _e('Content is unlisted (link-only access)', 'mindful-media'); ?></li>
-                                </ul>
-                                <p class="description">
-                                    <?php _e('Privacy status is cached for 24 hours to improve performance.', 'mindful-media'); ?>
-                                </p>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                
-                <!-- Archive Display Tab -->
+                <!-- Archive & Browse Tab -->
                 <div id="archive-tab" class="mindful-media-tab-content <?php echo $active_tab === 'archive' ? 'active' : ''; ?>">
                     <h3><?php _e('Filter Tabs Visibility', 'mindful-media'); ?></h3>
                     <p><?php _e('Choose which filter tabs to display on the archive page:', 'mindful-media'); ?></p>
@@ -1302,25 +1601,513 @@ class MindfulMedia_Admin {
                         <tr>
                             <th scope="row"><?php _e('Browse Page URL', 'mindful-media'); ?></th>
                             <td>
-                                <input type="text" name="archive_back_url" value="<?php echo esc_attr($settings['archive_back_url'] ?? '/media'); ?>" class="regular-text" placeholder="/media">
-                                <p class="description"><?php _e('URL for navigation links on taxonomy pages (teacher, topic, category, playlist). This is where "Home", "Topics", "Playlists", and "Back to All Media" buttons will navigate to. Use the page URL where your [mindful_media_browse] shortcode is placed (e.g., /browse, /media, or /test).', 'mindful-media'); ?></p>
+                                <input type="text" name="archive_back_url" value="<?php echo esc_attr($settings['archive_back_url'] ?? '/browse'); ?>" class="regular-text" placeholder="/browse">
+                                <p class="description"><?php _e('URL where your [mindful_media_browse] shortcode is placed. Used for "Home", "Topics", "Playlists", and navigation tabs.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Media Archive URL', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="text" name="media_archive_url" value="<?php echo esc_attr($settings['media_archive_url'] ?? '/media'); ?>" class="regular-text" placeholder="/media">
+                                <p class="description"><?php _e('URL where your [mindful_media_archive] shortcode is placed (or the WordPress media archive). Used for "View All Media" links and breadcrumbs.', 'mindful-media'); ?></p>
                             </td>
                         </tr>
                     </table>
                 </div>
                 
+                <!-- Engagement Tab -->
+                <div id="engagement-tab" class="mindful-media-tab-content <?php echo $active_tab === 'engagement' ? 'active' : ''; ?>">
+                    
+                    <h3><?php _e('Engagement Features', 'mindful-media'); ?></h3>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><?php _e('Enable Likes', 'mindful-media'); ?></th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" name="enable_likes" value="1" <?php checked($settings['enable_likes'] ?? '1', '1'); ?> />
+                                    <?php _e('Allow users to like media items', 'mindful-media'); ?>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Enable Comments', 'mindful-media'); ?></th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" name="enable_comments" value="1" <?php checked($settings['enable_comments'] ?? '1', '1'); ?> />
+                                    <?php _e('Allow users to comment on media items', 'mindful-media'); ?>
+                                </label>
+                                <br><br>
+                                <label>
+                                    <input type="checkbox" name="auto_approve_comments" value="1" <?php checked($settings['auto_approve_comments'] ?? '0', '1'); ?> />
+                                    <?php _e('Auto-approve comments (no moderation)', 'mindful-media'); ?>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Enable Subscriptions', 'mindful-media'); ?></th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" name="enable_subscriptions" value="1" <?php checked($settings['enable_subscriptions'] ?? '1', '1'); ?> />
+                                    <?php _e('Allow users to subscribe to content', 'mindful-media'); ?>
+                                </label>
+                                <p class="description"><?php _e('Choose what users can subscribe to:', 'mindful-media'); ?></p>
+                                <div style="margin-top: 10px; margin-left: 20px;">
+                                    <label style="display: block; margin-bottom: 5px;">
+                                        <input type="checkbox" name="allow_subscription_playlists" value="1" <?php checked($settings['allow_subscription_playlists'] ?? '1', '1'); ?> />
+                                        <?php _e('Playlists', 'mindful-media'); ?>
+                                    </label>
+                                    <label style="display: block; margin-bottom: 5px;">
+                                        <input type="checkbox" name="allow_subscription_teachers" value="1" <?php checked($settings['allow_subscription_teachers'] ?? '1', '1'); ?> />
+                                        <?php _e('Teachers', 'mindful-media'); ?>
+                                    </label>
+                                    <label style="display: block; margin-bottom: 5px;">
+                                        <input type="checkbox" name="allow_subscription_topics" value="1" <?php checked($settings['allow_subscription_topics'] ?? '1', '1'); ?> />
+                                        <?php _e('Topics', 'mindful-media'); ?>
+                                    </label>
+                                    <label style="display: block;">
+                                        <input type="checkbox" name="allow_subscription_categories" value="1" <?php checked($settings['allow_subscription_categories'] ?? '1', '1'); ?> />
+                                        <?php _e('Categories', 'mindful-media'); ?>
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Display Options', 'mindful-media'); ?></th>
+                            <td>
+                                <label style="display: block; margin-bottom: 8px;">
+                                    <input type="checkbox" name="show_counts_on_cards" value="1" <?php checked($settings['show_counts_on_cards'] ?? '1', '1'); ?> />
+                                    <?php _e('Show like/comment counts on media cards', 'mindful-media'); ?>
+                                </label>
+                                <label style="display: block; margin-bottom: 8px;">
+                                    <input type="checkbox" name="show_counts_on_single" value="1" <?php checked($settings['show_counts_on_single'] ?? '1', '1'); ?> />
+                                    <?php _e('Show like/comment counts on single media pages', 'mindful-media'); ?>
+                                </label>
+                                <label>
+                                    <input type="checkbox" name="require_login_for_engagement" value="1" <?php checked($settings['require_login_for_engagement'] ?? '1', '1'); ?> />
+                                    <?php _e('Require login to like/comment/subscribe', 'mindful-media'); ?>
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <hr style="margin: 30px 0;">
+                    
+                    <h3><?php _e('My Library', 'mindful-media'); ?></h3>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><?php _e('Library Page', 'mindful-media'); ?></th>
+                            <td>
+                                <?php
+                                $library_page_id = $settings['library_page_id'] ?? '';
+                                wp_dropdown_pages(array(
+                                    'name' => 'library_page_id',
+                                    'show_option_none' => __('— Select Page —', 'mindful-media'),
+                                    'option_none_value' => '',
+                                    'selected' => $library_page_id
+                                ));
+                                ?>
+                                <p class="description"><?php _e('The page that displays the My Library shortcode. A page is auto-created on activation.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                        <?php if (MindfulMedia_Settings::is_woocommerce_active()): ?>
+                        <tr>
+                            <th scope="row"><?php _e('WooCommerce Integration', 'mindful-media'); ?></th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" name="enable_woocommerce_tab" value="1" <?php checked($settings['enable_woocommerce_tab'] ?? '0', '1'); ?> />
+                                    <?php _e('Add "My Library" tab to WooCommerce My Account page', 'mindful-media'); ?>
+                                </label>
+                            </td>
+                        </tr>
+                        <?php endif; ?>
+                    </table>
+                </div>
+                
+                <!-- Emails Tab -->
+                <div id="emails-tab" class="mindful-media-tab-content <?php echo $active_tab === 'emails' ? 'active' : ''; ?>">
+                    
+                    <h3><?php _e('Email Settings', 'mindful-media'); ?></h3>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><?php _e('Enable Notifications', 'mindful-media'); ?></th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" name="enable_email_notifications" value="1" <?php checked($settings['enable_email_notifications'] ?? '1', '1'); ?> />
+                                    <?php _e('Send email notifications for new content to subscribers', 'mindful-media'); ?>
+                                </label>
+                                <br><br>
+                                <label style="color: #d63638;">
+                                    <input type="checkbox" name="disable_all_notifications" value="1" <?php checked($settings['disable_all_notifications'] ?? '0', '1'); ?> />
+                                    <?php _e('Disable ALL notifications (master switch)', 'mindful-media'); ?>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('From Name', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="text" name="notification_from_name" value="<?php echo esc_attr($settings['notification_from_name'] ?? get_bloginfo('name')); ?>" class="regular-text" />
+                                <p class="description"><?php _e('Name that appears as the sender.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('From Email', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="email" name="notification_from_email" value="<?php echo esc_attr($settings['notification_from_email'] ?? get_bloginfo('admin_email')); ?>" class="regular-text" />
+                                <p class="description"><?php _e('Email address that sends notifications.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Notification Frequency', 'mindful-media'); ?></th>
+                            <td>
+                                <select name="notification_throttle">
+                                    <option value="instant" <?php selected($settings['notification_throttle'] ?? 'instant', 'instant'); ?>><?php _e('Instant (send immediately)', 'mindful-media'); ?></option>
+                                    <option value="hourly" <?php selected($settings['notification_throttle'] ?? 'instant', 'hourly'); ?>><?php _e('Hourly digest', 'mindful-media'); ?></option>
+                                    <option value="daily" <?php selected($settings['notification_throttle'] ?? 'instant', 'daily'); ?>><?php _e('Daily digest', 'mindful-media'); ?></option>
+                                </select>
+                                <p class="description"><?php _e('How often to send notification emails to subscribers.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <hr style="margin: 30px 0;">
+                    
+                    <h3><?php _e('Email Template', 'mindful-media'); ?></h3>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><?php _e('Subject Line', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="text" name="notification_subject_template" value="<?php echo esc_attr($settings['notification_subject_template'] ?? __('New content from {term_name}', 'mindful-media')); ?>" class="large-text" />
+                                <p class="description"><?php _e('Available placeholders: {term_name}, {site_name}, {post_title}', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Header Logo', 'mindful-media'); ?></th>
+                            <td>
+                                <?php
+                                $logo_id = $settings['email_logo_id'] ?? 0;
+                                $logo_url = $logo_id ? wp_get_attachment_image_url($logo_id, 'medium') : '';
+                                ?>
+                                <div id="email-logo-preview" style="margin-bottom: 10px; <?php echo $logo_url ? '' : 'display:none;'; ?>">
+                                    <img src="<?php echo esc_url($logo_url); ?>" style="max-height: 60px; width: auto;" />
+                                </div>
+                                <input type="hidden" name="email_logo_id" id="email_logo_id" value="<?php echo esc_attr($logo_id); ?>" />
+                                <button type="button" class="button" id="email-logo-upload-btn"><?php _e('Select Logo', 'mindful-media'); ?></button>
+                                <button type="button" class="button" id="email-logo-remove-btn" style="<?php echo $logo_url ? '' : 'display:none;'; ?>"><?php _e('Remove', 'mindful-media'); ?></button>
+                                <p class="description"><?php _e('Optional logo image for the email header. Recommended size: 200x60px. Leave empty to show text only.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Header Text', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="text" name="email_header_text" value="<?php echo esc_attr($settings['email_header_text'] ?? get_bloginfo('name')); ?>" class="regular-text" />
+                                <p class="description"><?php _e('Text displayed in the email header banner (shown if no logo is set).', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Email Body', 'mindful-media'); ?></th>
+                            <td>
+                                <textarea name="email_body_template" rows="8" class="large-text" style="font-family: monospace;"><?php 
+                                    $default_body = "Hi {user_name},\n\nNew content is available from <strong>{term_name}</strong>:\n\n<div style=\"background: #f5f5f5; padding: 15px; border-radius: 6px; margin: 20px 0;\">\n<strong>{post_title}</strong>\n<p style=\"margin: 8px 0 0; color: #666;\">{post_excerpt}</p>\n</div>\n\n<a href=\"{post_url}\" style=\"display: inline-block; background: {button_color}; color: {button_text_color}; padding: 12px 24px; border-radius: 4px; text-decoration: none; font-weight: 600;\">Watch Now</a>";
+                                    echo esc_textarea($settings['email_body_template'] ?? $default_body); 
+                                ?></textarea>
+                                <p class="description" style="margin-top: 10px;">
+                                    <?php _e('Customize the email body content. Available placeholders:', 'mindful-media'); ?><br>
+                                    <code>{user_name}</code> - <?php _e('Recipient\'s name', 'mindful-media'); ?><br>
+                                    <code>{post_title}</code> - <?php _e('Media item title', 'mindful-media'); ?><br>
+                                    <code>{post_excerpt}</code> - <?php _e('Short description', 'mindful-media'); ?><br>
+                                    <code>{post_url}</code> - <?php _e('Link to the content', 'mindful-media'); ?><br>
+                                    <code>{term_name}</code> - <?php _e('Teacher/Topic/Playlist name', 'mindful-media'); ?><br>
+                                    <code>{site_name}</code> - <?php _e('Your website name', 'mindful-media'); ?><br>
+                                    <code>{thumbnail_url}</code> - <?php _e('Featured image URL', 'mindful-media'); ?><br>
+                                    <code>{button_color}</code> - <?php _e('Button background color', 'mindful-media'); ?><br>
+                                    <code>{button_text_color}</code> - <?php _e('Button text color', 'mindful-media'); ?>
+                                </p>
+                                <p style="margin-top: 10px;">
+                                    <button type="button" class="button button-secondary" id="mm-reset-email-body"><?php _e('Reset to Default', 'mindful-media'); ?></button>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Footer Text', 'mindful-media'); ?></th>
+                            <td>
+                                <textarea name="email_footer_text" rows="3" class="large-text"><?php echo esc_textarea($settings['email_footer_text'] ?? __('You received this email because you subscribed to updates. Click unsubscribe to stop receiving these emails.', 'mindful-media')); ?></textarea>
+                                <p class="description"><?php _e('Text displayed at the bottom of the email. HTML is allowed. An unsubscribe link is automatically added.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <hr style="margin: 30px 0;">
+                    
+                    <h3><?php _e('Email Colors', 'mindful-media'); ?></h3>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><?php _e('Header Background', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="color" name="email_header_bg" value="<?php echo esc_attr($settings['email_header_bg'] ?? '#8B0000'); ?>" />
+                                <input type="text" name="email_header_bg_text" value="<?php echo esc_attr($settings['email_header_bg'] ?? '#8B0000'); ?>" class="color-text-input" style="width: 80px; margin-left: 8px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Header Text Color', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="color" name="email_header_text_color" value="<?php echo esc_attr($settings['email_header_text_color'] ?? '#ffffff'); ?>" />
+                                <input type="text" name="email_header_text_color_text" value="<?php echo esc_attr($settings['email_header_text_color'] ?? '#ffffff'); ?>" class="color-text-input" style="width: 80px; margin-left: 8px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Button Color', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="color" name="email_button_bg" value="<?php echo esc_attr($settings['email_button_bg'] ?? '#DAA520'); ?>" />
+                                <input type="text" name="email_button_bg_text" value="<?php echo esc_attr($settings['email_button_bg'] ?? '#DAA520'); ?>" class="color-text-input" style="width: 80px; margin-left: 8px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Button Text Color', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="color" name="email_button_text_color" value="<?php echo esc_attr($settings['email_button_text_color'] ?? '#ffffff'); ?>" />
+                                <input type="text" name="email_button_text_color_text" value="<?php echo esc_attr($settings['email_button_text_color'] ?? '#ffffff'); ?>" class="color-text-input" style="width: 80px; margin-left: 8px;" />
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <hr style="margin: 30px 0;">
+                    
+                    <h3><?php _e('Email Preview & Test', 'mindful-media'); ?></h3>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><?php _e('Send Test Email', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="email" id="mm-test-email-address" value="<?php echo esc_attr(get_option('admin_email')); ?>" class="regular-text" placeholder="<?php _e('Enter email address', 'mindful-media'); ?>" />
+                                <button type="button" class="button button-secondary" id="mm-send-test-email"><?php _e('Send Test', 'mindful-media'); ?></button>
+                                <span class="spinner" id="mm-test-email-spinner" style="float: none; margin-left: 10px;"></span>
+                                <p class="description"><?php _e('Send a test email to verify your email settings are working correctly.', 'mindful-media'); ?></p>
+                                <div id="mm-test-email-result" style="margin-top: 10px;"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Preview', 'mindful-media'); ?></th>
+                            <td>
+                                <div style="border: 1px solid #ddd; border-radius: 4px; max-width: 600px; overflow: hidden; background: #f9f9f9;">
+                                    <!-- Email Preview Header -->
+                                    <?php 
+                                    $preview_logo_id = $settings['email_logo_id'] ?? 0;
+                                    $preview_logo_url = $preview_logo_id ? wp_get_attachment_image_url($preview_logo_id, 'medium') : '';
+                                    ?>
+                                    <div id="mm-email-preview-header" style="background: <?php echo esc_attr($settings['email_header_bg'] ?? '#8B0000'); ?>; color: <?php echo esc_attr($settings['email_header_text_color'] ?? '#ffffff'); ?>; padding: 20px; text-align: center;">
+                                        <img id="mm-email-preview-logo" src="<?php echo esc_url($preview_logo_url); ?>" alt="" style="max-height: 60px; width: auto; <?php echo $preview_logo_url ? '' : 'display: none;'; ?>" />
+                                        <strong id="mm-email-preview-text" style="font-size: 18px; <?php echo $preview_logo_url ? 'display: none;' : ''; ?>"><?php echo esc_html($settings['email_header_text'] ?? get_bloginfo('name')); ?></strong>
+                                    </div>
+                                    <!-- Email Preview Body -->
+                                    <div style="background: #ffffff; padding: 30px;">
+                                        <h2 style="margin: 0 0 15px; color: #333;"><?php _e('New Content Available', 'mindful-media'); ?></h2>
+                                        <p style="color: #666; margin: 0 0 20px;"><?php _e('A new video has been added that matches your subscription:', 'mindful-media'); ?></p>
+                                        <div style="background: #f5f5f5; border-radius: 4px; padding: 15px; margin-bottom: 20px;">
+                                            <strong style="color: #333;"><?php _e('Example Video Title', 'mindful-media'); ?></strong>
+                                            <p style="margin: 8px 0 0; color: #666; font-size: 13px;"><?php _e('From: Example Teacher | Duration: 15:30', 'mindful-media'); ?></p>
+                                        </div>
+                                        <a href="#" id="mm-email-preview-button" style="display: inline-block; background: <?php echo esc_attr($settings['email_button_bg'] ?? '#DAA520'); ?>; color: <?php echo esc_attr($settings['email_button_text_color'] ?? '#ffffff'); ?>; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: 600;"><?php _e('Watch Now', 'mindful-media'); ?></a>
+                                    </div>
+                                    <!-- Email Preview Footer -->
+                                    <div style="background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #999;">
+                                        <p style="margin: 0 0 10px;"><?php echo esc_html($settings['email_footer_text'] ?? __('You received this email because you subscribed to updates.', 'mindful-media')); ?></p>
+                                        <a href="#" style="color: #666;"><?php _e('Unsubscribe', 'mindful-media'); ?></a>
+                                    </div>
+                                </div>
+                                <p class="description" style="margin-top: 10px;"><?php _e('This is a preview of how your emails will look. Save settings to update the preview.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Access Control Tab -->
+                <div id="access-tab" class="mindful-media-tab-content <?php echo $active_tab === 'access' ? 'active' : ''; ?>">
+                    
+                    <h3><?php _e('Login & Registration', 'mindful-media'); ?></h3>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><?php _e('Login URL', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="url" name="login_url" value="<?php echo esc_attr($settings['login_url'] ?? wp_login_url()); ?>" class="regular-text" />
+                                <p class="description"><?php _e('URL to redirect guests when they try to engage with content.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <?php if (MindfulMedia_Settings::is_memberpress_active()): ?>
+                    <hr style="margin: 30px 0;">
+                    
+                    <h3><?php _e('MemberPress Integration', 'mindful-media'); ?></h3>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><?php _e('Enable MemberPress Gating', 'mindful-media'); ?></th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" name="enable_memberpress_gating" value="1" <?php checked($settings['enable_memberpress_gating'] ?? '0', '1'); ?> />
+                                    <?php _e('Restrict content access based on MemberPress membership levels', 'mindful-media'); ?>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Default Access Level', 'mindful-media'); ?></th>
+                            <td>
+                                <select name="default_access_level">
+                                    <option value=""><?php _e('Public (no restriction)', 'mindful-media'); ?></option>
+                                    <?php
+                                    $levels = MindfulMedia_Settings::get_memberpress_levels();
+                                    foreach ($levels as $id => $name) {
+                                        $selected = selected($settings['default_access_level'] ?? '', $id, false);
+                                        echo '<option value="' . esc_attr($id) . '"' . $selected . '>' . esc_html($name) . '</option>';
+                                    }
+                                    ?>
+                                </select>
+                                <p class="description"><?php _e('Default membership level required for all content. Can be overridden per-item.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Locked Content Behavior', 'mindful-media'); ?></th>
+                            <td>
+                                <select name="locked_content_behavior">
+                                    <option value="show_lock" <?php selected($settings['locked_content_behavior'] ?? 'show_lock', 'show_lock'); ?>><?php _e('Show lock icon + CTA', 'mindful-media'); ?></option>
+                                    <option value="hide" <?php selected($settings['locked_content_behavior'] ?? 'show_lock', 'hide'); ?>><?php _e('Hide locked content entirely', 'mindful-media'); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Locked Content CTA Text', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="text" name="locked_cta_text" value="<?php echo esc_attr($settings['locked_cta_text'] ?? __('Join to access this content', 'mindful-media')); ?>" class="regular-text" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Default Join/Pricing URL', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="url" name="join_url" value="<?php echo esc_attr($settings['join_url'] ?? ''); ?>" class="regular-text" placeholder="https://example.com/pricing" />
+                                <p class="description"><?php _e('Default URL for locked content. Used when no membership-specific URL is set.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Per-Membership URLs', 'mindful-media'); ?></th>
+                            <td>
+                                <p class="description" style="margin-top: 0; margin-bottom: 15px;"><?php _e('Set specific URLs for each membership level. Leave empty to use the default URL above.', 'mindful-media'); ?></p>
+                                <?php
+                                $levels = MindfulMedia_Settings::get_memberpress_levels();
+                                $membership_urls = $settings['membership_urls'] ?? array();
+                                
+                                if (!empty($levels)) {
+                                    foreach ($levels as $id => $name) {
+                                        $url = $membership_urls[$id] ?? '';
+                                        ?>
+                                        <div style="margin-bottom: 12px;">
+                                            <label style="display: inline-block; min-width: 150px; font-weight: 500;"><?php echo esc_html($name); ?>:</label>
+                                            <input type="url" name="membership_urls[<?php echo esc_attr($id); ?>]" value="<?php echo esc_attr($url); ?>" class="regular-text" placeholder="<?php _e('Use default URL', 'mindful-media'); ?>" />
+                                        </div>
+                                        <?php
+                                    }
+                                } else {
+                                    echo '<p style="color: #666;">' . __('No membership levels found. Create memberships in MemberPress first.', 'mindful-media') . '</p>';
+                                }
+                                ?>
+                            </td>
+                        </tr>
+                    </table>
+                    <?php else: ?>
+                    <hr style="margin: 30px 0;">
+                    
+                    <div style="background: #f0f6fc; border-left: 4px solid #0073aa; padding: 15px;">
+                        <h3 style="margin-top: 0;"><?php _e('MemberPress Integration', 'mindful-media'); ?></h3>
+                        <p><?php _e('MemberPress is not currently active. Install and activate MemberPress to restrict content access based on membership levels.', 'mindful-media'); ?></p>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                
                 <!-- Advanced Tab -->
                 <div id="advanced-tab" class="mindful-media-tab-content <?php echo $active_tab === 'advanced' ? 'active' : ''; ?>">
+                    
+                    <h3><?php _e('API Keys', 'mindful-media'); ?></h3>
+                    <p><?php _e('Configure API keys for enhanced platform integration and automatic duration fetching.', 'mindful-media'); ?></p>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><?php _e('YouTube Data API Key', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="text" name="youtube_api_key" 
+                                       value="<?php echo esc_attr($settings['youtube_api_key'] ?? ''); ?>" 
+                                       class="regular-text" 
+                                       placeholder="<?php _e('Enter your YouTube API Key', 'mindful-media'); ?>" />
+                                <p class="description">
+                                    <?php _e('Get your API key from', 'mindful-media'); ?> 
+                                    <a href="https://console.developers.google.com/" target="_blank">Google Developer Console</a>
+                                    <br><?php _e('Required for automatic video duration fetching from YouTube.', 'mindful-media'); ?>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('SoundCloud Client ID', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="text" name="soundcloud_client_id" 
+                                       value="<?php echo esc_attr($settings['soundcloud_client_id'] ?? ''); ?>" 
+                                       class="regular-text" 
+                                       placeholder="<?php _e('Enter your SoundCloud Client ID', 'mindful-media'); ?>" />
+                                <p class="description">
+                                    <?php _e('Get your Client ID from', 'mindful-media'); ?> 
+                                    <a href="https://developers.soundcloud.com/" target="_blank">SoundCloud Developers</a>
+                                    <br><?php _e('Used to detect track privacy status and fetch metadata.', 'mindful-media'); ?>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Vimeo Access Token', 'mindful-media'); ?></th>
+                            <td>
+                                <input type="text" name="vimeo_access_token" 
+                                       value="<?php echo esc_attr($settings['vimeo_access_token'] ?? ''); ?>" 
+                                       class="regular-text" 
+                                       placeholder="<?php _e('Enter your Vimeo Access Token', 'mindful-media'); ?>" />
+                                <p class="description">
+                                    <?php _e('Get your Access Token from', 'mindful-media'); ?> 
+                                    <a href="https://developer.vimeo.com/" target="_blank">Vimeo Developer Portal</a>
+                                    <br><?php _e('Used for enhanced video metadata. Duration fetching works without a token.', 'mindful-media'); ?>
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <hr style="margin: 30px 0;">
+                    
                     <h3><?php _e('Taxonomies', 'mindful-media'); ?></h3>
                     <p><?php _e('Select which taxonomies to use for organizing your content:', 'mindful-media'); ?></p>
                     <table class="form-table">
                         <?php $this->render_taxonomy_settings($settings); ?>
                     </table>
                     
+                    <hr style="margin: 30px 0;">
+                    
                     <h3><?php _e('Custom Fields', 'mindful-media'); ?></h3>
                     <div id="custom-fields-container">
                         <?php $this->render_custom_fields_editor($settings); ?>
                     </div>
+                    
+                    <hr style="margin: 30px 0;">
+                    
+                    <h3><?php _e('Data Management', 'mindful-media'); ?></h3>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><?php _e('On Uninstall', 'mindful-media'); ?></th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" name="keep_engagement_data_on_uninstall" value="1" <?php checked($settings['keep_engagement_data_on_uninstall'] ?? '1', '1'); ?> />
+                                    <?php _e('Keep engagement data (likes, comments, subscriptions, watch history) when plugin is uninstalled', 'mindful-media'); ?>
+                                </label>
+                                <p class="description"><?php _e('If unchecked, all engagement data will be permanently deleted when the plugin is removed.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"><?php _e('Clear Engagement Cache', 'mindful-media'); ?></th>
+                            <td>
+                                <button type="button" class="button button-secondary" id="mm-clear-engagement-cache"><?php _e('Clear Cached Counts', 'mindful-media'); ?></button>
+                                <span class="spinner" style="float: none; margin-left: 10px;"></span>
+                                <p class="description"><?php _e('Clears cached like/comment counts. Useful if counts appear incorrect.', 'mindful-media'); ?></p>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
                 
                 <p class="submit">
@@ -1514,6 +2301,7 @@ class MindfulMedia_Admin {
             'youtube_hide_end_screen' => isset($_POST['youtube_hide_end_screen']) ? '1' : '0',
             'soundcloud_client_id' => sanitize_text_field($_POST['soundcloud_client_id'] ?? ''),
             'vimeo_access_token' => sanitize_text_field($_POST['vimeo_access_token'] ?? ''),
+            'youtube_api_key' => sanitize_text_field($_POST['youtube_api_key'] ?? ''),
             // Archive Display settings
             'archive_show_home_tab' => isset($_POST['archive_show_home_tab']) ? '1' : '0',
             'archive_show_teachers_tab' => isset($_POST['archive_show_teachers_tab']) ? '1' : '0',
@@ -1527,13 +2315,72 @@ class MindfulMedia_Admin {
             'archive_show_taxonomy_counts' => isset($_POST['archive_show_taxonomy_counts']) ? '1' : '0',
             'archive_show_featured' => isset($_POST['archive_show_featured']) ? '1' : '0',
             'archive_items_per_row' => sanitize_text_field($_POST['archive_items_per_row'] ?? '5'),
-            'archive_back_url' => esc_url_raw($_POST['archive_back_url'] ?? '/media'),
+            'archive_back_url' => sanitize_text_field($_POST['archive_back_url'] ?? '/browse'),
+            'media_archive_url' => sanitize_text_field($_POST['media_archive_url'] ?? '/media'),
             // Browse page section visibility
             'browse_show_teachers' => isset($_POST['browse_show_teachers']) ? '1' : '0',
             'browse_show_topics' => isset($_POST['browse_show_topics']) ? '1' : '0',
             'browse_show_playlists' => isset($_POST['browse_show_playlists']) ? '1' : '0',
             'browse_show_categories' => isset($_POST['browse_show_categories']) ? '1' : '0',
             'browse_show_media_types' => isset($_POST['browse_show_media_types']) ? '1' : '0',
+            
+            // Per-taxonomy image aspect ratios
+            'teacher_image_ratio' => sanitize_text_field($_POST['teacher_image_ratio'] ?? 'landscape'),
+            'teacher_image_ratio_custom' => sanitize_text_field($_POST['teacher_image_ratio_custom'] ?? '16:9'),
+            'topic_image_ratio' => sanitize_text_field($_POST['topic_image_ratio'] ?? 'landscape'),
+            'topic_image_ratio_custom' => sanitize_text_field($_POST['topic_image_ratio_custom'] ?? '16:9'),
+            'category_image_ratio' => sanitize_text_field($_POST['category_image_ratio'] ?? 'landscape'),
+            'category_image_ratio_custom' => sanitize_text_field($_POST['category_image_ratio_custom'] ?? '16:9'),
+            'series_image_ratio' => sanitize_text_field($_POST['series_image_ratio'] ?? 'landscape'),
+            'series_image_ratio_custom' => sanitize_text_field($_POST['series_image_ratio_custom'] ?? '16:9'),
+            
+            // Engagement Settings
+            'enable_likes' => isset($_POST['enable_likes']) ? '1' : '0',
+            'enable_comments' => isset($_POST['enable_comments']) ? '1' : '0',
+            'enable_subscriptions' => isset($_POST['enable_subscriptions']) ? '1' : '0',
+            'show_counts_on_cards' => isset($_POST['show_counts_on_cards']) ? '1' : '0',
+            'show_counts_on_single' => isset($_POST['show_counts_on_single']) ? '1' : '0',
+            'require_login_for_engagement' => isset($_POST['require_login_for_engagement']) ? '1' : '0',
+            'auto_approve_comments' => isset($_POST['auto_approve_comments']) ? '1' : '0',
+            'allow_subscription_playlists' => isset($_POST['allow_subscription_playlists']) ? '1' : '0',
+            'allow_subscription_teachers' => isset($_POST['allow_subscription_teachers']) ? '1' : '0',
+            'allow_subscription_topics' => isset($_POST['allow_subscription_topics']) ? '1' : '0',
+            'allow_subscription_categories' => isset($_POST['allow_subscription_categories']) ? '1' : '0',
+            
+            // Notification Settings
+            'enable_email_notifications' => isset($_POST['enable_email_notifications']) ? '1' : '0',
+            'notification_from_name' => sanitize_text_field($_POST['notification_from_name'] ?? get_bloginfo('name')),
+            'notification_from_email' => sanitize_email($_POST['notification_from_email'] ?? get_bloginfo('admin_email')),
+            'notification_subject_template' => sanitize_text_field($_POST['notification_subject_template'] ?? ''),
+            'notification_throttle' => sanitize_key($_POST['notification_throttle'] ?? 'instant'),
+            'disable_all_notifications' => isset($_POST['disable_all_notifications']) ? '1' : '0',
+            
+            // Email Template Settings
+            'email_header_text' => sanitize_text_field($_POST['email_header_text'] ?? get_bloginfo('name')),
+            'email_body_template' => wp_kses_post($_POST['email_body_template'] ?? ''),
+            'email_footer_text' => wp_kses_post($_POST['email_footer_text'] ?? ''),
+            'email_logo_id' => intval($_POST['email_logo_id'] ?? 0),
+            'email_header_bg' => sanitize_hex_color($_POST['email_header_bg'] ?? '#8B0000'),
+            'email_header_text_color' => sanitize_hex_color($_POST['email_header_text_color'] ?? '#ffffff'),
+            'email_button_bg' => sanitize_hex_color($_POST['email_button_bg'] ?? '#DAA520'),
+            'email_button_text_color' => sanitize_hex_color($_POST['email_button_text_color'] ?? '#ffffff'),
+            
+            // Access Settings (MemberPress)
+            'enable_memberpress_gating' => isset($_POST['enable_memberpress_gating']) ? '1' : '0',
+            'login_url' => esc_url_raw($_POST['login_url'] ?? wp_login_url()),
+            'join_url' => esc_url_raw($_POST['join_url'] ?? ''),
+            'membership_urls' => array(),
+            'locked_content_behavior' => sanitize_key($_POST['locked_content_behavior'] ?? 'show_lock'),
+            'locked_cta_text' => sanitize_text_field($_POST['locked_cta_text'] ?? ''),
+            'default_access_level' => sanitize_text_field($_POST['default_access_level'] ?? ''),
+            
+            // My Library Settings
+            'library_page_id' => intval($_POST['library_page_id'] ?? 0),
+            'enable_woocommerce_tab' => isset($_POST['enable_woocommerce_tab']) ? '1' : '0',
+            
+            // Data Retention
+            'keep_engagement_data_on_uninstall' => isset($_POST['keep_engagement_data_on_uninstall']) ? '1' : '0',
+            
             'enabled_taxonomies' => array(),
             'custom_fields' => array()
         );
@@ -1541,6 +2388,16 @@ class MindfulMedia_Admin {
         // Process enabled taxonomies
         if (isset($_POST['enabled_taxonomies']) && is_array($_POST['enabled_taxonomies'])) {
             $settings['enabled_taxonomies'] = array_map('sanitize_key', $_POST['enabled_taxonomies']);
+        }
+        
+        // Process per-membership URLs
+        if (isset($_POST['membership_urls']) && is_array($_POST['membership_urls'])) {
+            foreach ($_POST['membership_urls'] as $level_id => $url) {
+                $url = trim($url);
+                if (!empty($url)) {
+                    $settings['membership_urls'][sanitize_key($level_id)] = esc_url_raw($url);
+                }
+            }
         }
         
         // Process custom fields
@@ -1565,6 +2422,7 @@ class MindfulMedia_Admin {
         
         if ($post_type === 'mindful_media' || strpos($hook, 'mindful-media') !== false) {
             wp_enqueue_script('jquery');
+            wp_enqueue_media(); // For logo uploader
             wp_enqueue_style(
                 'mindful-media-admin',
                 MINDFUL_MEDIA_PLUGIN_URL . 'admin/css/admin.css',
@@ -1578,6 +2436,17 @@ class MindfulMedia_Admin {
                 MINDFUL_MEDIA_VERSION,
                 true
             );
+            
+            // Localize script for AJAX
+            wp_localize_script('mindful-media-admin', 'mindfulMediaAdmin', array(
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('mindful_media_admin_nonce'),
+                'strings' => array(
+                    'sending' => __('Sending...', 'mindful-media'),
+                    'send_test' => __('Send Test', 'mindful-media'),
+                    'error' => __('An error occurred. Please try again.', 'mindful-media')
+                )
+            ));
         }
     }
     
@@ -2196,5 +3065,134 @@ class MindfulMedia_Admin {
         });
         </script>
         <?php
+    }
+    
+    /**
+     * AJAX handler for sending test email
+     */
+    public function ajax_send_test_email() {
+        // Verify nonce
+        if (!check_ajax_referer('mindful_media_admin_nonce', 'nonce', false)) {
+            wp_send_json_error(array('message' => __('Security check failed.', 'mindful-media')));
+        }
+        
+        // Check permissions
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('You do not have permission to perform this action.', 'mindful-media')));
+        }
+        
+        $email = sanitize_email($_POST['email'] ?? '');
+        if (!is_email($email)) {
+            wp_send_json_error(array('message' => __('Please enter a valid email address.', 'mindful-media')));
+        }
+        
+        $settings = get_option('mindful_media_settings', array());
+        
+        // Build test email using template settings
+        $header_bg = $settings['email_header_bg'] ?? '#8B0000';
+        $header_text_color = $settings['email_header_text_color'] ?? '#ffffff';
+        $button_bg = $settings['email_button_bg'] ?? '#DAA520';
+        $button_text_color = $settings['email_button_text_color'] ?? '#ffffff';
+        $header_text = $settings['email_header_text'] ?? get_bloginfo('name');
+        $footer_text = $settings['email_footer_text'] ?? __('You received this email because you subscribed to updates.', 'mindful-media');
+        $logo_id = $settings['email_logo_id'] ?? 0;
+        $logo_url = $logo_id ? wp_get_attachment_image_url($logo_id, 'medium') : '';
+        
+        // Build header content (logo or text)
+        $header_content = '';
+        if ($logo_url) {
+            $header_content = '<img src="' . esc_url($logo_url) . '" alt="' . esc_attr(get_bloginfo('name')) . '" style="max-height: 60px; width: auto;" />';
+        } else {
+            $header_content = '<h1 style="margin: 0; color: ' . esc_attr($header_text_color) . '; font-size: 24px; font-weight: 600;">' . esc_html($header_text) . '</h1>';
+        }
+        
+        $html = '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Oxygen-Sans, Ubuntu, Cantarell, \'Helvetica Neue\', sans-serif; background-color: #f5f5f5;">
+    <table cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Header -->
+        <tr>
+            <td style="background-color: ' . esc_attr($header_bg) . '; padding: 25px; text-align: center;">
+                ' . $header_content . '
+            </td>
+        </tr>
+        <!-- Content -->
+        <tr>
+            <td style="padding: 40px 30px;">
+                <h2 style="margin: 0 0 15px; color: #333333; font-size: 20px;">' . __('Test Email - Configuration Working!', 'mindful-media') . '</h2>
+                <p style="margin: 0 0 20px; color: #666666; font-size: 16px; line-height: 1.5;">' . __('This is a test email from MindfulMedia to verify your email settings are configured correctly.', 'mindful-media') . '</p>
+                
+                <div style="background-color: #f9f9f9; border-radius: 6px; padding: 20px; margin-bottom: 25px;">
+                    <p style="margin: 0 0 8px; color: #333333; font-weight: 600;">' . __('Sample Content Preview', 'mindful-media') . '</p>
+                    <p style="margin: 0; color: #666666; font-size: 14px;">' . __('This is how a new content notification would appear in subscriber emails.', 'mindful-media') . '</p>
+                </div>
+                
+                <table cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td style="background-color: ' . esc_attr($button_bg) . '; border-radius: 4px;">
+                            <a href="' . esc_url(home_url()) . '" style="display: inline-block; padding: 14px 28px; color: ' . esc_attr($button_text_color) . '; text-decoration: none; font-weight: 600; font-size: 14px;">' . __('Visit Website', 'mindful-media') . '</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+            <td style="background-color: #f9f9f9; padding: 25px; text-align: center; border-top: 1px solid #eeeeee;">
+                <p style="margin: 0 0 10px; color: #999999; font-size: 13px; line-height: 1.5;">' . wp_kses_post($footer_text) . '</p>
+                <p style="margin: 0; color: #999999; font-size: 12px;">' . sprintf(__('Sent from %s', 'mindful-media'), get_bloginfo('name')) . '</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>';
+        
+        // Set up email headers
+        $from_name = $settings['notification_from_name'] ?? get_bloginfo('name');
+        $from_email = $settings['notification_from_email'] ?? get_bloginfo('admin_email');
+        
+        // Validate from email
+        if (!is_email($from_email)) {
+            $from_email = get_bloginfo('admin_email');
+        }
+        
+        $headers = array(
+            'Content-Type: text/html; charset=UTF-8',
+            'From: ' . sanitize_text_field($from_name) . ' <' . sanitize_email($from_email) . '>'
+        );
+        
+        $subject = sprintf(__('[Test] Email from %s', 'mindful-media'), get_bloginfo('name'));
+        
+        // Add error tracking
+        global $phpmailer_error;
+        $phpmailer_error = null;
+        
+        add_action('wp_mail_failed', function($wp_error) {
+            global $phpmailer_error;
+            $phpmailer_error = $wp_error;
+        });
+        
+        // Send the email
+        $sent = wp_mail($email, $subject, $html, $headers);
+        
+        if ($sent && !$phpmailer_error) {
+            wp_send_json_success(array(
+                'message' => sprintf(__('Test email sent successfully to %s. Please check your inbox (and spam folder).', 'mindful-media'), $email)
+            ));
+        } else {
+            $error_msg = __('Failed to send test email.', 'mindful-media');
+            if ($phpmailer_error && is_wp_error($phpmailer_error)) {
+                $error_msg .= ' ' . $phpmailer_error->get_error_message();
+            } else {
+                $error_msg .= ' ' . __('Please check your SMTP configuration in WP Mail SMTP settings.', 'mindful-media');
+            }
+            wp_send_json_error(array(
+                'message' => $error_msg
+            ));
+        }
     }
 }

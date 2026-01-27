@@ -122,6 +122,7 @@ class MindfulMedia_Settings {
             'player_volume' => 80,
             'soundcloud_client_id' => '',
             'vimeo_access_token' => '',
+            'youtube_api_key' => '',
             'player_size' => 'normal',
             'player_controls' => '1',
             'modal_player_theme' => 'dark', // dark or light
@@ -129,16 +130,321 @@ class MindfulMedia_Settings {
             'modal_show_more_media' => '1', // Show "More Media" recommendations in modal
             'youtube_hide_end_screen' => '0', // Cover YouTube end-screen overlay
             'custom_fields' => array(),
+            // Navigation URLs
+            'archive_back_url' => '/browse',
+            'media_archive_url' => '/media',
             // Browse page section visibility
             'browse_show_teachers' => '1',
             'browse_show_topics' => '1',
             'browse_show_playlists' => '1',
             'browse_show_categories' => '1',
-            'browse_show_media_types' => '0'
+            'browse_show_media_types' => '0',
+            
+            // Per-taxonomy image aspect ratios
+            'teacher_image_ratio' => 'landscape',     // square, landscape, portrait, custom
+            'teacher_image_ratio_custom' => '16:9',
+            'topic_image_ratio' => 'landscape',
+            'topic_image_ratio_custom' => '16:9',
+            'category_image_ratio' => 'landscape',
+            'category_image_ratio_custom' => '16:9',
+            'series_image_ratio' => 'landscape',
+            'series_image_ratio_custom' => '16:9',
+            
+            // Engagement Settings
+            'enable_likes' => '1',
+            'enable_comments' => '1',
+            'enable_subscriptions' => '1',
+            'show_counts_on_cards' => '1',
+            'show_counts_on_single' => '1',
+            'require_login_for_engagement' => '1',
+            'auto_approve_comments' => '0',
+            'allow_subscription_playlists' => '1',
+            'allow_subscription_teachers' => '1',
+            'allow_subscription_topics' => '1',
+            'allow_subscription_categories' => '1',
+            
+            // Notification Settings
+            'enable_email_notifications' => '1',
+            'notification_from_name' => get_bloginfo('name'),
+            'notification_from_email' => get_bloginfo('admin_email'),
+            'notification_subject_template' => __('New content from {term_name}', 'mindful-media'),
+            'notification_throttle' => 'instant', // instant, hourly, daily
+            'disable_all_notifications' => '0',
+            
+            // Email Template Settings
+            'email_logo_id' => 0,
+            'email_header_text' => get_bloginfo('name'),
+            'email_body_template' => "Hi {user_name},\n\nNew content is available from <strong>{term_name}</strong>:\n\n<div style=\"background: #f5f5f5; padding: 15px; border-radius: 6px; margin: 20px 0;\">\n<strong>{post_title}</strong>\n<p style=\"margin: 8px 0 0; color: #666;\">{post_excerpt}</p>\n</div>\n\n<a href=\"{post_url}\" style=\"display: inline-block; background: {button_color}; color: {button_text_color}; padding: 12px 24px; border-radius: 4px; text-decoration: none; font-weight: 600;\">Watch Now</a>",
+            'email_footer_text' => __('You received this email because you subscribed to updates. Click unsubscribe to stop receiving these emails.', 'mindful-media'),
+            'email_header_bg' => '#8B0000',
+            'email_header_text_color' => '#ffffff',
+            'email_button_bg' => '#DAA520',
+            'email_button_text_color' => '#ffffff',
+            
+            // Access Settings (MemberPress)
+            'enable_memberpress_gating' => '0',
+            'login_url' => wp_login_url(),
+            'join_url' => '',
+            'locked_content_behavior' => 'show_lock', // hide, show_lock
+            'locked_cta_text' => __('Join to access this content', 'mindful-media'),
+            'default_access_level' => '', // Default MemberPress level (empty = public)
+            
+            // My Library Settings
+            'library_page_id' => '',
+            'enable_woocommerce_tab' => '0',
+            
+            // Data Retention
+            'keep_engagement_data_on_uninstall' => '1'
         );
         
         $settings = get_option('mindful_media_settings', array());
         return wp_parse_args($settings, $defaults);
+    }
+    
+    /**
+     * Check if MemberPress is active
+     */
+    public static function is_memberpress_active() {
+        return class_exists('MeprProduct');
+    }
+    
+    /**
+     * Check if WooCommerce is active
+     */
+    public static function is_woocommerce_active() {
+        return class_exists('WooCommerce');
+    }
+    
+    /**
+     * Get the CSS aspect ratio value for a taxonomy
+     * 
+     * @param string $taxonomy The taxonomy name (media_teacher, media_topic, media_category, media_series)
+     * @return string CSS aspect-ratio value (e.g., "16 / 9", "1 / 1")
+     */
+    public static function get_taxonomy_aspect_ratio($taxonomy) {
+        $settings = self::get_settings();
+        
+        // Map taxonomy to settings key prefix
+        $prefix_map = array(
+            'media_teacher' => 'teacher',
+            'media_topic' => 'topic',
+            'media_category' => 'category',
+            'media_series' => 'series'
+        );
+        
+        $prefix = isset($prefix_map[$taxonomy]) ? $prefix_map[$taxonomy] : 'teacher';
+        $ratio_setting = isset($settings[$prefix . '_image_ratio']) ? $settings[$prefix . '_image_ratio'] : 'landscape';
+        $custom_ratio = isset($settings[$prefix . '_image_ratio_custom']) ? $settings[$prefix . '_image_ratio_custom'] : '16:9';
+        
+        // Convert preset to CSS aspect-ratio value
+        switch ($ratio_setting) {
+            case 'square':
+                return '1 / 1';
+            case 'portrait':
+                return '3 / 4';
+            case 'custom':
+                // Parse custom ratio (e.g., "16:9" -> "16 / 9")
+                $parts = explode(':', $custom_ratio);
+                if (count($parts) === 2 && is_numeric(trim($parts[0])) && is_numeric(trim($parts[1]))) {
+                    return trim($parts[0]) . ' / ' . trim($parts[1]);
+                }
+                return '16 / 9'; // Fallback
+            case 'landscape':
+            default:
+                return '16 / 9';
+        }
+    }
+    
+    /**
+     * Get MemberPress membership levels
+     */
+    public static function get_memberpress_levels() {
+        if (!self::is_memberpress_active()) {
+            return array();
+        }
+        
+        $products = MeprProduct::get_all();
+        $levels = array();
+        
+        foreach ($products as $product) {
+            $levels[$product->ID] = $product->post_title;
+        }
+        
+        return $levels;
+    }
+    
+    /**
+     * Get join URL for a specific membership level (or default)
+     * 
+     * @param int|null $level_id Specific membership level ID, or null for default
+     * @return string The join/pricing URL
+     */
+    public static function get_join_url($level_id = null) {
+        $settings = self::get_settings();
+        
+        // Check for level-specific URL first
+        if ($level_id && !empty($settings['membership_urls'][$level_id])) {
+            return $settings['membership_urls'][$level_id];
+        }
+        
+        // Fall back to default URL
+        if (!empty($settings['join_url'])) {
+            return $settings['join_url'];
+        }
+        
+        // Last resort: MemberPress registration page if available
+        if (self::is_memberpress_active() && $level_id) {
+            $product = new MeprProduct($level_id);
+            if ($product->ID) {
+                return $product->url();
+            }
+        }
+        
+        return '';
+    }
+    
+    /**
+     * Check if user can view a media item (access control)
+     * 
+     * @param int $post_id The post ID to check
+     * @param int|null $user_id User ID to check (defaults to current user)
+     * @return bool|array True if allowed, or array with 'locked' => true and 'reason' if restricted
+     */
+    public static function user_can_view($post_id, $user_id = null) {
+        if ($user_id === null) {
+            $user_id = get_current_user_id();
+        }
+        
+        $settings = self::get_settings();
+        
+        // Check password protection first (existing functionality)
+        $is_password_protected = get_post_meta($post_id, '_mindful_media_password_protected', true);
+        if ($is_password_protected === '1') {
+            // Check if user has the password in session
+            $session_key = 'mindful_media_unlocked_' . $post_id;
+            if (!isset($_SESSION[$session_key]) || $_SESSION[$session_key] !== true) {
+                // Also check cookie
+                $cookie_key = 'mm_unlocked_' . $post_id;
+                if (!isset($_COOKIE[$cookie_key])) {
+                    return array(
+                        'locked' => true,
+                        'reason' => 'password',
+                        'message' => __('This content is password protected.', 'mindful-media')
+                    );
+                }
+            }
+        }
+        
+        // Check MemberPress gating
+        if (empty($settings['enable_memberpress_gating']) || !self::is_memberpress_active()) {
+            return true;
+        }
+        
+        // Get required levels for this post
+        $required_levels = get_post_meta($post_id, '_mindful_media_memberpress_levels', true);
+        
+        // If no specific levels set, use global default
+        if (empty($required_levels) && !empty($settings['default_access_level'])) {
+            $required_levels = array((int) $settings['default_access_level']);
+        }
+        
+        // If still no required levels, content is public
+        if (empty($required_levels)) {
+            return true;
+        }
+        
+        // Guest users cannot access restricted content
+        if (!$user_id) {
+            return array(
+                'locked' => true,
+                'reason' => 'membership',
+                'required_levels' => $required_levels,
+                'message' => $settings['locked_cta_text'] ?? __('Join to access this content', 'mindful-media')
+            );
+        }
+        
+        // Check if user has any of the required membership levels
+        $mepr_user = new MeprUser($user_id);
+        
+        foreach ($required_levels as $level_id) {
+            if ($mepr_user->is_active_on_membership($level_id)) {
+                return true;
+            }
+        }
+        
+        // User doesn't have required membership
+        return array(
+            'locked' => true,
+            'reason' => 'membership',
+            'required_levels' => $required_levels,
+            'message' => $settings['locked_cta_text'] ?? __('Join to access this content', 'mindful-media')
+        );
+    }
+    
+    /**
+     * Check if user can view a term (taxonomy access control)
+     * 
+     * @param int $term_id The term ID
+     * @param string $taxonomy The taxonomy name
+     * @param int|null $user_id User ID to check
+     * @return bool|array True if allowed, or array with lock details
+     */
+    public static function user_can_view_term($term_id, $taxonomy, $user_id = null) {
+        if ($user_id === null) {
+            $user_id = get_current_user_id();
+        }
+        
+        $settings = self::get_settings();
+        
+        // Check password protection for playlists
+        if ($taxonomy === 'media_series') {
+            $is_protected = get_term_meta($term_id, 'playlist_password_enabled', true);
+            if ($is_protected === '1') {
+                $cookie_key = 'mm_playlist_unlocked_' . $term_id;
+                if (!isset($_COOKIE[$cookie_key])) {
+                    return array(
+                        'locked' => true,
+                        'reason' => 'password',
+                        'message' => __('This playlist is password protected.', 'mindful-media')
+                    );
+                }
+            }
+        }
+        
+        // Check MemberPress gating for terms
+        if (empty($settings['enable_memberpress_gating']) || !self::is_memberpress_active()) {
+            return true;
+        }
+        
+        $required_levels = get_term_meta($term_id, '_mindful_media_memberpress_levels', true);
+        
+        if (empty($required_levels)) {
+            return true;
+        }
+        
+        if (!$user_id) {
+            return array(
+                'locked' => true,
+                'reason' => 'membership',
+                'required_levels' => $required_levels,
+                'message' => $settings['locked_cta_text'] ?? __('Join to access this content', 'mindful-media')
+            );
+        }
+        
+        $mepr_user = new MeprUser($user_id);
+        
+        foreach ($required_levels as $level_id) {
+            if ($mepr_user->is_active_on_membership($level_id)) {
+                return true;
+            }
+        }
+        
+        return array(
+            'locked' => true,
+            'reason' => 'membership',
+            'required_levels' => $required_levels,
+            'message' => $settings['locked_cta_text'] ?? __('Join to access this content', 'mindful-media')
+        );
     }
     
     /**

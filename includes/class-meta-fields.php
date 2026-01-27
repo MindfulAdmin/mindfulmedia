@@ -15,6 +15,33 @@ class MindfulMedia_Meta_Fields {
         add_action('save_post', array($this, 'save_meta_fields'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
         add_action('wp_ajax_mindful_media_preview', array($this, 'ajax_preview_media'));
+        add_action('wp_ajax_mindful_media_fetch_duration', array($this, 'ajax_fetch_duration'));
+    }
+    
+    /**
+     * AJAX handler for fetching duration
+     */
+    public function ajax_fetch_duration() {
+        // Security check
+        check_ajax_referer('mindful_media_ajax_nonce', 'nonce');
+        
+        $url = isset($_POST['url']) ? esc_url_raw($_POST['url']) : '';
+        
+        if (empty($url)) {
+            wp_send_json_error('No media URL provided');
+        }
+        
+        $duration = $this->fetch_duration_from_url($url);
+        
+        if ($duration) {
+            wp_send_json_success(array(
+                'hours' => $duration['hours'],
+                'minutes' => $duration['minutes'],
+                'message' => sprintf(__('Duration fetched: %d hours, %d minutes', 'mindful-media'), $duration['hours'], $duration['minutes'])
+            ));
+        } else {
+            wp_send_json_error(__('Could not fetch duration. YouTube requires an API key (see Settings > API Keys). Vimeo durations are fetched automatically.', 'mindful-media'));
+        }
     }
     
     /**
@@ -186,6 +213,49 @@ class MindfulMedia_Meta_Fields {
                     </p>
                 <?php endif; ?>
             </div>
+            
+            <?php
+            // MemberPress Access Control (only show when MemberPress is active and gating is enabled)
+            $settings = MindfulMedia_Settings::get_settings();
+            if (MindfulMedia_Settings::is_memberpress_active() && !empty($settings['enable_memberpress_gating'])):
+                $required_levels = get_post_meta($post->ID, '_mindful_media_memberpress_levels', true);
+                if (!is_array($required_levels)) {
+                    $required_levels = array();
+                }
+                $levels = MindfulMedia_Settings::get_memberpress_levels();
+            ?>
+            
+            <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
+            
+            <!-- MemberPress Access Section -->
+            <p style="margin-top: 0;">
+                <strong><?php _e('Membership Access', 'mindful-media'); ?></strong>
+            </p>
+            <p style="color: #666; font-size: 13px; margin-bottom: 10px;">
+                <?php _e('Restrict this content to specific membership levels.', 'mindful-media'); ?>
+            </p>
+            
+            <div class="mm-memberpress-levels" style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 8px; border-radius: 4px; background: #fafafa;">
+                <?php if (empty($levels)): ?>
+                    <p style="margin: 0; color: #666; font-size: 12px;"><?php _e('No membership levels found.', 'mindful-media'); ?></p>
+                <?php else: ?>
+                    <label style="display: block; margin-bottom: 8px; color: #666;">
+                        <input type="checkbox" name="mindful_media_memberpress_levels[]" value="" <?php checked(empty($required_levels)); ?> class="mm-level-public">
+                        <?php _e('Public (no restriction)', 'mindful-media'); ?>
+                    </label>
+                    <?php foreach ($levels as $level_id => $level_name): ?>
+                        <label style="display: block; margin-bottom: 5px;">
+                            <input type="checkbox" name="mindful_media_memberpress_levels[]" value="<?php echo esc_attr($level_id); ?>" <?php checked(in_array($level_id, $required_levels)); ?> class="mm-level-specific">
+                            <?php echo esc_html($level_name); ?>
+                        </label>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            <small style="color: #666; display: block; margin-top: 5px;">
+                <?php _e('Select which membership levels can access this content. Leave empty to use global default.', 'mindful-media'); ?>
+            </small>
+            
+            <?php endif; ?>
         </div>
         
         <script>
@@ -314,12 +384,18 @@ class MindfulMedia_Meta_Fields {
                 <th><label for="mindful_media_duration_hours"><?php _e('Duration', 'mindful-media'); ?></label></th>
                 <td>
                     <input type="number" id="mindful_media_duration_hours" name="mindful_media_duration_hours" 
-                           value="<?php echo esc_attr($duration_hours); ?>" min="0" max="23" style="width: 60px;" />
+                           value="<?php echo esc_attr($duration_hours); ?>" min="0" max="99" style="width: 60px;" placeholder="0" />
                     <label for="mindful_media_duration_hours"><?php _e('hours', 'mindful-media'); ?></label>
                     
                     <input type="number" id="mindful_media_duration_minutes" name="mindful_media_duration_minutes" 
-                           value="<?php echo esc_attr($duration_minutes); ?>" min="0" max="59" style="width: 60px;" />
+                           value="<?php echo esc_attr($duration_minutes); ?>" min="0" max="59" style="width: 60px;" placeholder="0" />
                     <label for="mindful_media_duration_minutes"><?php _e('minutes', 'mindful-media'); ?></label>
+                    
+                    <button type="button" class="button" id="mindful-media-fetch-duration" style="margin-left: 10px;">
+                        <?php _e('Fetch Duration', 'mindful-media'); ?>
+                    </button>
+                    <span id="mindful-media-duration-status" style="margin-left: 10px; color: #666;"></span>
+                    <p class="description"><?php _e('Leave empty to auto-detect from YouTube/Vimeo when saving. Use "Fetch Duration" to get it now.', 'mindful-media'); ?></p>
                 </td>
             </tr>
             <tr>
@@ -468,14 +544,22 @@ class MindfulMedia_Meta_Fields {
         if (isset($_POST['mindful_media_meta_nonce_field']) && 
             wp_verify_nonce($_POST['mindful_media_meta_nonce_field'], 'mindful_media_meta_nonce')) {
         
-        // Save duration
-        if (isset($_POST['mindful_media_duration_hours'])) {
-            update_post_meta($post_id, '_mindful_media_duration_hours', sanitize_text_field($_POST['mindful_media_duration_hours']));
+        // Save duration - check if manual values provided, otherwise auto-fetch
+        $manual_hours = isset($_POST['mindful_media_duration_hours']) ? sanitize_text_field($_POST['mindful_media_duration_hours']) : '';
+        $manual_minutes = isset($_POST['mindful_media_duration_minutes']) ? sanitize_text_field($_POST['mindful_media_duration_minutes']) : '';
+        $media_url = isset($_POST['mindful_media_url']) ? esc_url_raw($_POST['mindful_media_url']) : '';
+        
+        // If manual duration is empty and we have a URL, try to auto-fetch
+        if (empty($manual_hours) && empty($manual_minutes) && !empty($media_url)) {
+            $auto_duration = $this->fetch_duration_from_url($media_url);
+            if ($auto_duration) {
+                $manual_hours = $auto_duration['hours'];
+                $manual_minutes = $auto_duration['minutes'];
+            }
         }
         
-        if (isset($_POST['mindful_media_duration_minutes'])) {
-            update_post_meta($post_id, '_mindful_media_duration_minutes', sanitize_text_field($_POST['mindful_media_duration_minutes']));
-        }
+        update_post_meta($post_id, '_mindful_media_duration_hours', $manual_hours);
+        update_post_meta($post_id, '_mindful_media_duration_minutes', $manual_minutes);
         
         // Save recording date
         if (isset($_POST['mindful_media_recording_date'])) {
@@ -610,6 +694,16 @@ class MindfulMedia_Meta_Fields {
             } else {
                 delete_post_meta($post_id, '_mindful_media_hide_from_archive');
             }
+            
+            // Save MemberPress levels
+            if (isset($_POST['mindful_media_memberpress_levels'])) {
+                $levels = array_filter(array_map('intval', $_POST['mindful_media_memberpress_levels']));
+                if (empty($levels)) {
+                    delete_post_meta($post_id, '_mindful_media_memberpress_levels');
+                } else {
+                    update_post_meta($post_id, '_mindful_media_memberpress_levels', $levels);
+                }
+            }
         }
     }
     
@@ -639,6 +733,136 @@ class MindfulMedia_Meta_Fields {
     }
     
     /**
+     * Fetch duration from video URL using oEmbed APIs
+     * 
+     * @param string $url The video URL
+     * @return array|false Array with 'hours' and 'minutes' keys, or false if unable to fetch
+     */
+    private function fetch_duration_from_url($url) {
+        if (empty($url)) {
+            return false;
+        }
+        
+        $duration_seconds = 0;
+        
+        // Detect platform and fetch duration
+        if (strpos($url, 'youtube.com') !== false || strpos($url, 'youtu.be') !== false) {
+            $duration_seconds = $this->fetch_youtube_duration($url);
+        } elseif (strpos($url, 'vimeo.com') !== false) {
+            $duration_seconds = $this->fetch_vimeo_duration($url);
+        } elseif (strpos($url, 'soundcloud.com') !== false) {
+            $duration_seconds = $this->fetch_soundcloud_duration($url);
+        }
+        
+        if ($duration_seconds > 0) {
+            $hours = floor($duration_seconds / 3600);
+            $minutes = floor(($duration_seconds % 3600) / 60);
+            
+            // Round up if there are remaining seconds
+            $remaining_seconds = $duration_seconds % 60;
+            if ($remaining_seconds > 30) {
+                $minutes++;
+                if ($minutes >= 60) {
+                    $hours++;
+                    $minutes = 0;
+                }
+            }
+            
+            return array(
+                'hours' => $hours,
+                'minutes' => $minutes
+            );
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Fetch YouTube video duration using oEmbed
+     */
+    private function fetch_youtube_duration($url) {
+        // Extract video ID
+        $video_id = '';
+        if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/', $url, $matches)) {
+            $video_id = $matches[1];
+        }
+        
+        if (empty($video_id)) {
+            return 0;
+        }
+        
+        // Try to get duration from YouTube Data API (if API key is available in settings)
+        $settings = MindfulMedia_Settings::get_settings();
+        $youtube_api_key = isset($settings['youtube_api_key']) ? $settings['youtube_api_key'] : '';
+        
+        if (!empty($youtube_api_key)) {
+            $api_url = 'https://www.googleapis.com/youtube/v3/videos?id=' . $video_id . '&part=contentDetails&key=' . $youtube_api_key;
+            $response = wp_remote_get($api_url, array('timeout' => 10));
+            
+            if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+                $data = json_decode(wp_remote_retrieve_body($response), true);
+                if (!empty($data['items'][0]['contentDetails']['duration'])) {
+                    // Parse ISO 8601 duration (e.g., PT1H30M45S)
+                    return $this->parse_iso8601_duration($data['items'][0]['contentDetails']['duration']);
+                }
+            }
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Fetch Vimeo video duration using oEmbed
+     */
+    private function fetch_vimeo_duration($url) {
+        $oembed_url = 'https://vimeo.com/api/oembed.json?url=' . urlencode($url);
+        $response = wp_remote_get($oembed_url, array('timeout' => 10));
+        
+        if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+            $data = json_decode(wp_remote_retrieve_body($response), true);
+            if (!empty($data['duration'])) {
+                return intval($data['duration']);
+            }
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Fetch SoundCloud track duration using oEmbed
+     */
+    private function fetch_soundcloud_duration($url) {
+        $oembed_url = 'https://soundcloud.com/oembed?format=json&url=' . urlencode($url);
+        $response = wp_remote_get($oembed_url, array('timeout' => 10));
+        
+        if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+            $data = json_decode(wp_remote_retrieve_body($response), true);
+            // SoundCloud oEmbed doesn't include duration directly, try to extract from HTML
+            // We'll need to use a different approach or skip for now
+            // The Widget API provides duration but requires more complex integration
+        }
+        
+        // Alternative: Try to get from SoundCloud API if we have a client_id
+        // For now, return 0 - SoundCloud requires API authentication for duration
+        return 0;
+    }
+    
+    /**
+     * Parse ISO 8601 duration format (used by YouTube)
+     * e.g., PT1H30M45S -> 5445 seconds
+     */
+    private function parse_iso8601_duration($duration) {
+        $matches = array();
+        preg_match('/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/', $duration, $matches);
+        
+        $hours = isset($matches[1]) ? intval($matches[1]) : 0;
+        $minutes = isset($matches[2]) ? intval($matches[2]) : 0;
+        $seconds = isset($matches[3]) ? intval($matches[3]) : 0;
+        
+        return ($hours * 3600) + ($minutes * 60) + $seconds;
+    }
+    
+    /**
      * Enqueue admin scripts
      */
     public function enqueue_admin_scripts($hook) {
@@ -656,6 +880,12 @@ class MindfulMedia_Meta_Fields {
                     MINDFUL_MEDIA_VERSION,
                     true
                 );
+                
+                // Localize script with nonce for AJAX
+                wp_localize_script('mindful-media-admin', 'mindfulMediaAdmin', array(
+                    'nonce' => wp_create_nonce('mindful_media_ajax_nonce'),
+                    'ajaxUrl' => admin_url('admin-ajax.php')
+                ));
                 
                 // Enqueue frontend CSS for preview functionality
                 wp_enqueue_style(

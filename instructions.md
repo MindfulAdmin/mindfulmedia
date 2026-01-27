@@ -1,7 +1,7 @@
 # MindfulMedia Plugin - Development Guide
 
-**Version:** 2.8.4  
-**Last Updated:** January 23, 2026
+**Version:** 2.13.0  
+**Last Updated:** January 27, 2026
 
 ---
 
@@ -13,6 +13,9 @@ MindfulMedia is a WordPress media management plugin with YouTube-inspired stylin
 - Modal player with playlist sidebar
 - Password protection for content
 - Responsive YouTube-style card layouts
+- User engagement features (likes, comments, subscriptions)
+- MemberPress integration for membership-gated content
+- My Library page with watch history and continue watching
 
 ---
 
@@ -128,6 +131,23 @@ Displays a full page of all terms from a taxonomy, each as a Netflix-style row w
 **Example:** `[mindful_media_taxonomy_archive taxonomy="media_series" title="All Playlists"]`
 
 **Note:** When displaying playlists (`media_series`), password-protected playlists show a lock icon and require password entry before revealing content.
+
+### 6. `[mindful_media_library]` - My Library Page
+Displays the user's personal library with liked videos, watch history, subscriptions, and continue watching sections.
+
+| Attribute | Default | Description |
+|-----------|---------|-------------|
+| (none) | - | No attributes required |
+
+**Example:** `[mindful_media_library]`
+
+**Sections displayed:**
+- **Continue Watching** - Videos with saved playback progress (< 90% complete)
+- **Liked Videos** - Videos the user has liked
+- **Watch History** - Recently viewed videos
+- **Subscriptions** - Followed teachers, topics, playlists, categories with unsubscribe toggles
+
+**Note:** Requires user to be logged in. Guests see a login prompt. A My Library page is automatically created on plugin activation.
 
 ---
 
@@ -266,16 +286,19 @@ The plugin includes print-optimized styles that:
 mindfulmedia/
 ├── mindful-media.php          # Main plugin file
 ├── instructions.md            # This file
+├── uninstall.php              # Cleanup on plugin deletion
 ├── includes/
 │   ├── class-shortcodes.php   # All shortcodes & AJAX handlers
 │   ├── class-post-types.php   # Custom post type & single filter
 │   ├── class-taxonomies.php   # Taxonomy registration & admin
 │   ├── class-meta-fields.php  # Custom meta boxes
 │   ├── class-players.php      # Media player rendering
-│   ├── class-settings.php     # Plugin settings
+│   ├── class-settings.php     # Plugin settings + access helpers
 │   ├── class-admin.php        # Admin customizations
 │   ├── class-blocks.php       # Gutenberg blocks
 │   ├── class-elementor.php    # Elementor integration
+│   ├── class-engagement.php   # Likes, comments, subscriptions, watch history
+│   ├── class-notifications.php # Email notifications for subscriptions
 │   └── elementor/
 │       ├── widget-browse.php
 │       ├── widget-embed.php
@@ -287,8 +310,8 @@ mindfulmedia/
 │   ├── taxonomy-media_teacher.php
 │   └── taxonomy-media_topic.php
 ├── public/
-│   ├── css/frontend.css       # All frontend styles
-│   └── js/frontend.js         # All frontend JavaScript
+│   ├── css/frontend.css       # All frontend styles (incl. engagement)
+│   └── js/frontend.js         # All frontend JavaScript (incl. engagement)
 ├── admin/
 │   ├── css/admin.css
 │   ├── css/blocks-editor.css
@@ -407,6 +430,110 @@ When querying media items for display, ALWAYS exclude videos from protected play
 
 ---
 
+## Engagement Features
+
+### Likes
+Users can like videos to save them for later. Like counts are displayed on media cards and single pages.
+
+- **Enable/Disable:** Settings > Engagement & Access > Enable Likes
+- **Display Counts:** Settings > Engagement & Access > Show counts on cards/single
+- **Storage:** Custom database table `{prefix}_mindful_media_likes`
+- **AJAX Endpoint:** `mindful_media_like` (toggle like status)
+
+### Comments
+Users can comment on videos. Comments can be moderated or auto-approved.
+
+- **Enable/Disable:** Settings > Engagement & Access > Enable Comments
+- **Auto-approve:** Settings > Engagement & Access > Auto-approve comments
+- **Storage:** Custom database table `{prefix}_mindful_media_comments`
+- **AJAX Endpoints:** `mindful_media_post_comment`, `mindful_media_get_comments`, `mindful_media_delete_comment`
+
+### Subscriptions
+Users can subscribe to teachers, topics, playlists, and categories to be notified of new content.
+
+- **Enable/Disable:** Settings > Engagement & Access > Enable Subscriptions
+- **Per-taxonomy controls:** Toggle which taxonomies users can subscribe to
+- **Storage:** Custom database table `{prefix}_mindful_media_subscriptions`
+- **AJAX Endpoints:** `mindful_media_subscribe` (toggle), `mindful_media_get_subscriptions`
+
+### Watch History & Continue Watching
+Track what users have watched and where they left off.
+
+- **Watch History:** Records when a user views a video
+- **Playback Progress:** Saves current playback position periodically
+- **Continue Watching:** Shows videos with saved progress < 90% complete
+- **Storage:** Custom tables `{prefix}_mindful_media_watch_history` and `{prefix}_mindful_media_playback_progress`
+
+### Email Notifications
+Subscribers receive email notifications when new content matches their subscriptions.
+
+- **Enable/Disable:** Settings > Engagement & Access > Enable email notifications
+- **Throttling Options:** Instant, Hourly digest, or Daily digest
+- **Templates:** Customizable from name, email, and subject template
+- **Placeholders:** `{term_name}`, `{site_name}`, `{post_title}`
+- **Master Kill Switch:** Disable ALL notifications setting
+
+### My Library Page
+A dedicated page showing the user's engagement data.
+
+- **Auto-created:** Page with `[mindful_media_library]` shortcode created on plugin activation
+- **WooCommerce Integration:** Optional tab in WooCommerce My Account page
+- **Sections:** Continue Watching, Liked Videos, Watch History, Subscriptions
+
+---
+
+## MemberPress Integration
+
+### Overview
+Restrict media content access based on MemberPress membership levels.
+
+### Setup
+1. Install and activate MemberPress
+2. Go to Settings > Engagement & Access
+3. Enable "MemberPress Gating"
+4. Configure default access level and locked content behavior
+
+### Global Settings (Settings > Engagement & Access)
+- **Enable MemberPress Gating:** Master toggle for membership restrictions
+- **Default Access Level:** Membership level required for all content (can be overridden per-item)
+- **Locked Content Behavior:** Show lock icon + CTA, or hide content entirely
+- **Locked CTA Text:** Custom message displayed on locked content
+- **Join/Pricing URL:** Where to send users who need to upgrade
+
+### Per-Item Access Control
+On each media item edit screen (Visibility & Protection meta box):
+- Select which membership levels can access this specific content
+- Leave empty to use global default
+- Select "Public" to make content available to everyone (override global)
+
+### Per-Taxonomy Access Control
+On each taxonomy term edit screen (Playlists, Teachers, Topics, Categories):
+- Select which membership levels can access all content in this term
+- Useful for restricting entire playlists or all content from a teacher
+
+### How Access Checks Work
+1. Password protection is checked first
+2. If MemberPress gating is enabled, membership levels are checked
+3. Per-item settings override per-taxonomy settings
+4. Per-taxonomy settings override global default
+5. Guests see login prompt with link to join page
+
+### Access Check Function
+Use `MindfulMedia_Settings::user_can_view($post_id)` to check access programmatically:
+
+```php
+$access = MindfulMedia_Settings::user_can_view($post_id);
+if ($access === true) {
+    // User has access
+} else {
+    // $access['locked'] = true
+    // $access['reason'] = 'membership' or 'password'
+    // $access['message'] = Custom lock message
+}
+```
+
+---
+
 ## Features Checklist
 
 ### Core Features
@@ -423,6 +550,24 @@ When querying media items for display, ALWAYS exclude videos from protected play
 - [x] Featured content support
 - [x] Hide from Archive (Visibility control for media and playlists)
 
+### Engagement Features
+- [x] Like videos with like counts
+- [x] Comments with moderation option
+- [x] Subscribe to teachers/topics/playlists/categories
+- [x] Email notifications for new subscribed content
+- [x] Watch history tracking
+- [x] Playback progress saving (continue watching)
+- [x] My Library page with all engagement data
+- [x] WooCommerce My Account integration (optional)
+
+### Access Control
+- [x] MemberPress integration for membership gating
+- [x] Global default access level
+- [x] Per-item membership level overrides
+- [x] Per-taxonomy membership level overrides
+- [x] Locked content display with CTA
+- [x] MemberPress controls hidden when not active
+
 ### Display Features
 - [x] Responsive grid (1-5 columns based on screen)
 - [x] Duration badges on thumbnails
@@ -437,6 +582,8 @@ When querying media items for display, ALWAYS exclude videos from protected play
 - [x] Lazy-loaded images
 - [x] Keyboard navigation (Escape, Space)
 - [x] Mobile swipe gestures
+- [x] Per-taxonomy image aspect ratios (square, landscape, portrait, custom)
+- [x] Featured images for teachers, topics, categories, and playlists
 
 ### Integration
 - [x] Gutenberg blocks (Archive, Embed, Browse, Category Row)
@@ -539,19 +686,6 @@ Ideas for future development:
 - Embed media directly in Moodle courses
 - Track completion status between platforms
 
-### MemberPress Membership Gating
-- Restrict media access based on MemberPress membership levels
-- Automatic playlist/content protection based on membership rules
-- Integration with MemberPress content restriction rules
-- Drip content scheduling for membership tiers
-
-### Continue Watching / Progress Tracking
-- Track user's watch progress for each video
-- "Continue Watching" section showing partially viewed content
-- Progress bar indicators on cards
-- Resume playback from last position
-- Sync progress across devices for logged-in users
-
 ### Setup Wizard
 - Guided onboarding experience for new users
 - Step-by-step configuration of taxonomies, colors, and default settings
@@ -565,10 +699,131 @@ Ideas for future development:
 - Custom embed player themes
 - REST API endpoints for headless usage
 - Autoplay next video in playlists (toggle-able)
+- Progress bar indicators on cards in archive views
+- Resume playback from last position in modal player
+- Drip content scheduling for membership tiers
 
 ---
 
 ## Version History
+
+- **2.13.0** - MemberPress & Navigation Enhancements
+  - **Per-Membership Join URLs**
+    - Global default join/pricing URL (existing)
+    - Per-membership level URL overrides
+    - Content locked for "Premium" redirects to Premium signup page
+    - Fallback to MemberPress product registration page if no custom URL set
+  - **Navigation URLs**
+    - Renamed setting to "Browse Page URL" for clarity
+    - New "Media Archive URL" setting for archive page links
+    - Separate URLs for browse view (`[mindful_media_browse]`) and media listing (`[mindful_media_archive]`)
+  - **Email Template Enhancements**
+    - Added header logo option (upload or use text)
+    - Customizable email body template with placeholders
+    - Live preview updates for logo/text toggle
+    - HTML support in footer text
+    - Reset button for email body template
+
+- **2.12.0** - Email Settings & Template Customization
+  - **New Emails Tab**
+    - Dedicated tab for email notifications (like WooCommerce)
+    - Moved email settings from Engagement tab to new Emails tab
+    - Clear organization of sender settings and template options
+  - **Email Template Customization**
+    - Customizable header text (site branding)
+    - Customizable footer text (subscription explanation)
+    - Header background color picker
+    - Header text color picker
+    - Button/CTA color picker
+    - Button text color picker
+    - Live preview of email template in settings
+  - **Send Test Email**
+    - One-click test email to verify configuration
+    - Sends styled test email matching your template settings
+    - Immediate feedback on success/failure
+  - **Template Improvements**
+    - Notification emails now use customizable colors
+    - Digest emails updated to match template settings
+    - Consistent branding across all email types
+
+- **2.11.0** - Settings UX & Audio Player Improvements
+  - **Audio Player Controls**
+    - Volume slider now uses configurable progress bar color instead of browser default blue
+    - Consistent gold/custom color across progress bar and volume controls
+  - **Settings Page Reorganization**
+    - Reduced from 8 tabs to 7 with logical grouping
+    - New **Appearance** tab combining Colors, Typography, and Image Ratios
+    - New **Access Control** tab split from Engagement (MemberPress, Login settings)
+    - **API Keys** moved to Advanced tab
+    - **Data Management** consolidated in Advanced tab
+    - Added YouTube Data API key field for automatic duration fetching
+  - **Getting Started Guide Enhancements**
+    - Added **Page Builder Integration** section (Gutenberg blocks, Elementor widgets)
+    - Added **Content Protection** section (password protection for items/playlists)
+    - Added **Access Control Overview** section (MemberPress integration)
+    - Added **Import/Export** section with links to tools
+    - Added **What's Next?** section with suggested workflow steps
+  - **UX Improvements**
+    - Professional tab organization following WooCommerce patterns
+    - Clear separation between engagement features and access control
+    - Better discoverability of all plugin features
+
+- **2.10.0** - Taxonomy Images & Aspect Ratios
+  - **Category Featured Images**
+    - Added featured image support to media_category taxonomy (matching topics)
+    - Categories now display images on browse cards and archive headers
+    - Media uploader integration on category add/edit screens
+    - Image column in category list table
+  - **Per-Taxonomy Image Aspect Ratios**
+    - New settings to control aspect ratio for each taxonomy (Teachers, Topics, Categories, Playlists)
+    - Preset options: Square (1:1), Landscape (16:9), Portrait (3:4)
+    - Custom aspect ratio input (width:height format)
+    - Applies to browse cards, term avatars, and archive templates
+    - Dynamic CSS output ensures consistent styling across all views
+  - **Automatic Duration Fetching**
+    - Auto-fetch duration from Vimeo when saving media items (no API key needed)
+    - Auto-fetch duration from YouTube when saving (requires API key)
+    - "Fetch Duration" button on edit screen for manual fetch
+    - Manual override fields still available for custom durations
+  - **Bug Fix: Browse By Teacher Counts**
+    - Fixed inaccurate media counts on browse page term cards
+    - Counts now always recalculated from database instead of using cached term->count
+
+- **2.9.0** - User Engagement & MemberPress Integration
+  - **User Engagement Features**
+    - Added likes system with like counts on cards and single pages
+    - Added comments system with moderation/auto-approve option
+    - Added subscription system for teachers, topics, playlists, categories
+    - Added watch history tracking (records when users view videos)
+    - Added playback progress saving (continue watching functionality)
+    - Email notifications for subscribed content (instant/hourly/daily digest)
+  - **My Library Page**
+    - Auto-created page on plugin activation with `[mindful_media_library]` shortcode
+    - Tabbed interface: Continue Watching, Liked, History, Subscriptions
+    - Optional WooCommerce My Account tab integration
+  - **MemberPress Integration**
+    - Restrict content based on MemberPress membership levels
+    - Global default access level with per-item/per-taxonomy overrides
+    - Locked content displays with customizable CTA and join URL
+    - MemberPress controls hidden when plugin not active
+  - **New Database Tables**
+    - `{prefix}_mindful_media_likes`
+    - `{prefix}_mindful_media_comments`
+    - `{prefix}_mindful_media_subscriptions`
+    - `{prefix}_mindful_media_watch_history`
+    - `{prefix}_mindful_media_playback_progress`
+  - **Settings Page Updates**
+    - New "Engagement & Access" tab with all engagement controls
+    - Email notification settings (from name/email, subject template, throttle)
+    - MemberPress gating settings (enable, default level, locked behavior)
+    - My Library settings (page selector, WooCommerce integration toggle)
+    - Data retention option (keep engagement data on uninstall)
+  - **Frontend Updates**
+    - Like button and subscribe button on single media pages
+    - Comment composer and comment list on single media pages
+    - Guest prompts linking to login page
+    - CSS styles for all engagement components
+    - JavaScript handlers for AJAX engagement actions
 
 - **2.8.4** - Navigation Arrows & Modal Styling Fix
   - **Browse Slider Navigation Arrows**

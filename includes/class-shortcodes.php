@@ -18,6 +18,7 @@ class MindfulMedia_Shortcodes {
     public function __construct() {
         add_action('init', array($this, 'register_shortcodes'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
+        add_action('wp_head', array($this, 'output_dynamic_css'), 100);
         add_action('wp_ajax_mindful_media_filter', array($this, 'ajax_filter_content'));
         add_action('wp_ajax_nopriv_mindful_media_filter', array($this, 'ajax_filter_content'));
         add_action('wp_ajax_mindful_media_load_inline', array($this, 'ajax_load_inline_player'));
@@ -41,6 +42,56 @@ class MindfulMedia_Shortcodes {
         add_shortcode('mindful_media_browse', array($this, 'browse_shortcode')); // Browse/landing page shortcode
         add_shortcode('mindful_media_row', array($this, 'row_shortcode')); // Netflix-style category row
         add_shortcode('mindful_media_taxonomy_archive', array($this, 'taxonomy_archive_shortcode')); // Full taxonomy archive with Netflix rows
+        add_shortcode('mindful_media_library', array($this, 'library_shortcode')); // My Library page for user engagement
+        
+        // WooCommerce integration
+        if (MindfulMedia_Settings::is_woocommerce_active()) {
+            add_filter('woocommerce_account_menu_items', array($this, 'add_woocommerce_library_tab'), 40);
+            add_action('woocommerce_account_mindful-media-library_endpoint', array($this, 'render_woocommerce_library_tab'));
+            add_action('init', array($this, 'add_woocommerce_endpoint'));
+        }
+    }
+    
+    /**
+     * Add WooCommerce endpoint for My Library
+     */
+    public function add_woocommerce_endpoint() {
+        $settings = MindfulMedia_Settings::get_settings();
+        if (!empty($settings['enable_woocommerce_tab'])) {
+            add_rewrite_endpoint('mindful-media-library', EP_ROOT | EP_PAGES);
+        }
+    }
+    
+    /**
+     * Add My Library tab to WooCommerce My Account menu
+     */
+    public function add_woocommerce_library_tab($items) {
+        $settings = MindfulMedia_Settings::get_settings();
+        if (empty($settings['enable_woocommerce_tab'])) {
+            return $items;
+        }
+        
+        // Insert before logout
+        $logout = false;
+        if (isset($items['customer-logout'])) {
+            $logout = $items['customer-logout'];
+            unset($items['customer-logout']);
+        }
+        
+        $items['mindful-media-library'] = __('My Library', 'mindful-media');
+        
+        if ($logout) {
+            $items['customer-logout'] = $logout;
+        }
+        
+        return $items;
+    }
+    
+    /**
+     * Render the WooCommerce My Library tab content
+     */
+    public function render_woocommerce_library_tab() {
+        echo $this->library_shortcode(array());
     }
     
     /**
@@ -1634,8 +1685,8 @@ class MindfulMedia_Shortcodes {
         // Term header with image, name, count
         echo '<div class="mindful-media-term-header" style="display:flex;align-items:center;gap:20px;padding:0 24px 24px;border-bottom:1px solid #e5e5e5;margin-bottom:24px;">';
         
-        // Term avatar/image
-        echo '<div class="mindful-media-term-avatar" style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:#f2f2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">';
+        // Term avatar/image - add data-taxonomy for CSS targeting
+        echo '<div class="mindful-media-term-avatar" data-taxonomy="' . esc_attr($taxonomy) . '" style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:#f2f2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">';
         if ($term_image) {
             echo '<img src="' . esc_url($term_image) . '" alt="' . esc_attr($term->name) . '" style="width:100%;height:100%;object-fit:cover;">';
         } else {
@@ -1823,8 +1874,8 @@ class MindfulMedia_Shortcodes {
         // Playlist header
         echo '<div class="mindful-media-term-header" style="display:flex;align-items:center;gap:20px;padding:0 24px 24px;border-bottom:1px solid #e5e5e5;margin-bottom:24px;">';
         
-        // Playlist image/icon
-        echo '<div class="mindful-media-term-avatar" style="width:80px;height:80px;border-radius:12px;overflow:hidden;background:#f2f2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">';
+        // Playlist image/icon - add data-taxonomy for CSS targeting
+        echo '<div class="mindful-media-term-avatar" data-taxonomy="media_series" style="width:80px;height:80px;border-radius:12px;overflow:hidden;background:#f2f2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">';
         if ($term_image) {
             echo '<img src="' . esc_url($term_image) . '" alt="' . esc_attr($term->name) . '" style="width:100%;height:100%;object-fit:cover;">';
         } else {
@@ -2351,6 +2402,325 @@ class MindfulMedia_Shortcodes {
     }
     
     /**
+     * My Library shortcode
+     * Displays user's engagement data: continue watching, liked videos, watch history, subscriptions
+     * 
+     * Usage: [mindful_media_library]
+     */
+    public function library_shortcode($atts) {
+        // Require login
+        if (!is_user_logged_in()) {
+            $settings = MindfulMedia_Settings::get_settings();
+            $login_url = $settings['login_url'] ?? wp_login_url(get_permalink());
+            
+            ob_start();
+            ?>
+            <div class="mindful-media-library mindful-media-library-guest">
+                <div class="mm-library-login-prompt">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <h2><?php _e('Sign in to access your library', 'mindful-media'); ?></h2>
+                    <p><?php _e('Keep track of your liked videos, subscriptions, and watch history.', 'mindful-media'); ?></p>
+                    <a href="<?php echo esc_url($login_url); ?>" class="mm-library-login-btn"><?php _e('Sign In', 'mindful-media'); ?></a>
+                </div>
+            </div>
+            <?php
+            return ob_get_clean();
+        }
+        
+        $user_id = get_current_user_id();
+        $settings = MindfulMedia_Settings::get_settings();
+        $user = get_userdata($user_id);
+        
+        // Get engagement instance
+        $engagement = new MindfulMedia_Engagement();
+        
+        // Get user stats for the header
+        $liked_count = count($engagement->get_user_likes($user_id, 999));
+        $subscriptions = $engagement->get_user_subscriptions($user_id);
+        $subscription_count = count($subscriptions);
+        
+        ob_start();
+        
+        // Include modal player container for video playback
+        echo $this->get_modal_player_html();
+        ?>
+        <div class="mindful-media-library" data-user-id="<?php echo esc_attr($user_id); ?>">
+            
+            <!-- User Profile Header (like teacher pages) -->
+            <div class="mm-library-header">
+                <div class="mm-library-header-inner">
+                    <div class="mm-library-avatar">
+                        <?php echo get_avatar($user_id, 80); ?>
+                    </div>
+                    <div class="mm-library-user-info">
+                        <h1 class="mm-library-user-name"><?php echo esc_html($user->display_name); ?></h1>
+                        <div class="mm-library-user-stats">
+                            <span class="mm-library-stat">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                                <?php echo sprintf(_n('%d liked', '%d liked', $liked_count, 'mindful-media'), $liked_count); ?>
+                            </span>
+                            <span class="mm-library-stat">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                                <?php echo sprintf(_n('%d subscription', '%d subscriptions', $subscription_count, 'mindful-media'), $subscription_count); ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <?php 
+            // Continue Watching - shown at top only if there are items
+            $continue_watching = $engagement->get_continue_watching($user_id, 6);
+            if (!empty($continue_watching)): 
+            ?>
+            <div class="mm-library-continue-watching">
+                <h3><?php _e('Continue Watching', 'mindful-media'); ?></h3>
+                <div class="mm-library-grid mm-library-grid-row">
+                    <?php foreach ($continue_watching as $item): ?>
+                        <?php $this->render_library_card($item->post_id, array(
+                            'progress' => $item->progress_seconds,
+                            'duration' => $item->duration_seconds
+                        )); ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <!-- Library Navigation Tabs -->
+            <div class="mm-library-tabs">
+                <button class="mm-library-tab active" data-section="liked"><?php _e('Liked', 'mindful-media'); ?></button>
+                <button class="mm-library-tab" data-section="history"><?php _e('History', 'mindful-media'); ?></button>
+                <button class="mm-library-tab" data-section="subscriptions"><?php _e('Subscriptions', 'mindful-media'); ?></button>
+            </div>
+            
+            <!-- Liked Videos Section -->
+            <div class="mm-library-section mm-library-section-liked active" data-section="liked">
+                <h3><?php _e('Liked Videos', 'mindful-media'); ?></h3>
+                <?php
+                $liked_videos = $engagement->get_user_likes($user_id, 24);
+                if (empty($liked_videos)) {
+                    echo '<p class="mm-library-empty">' . __('No liked videos yet. Like a video to save it here!', 'mindful-media') . '</p>';
+                } else {
+                    echo '<div class="mm-library-grid">';
+                    foreach ($liked_videos as $item) {
+                        $this->render_library_card($item->post_id);
+                    }
+                    echo '</div>';
+                }
+                ?>
+            </div>
+            
+            <!-- Watch History Section -->
+            <div class="mm-library-section mm-library-section-history" data-section="history">
+                <h3><?php _e('Watch History', 'mindful-media'); ?></h3>
+                <?php
+                $history = $engagement->get_watch_history($user_id, 24);
+                if (empty($history)) {
+                    echo '<p class="mm-library-empty">' . __('No watch history yet.', 'mindful-media') . '</p>';
+                } else {
+                    echo '<div class="mm-library-grid">';
+                    foreach ($history as $item) {
+                        $this->render_library_card($item->post_id, array(
+                            'watched_at' => $item->last_watched_at
+                        ));
+                    }
+                    echo '</div>';
+                }
+                ?>
+            </div>
+            
+            <!-- Subscriptions Section -->
+            <div class="mm-library-section mm-library-section-subscriptions" data-section="subscriptions">
+                <h3><?php _e('Subscriptions', 'mindful-media'); ?></h3>
+                <?php
+                $subscriptions = $engagement->get_user_subscriptions($user_id);
+                if (empty($subscriptions)) {
+                    echo '<p class="mm-library-empty">' . __('No subscriptions yet. Subscribe to teachers, topics, or playlists to get notified of new content!', 'mindful-media') . '</p>';
+                } else {
+                    // Group by type
+                    $grouped = array();
+                    foreach ($subscriptions as $sub) {
+                        $grouped[$sub->object_type][] = $sub;
+                    }
+                    
+                    foreach ($grouped as $type => $items) {
+                        $type_label = $this->get_subscription_type_label($type);
+                        echo '<div class="mm-library-subscription-group">';
+                        echo '<h4>' . esc_html($type_label) . '</h4>';
+                        echo '<div class="mm-library-subscription-list">';
+                        
+                        foreach ($items as $sub) {
+                            $this->render_subscription_item($sub);
+                        }
+                        
+                        echo '</div>';
+                        echo '</div>';
+                    }
+                }
+                ?>
+            </div>
+            
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
+    /**
+     * Render a library card for a post
+     */
+    private function render_library_card($post_id, $extra = array()) {
+        $post = get_post($post_id);
+        if (!$post || $post->post_status !== 'publish') {
+            return;
+        }
+        
+        $thumbnail_url = self::get_media_thumbnail_url($post_id, 'medium_large');
+        $duration_hours = get_post_meta($post_id, '_mindful_media_duration_hours', true);
+        $duration_minutes = get_post_meta($post_id, '_mindful_media_duration_minutes', true);
+        $duration_badge = self::format_duration_badge($duration_hours, $duration_minutes);
+        
+        $teachers = get_the_terms($post_id, 'media_teacher');
+        $teacher_name = ($teachers && !is_wp_error($teachers)) ? $teachers[0]->name : '';
+        
+        // Calculate progress percentage if available
+        $progress_percent = 0;
+        if (!empty($extra['progress']) && !empty($extra['duration']) && $extra['duration'] > 0) {
+            $progress_percent = min(100, ($extra['progress'] / $extra['duration']) * 100);
+        }
+        
+        ?>
+        <article class="mm-library-card" data-post-id="<?php echo esc_attr($post_id); ?>">
+            <button type="button" class="mm-library-card-btn mindful-media-thumb-trigger" data-post-id="<?php echo esc_attr($post_id); ?>">
+                <div class="mm-library-card-thumb">
+                    <img src="<?php echo esc_url($thumbnail_url); ?>" alt="<?php echo esc_attr($post->post_title); ?>" loading="lazy">
+                    
+                    <div class="mm-library-card-overlay">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                    
+                    <?php if ($duration_badge): ?>
+                        <span class="mm-library-duration"><?php echo esc_html($duration_badge); ?></span>
+                    <?php endif; ?>
+                    
+                    <?php if ($progress_percent > 0): ?>
+                        <div class="mm-library-progress-bar">
+                            <div class="mm-library-progress-fill" style="width: <?php echo esc_attr($progress_percent); ?>%"></div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </button>
+            
+            <div class="mm-library-card-content">
+                <h4 class="mm-library-card-title"><?php echo esc_html($post->post_title); ?></h4>
+                <?php if ($teacher_name): ?>
+                    <p class="mm-library-card-teacher"><?php echo esc_html($teacher_name); ?></p>
+                <?php endif; ?>
+                <?php if (!empty($extra['watched_at'])): ?>
+                    <p class="mm-library-card-meta"><?php echo esc_html(human_time_diff(strtotime($extra['watched_at']), current_time('timestamp')) . ' ' . __('ago', 'mindful-media')); ?></p>
+                <?php endif; ?>
+            </div>
+        </article>
+        <?php
+    }
+    
+    /**
+     * Render a subscription item
+     */
+    private function render_subscription_item($subscription) {
+        $term = null;
+        $name = '';
+        $url = '';
+        $thumbnail = '';
+        
+        // Get term details based on type
+        if (in_array($subscription->object_type, array('media_series', 'media_teacher', 'media_topic', 'media_category'))) {
+            $term = get_term($subscription->object_id, $subscription->object_type);
+            if ($term && !is_wp_error($term)) {
+                $name = $term->name;
+                $url = get_term_link($term);
+                // Get term thumbnail if available
+                $term_image = get_term_meta($subscription->object_id, 'term_image', true);
+                if ($term_image) {
+                    $thumbnail = wp_get_attachment_image_url($term_image, 'thumbnail');
+                }
+            }
+        } elseif ($subscription->object_type === 'playlist') {
+            // Playlist is stored as media_series
+            $term = get_term($subscription->object_id, 'media_series');
+            if ($term && !is_wp_error($term)) {
+                $name = $term->name;
+                $url = get_term_link($term);
+            }
+        }
+        
+        if (!$name) {
+            return;
+        }
+        
+        ?>
+        <div class="mm-library-subscription-item" data-object-id="<?php echo esc_attr($subscription->object_id); ?>" data-object-type="<?php echo esc_attr($subscription->object_type); ?>">
+            <?php if ($thumbnail): ?>
+                <div class="mm-subscription-thumb">
+                    <img src="<?php echo esc_url($thumbnail); ?>" alt="<?php echo esc_attr($name); ?>">
+                </div>
+            <?php else: ?>
+                <div class="mm-subscription-thumb mm-subscription-thumb-placeholder">
+                    <?php echo $this->get_subscription_type_icon($subscription->object_type); ?>
+                </div>
+            <?php endif; ?>
+            
+            <div class="mm-subscription-info">
+                <a href="<?php echo esc_url($url); ?>" class="mm-subscription-name"><?php echo esc_html($name); ?></a>
+                <span class="mm-subscription-type"><?php echo esc_html($this->get_subscription_type_label($subscription->object_type, true)); ?></span>
+            </div>
+            
+            <div class="mm-subscription-actions">
+                <label class="mm-subscription-notify">
+                    <input type="checkbox" <?php checked($subscription->notify_email, 1); ?> class="mm-subscription-notify-toggle">
+                    <span><?php _e('Notify', 'mindful-media'); ?></span>
+                </label>
+                <button type="button" class="mm-subscription-unsubscribe" title="<?php esc_attr_e('Unsubscribe', 'mindful-media'); ?>">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>
+        <?php
+    }
+    
+    /**
+     * Get human-readable label for subscription type
+     */
+    private function get_subscription_type_label($type, $singular = false) {
+        $labels = array(
+            'media_series' => $singular ? __('Playlist', 'mindful-media') : __('Playlists', 'mindful-media'),
+            'playlist' => $singular ? __('Playlist', 'mindful-media') : __('Playlists', 'mindful-media'),
+            'media_teacher' => $singular ? __('Teacher', 'mindful-media') : __('Teachers', 'mindful-media'),
+            'media_topic' => $singular ? __('Topic', 'mindful-media') : __('Topics', 'mindful-media'),
+            'media_category' => $singular ? __('Category', 'mindful-media') : __('Categories', 'mindful-media')
+        );
+        
+        return isset($labels[$type]) ? $labels[$type] : ucfirst($type);
+    }
+    
+    /**
+     * Get icon for subscription type
+     */
+    private function get_subscription_type_icon($type) {
+        $icons = array(
+            'media_series' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4zm14 0v6l5-3-5-3z"/></svg>',
+            'playlist' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4zm14 0v6l5-3-5-3z"/></svg>',
+            'media_teacher' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>',
+            'media_topic' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
+            'media_category' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>'
+        );
+        
+        return isset($icons[$type]) ? $icons[$type] : '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>';
+    }
+    
+    /**
      * Render navigation bar for browse page
      * Navigation now uses data attributes for dynamic filtering
      * Respects Archive Display settings from admin
@@ -2590,26 +2960,30 @@ class MindfulMedia_Shortcodes {
             $output .= '<h4 class="mindful-media-browse-card-title">' . esc_html($term->name) . '</h4>';
             
             if ($show_counts) {
-                // Count only accessible videos (exclude protected)
-                $accessible_count = $term->count;
-                if (!empty($protected_ids)) {
-                    $count_query = new WP_Query(array(
-                        'post_type' => 'mindful_media',
-                        'post_status' => 'publish',
-                        'posts_per_page' => -1,
-                        'fields' => 'ids',
-                        'post__not_in' => $protected_ids,
-                        'tax_query' => array(
-                            array(
-                                'taxonomy' => $taxonomy,
-                                'field' => 'term_id',
-                                'terms' => $term->term_id
-                            )
+                // Always recalculate count for accuracy (term->count can be stale)
+                $count_query_args = array(
+                    'post_type' => 'mindful_media',
+                    'post_status' => 'publish',
+                    'posts_per_page' => -1,
+                    'fields' => 'ids',
+                    'tax_query' => array(
+                        array(
+                            'taxonomy' => $taxonomy,
+                            'field' => 'term_id',
+                            'terms' => $term->term_id
                         )
-                    ));
-                    $accessible_count = $count_query->found_posts;
-                    wp_reset_postdata();
+                    )
+                );
+                
+                // Exclude protected videos if any
+                if (!empty($protected_ids)) {
+                    $count_query_args['post__not_in'] = $protected_ids;
                 }
+                
+                $count_query = new WP_Query($count_query_args);
+                $accessible_count = $count_query->found_posts;
+                wp_reset_postdata();
+                
                 $output .= '<span class="mindful-media-browse-card-count">';
                 $output .= sprintf(_n('%d item', '%d items', $accessible_count, 'mindful-media'), $accessible_count);
                 $output .= '</span>';
@@ -4030,8 +4404,53 @@ class MindfulMedia_Shortcodes {
             'nonce' => wp_create_nonce('mindful_media_ajax_nonce'),
             'modalPlayerTheme' => $settings['modal_player_theme'] ?? 'dark',
             'modalShowMoreMedia' => $settings['modal_show_more_media'] ?? '1',
-            'youtubeHideEndScreen' => $settings['youtube_hide_end_screen'] ?? '0'
+            'youtubeHideEndScreen' => $settings['youtube_hide_end_screen'] ?? '0',
+            'isLoggedIn' => is_user_logged_in(),
+            'loginUrl' => $settings['login_url'] ?? wp_login_url(),
+            'enableLikes' => $settings['enable_likes'] ?? '1',
+            'enableComments' => $settings['enable_comments'] ?? '1',
+            'enableSubscriptions' => $settings['enable_subscriptions'] ?? '1'
         ));
+    }
+    
+    /**
+     * Output dynamic CSS for taxonomy aspect ratios
+     */
+    public function output_dynamic_css() {
+        $taxonomies = array(
+            'media_teacher' => 'teacher',
+            'media_topic' => 'topic',
+            'media_category' => 'category',
+            'media_series' => 'series'
+        );
+        
+        echo '<style id="mindful-media-dynamic-css">';
+        echo '/* MindfulMedia Dynamic Taxonomy Aspect Ratios */';
+        
+        foreach ($taxonomies as $taxonomy => $short_name) {
+            $ratio = MindfulMedia_Settings::get_taxonomy_aspect_ratio($taxonomy);
+            
+            // Browse cards on browse page
+            echo '.mm-term-card[data-taxonomy="' . esc_attr($taxonomy) . '"] .mindful-media-browse-card-image { aspect-ratio: ' . esc_attr($ratio) . ' !important; }';
+            echo '.mm-term-card[data-taxonomy="' . esc_attr($taxonomy) . '"] .mindful-media-browse-card-placeholder { aspect-ratio: ' . esc_attr($ratio) . ' !important; }';
+            
+            // Slider items
+            echo '.mm-slider-item[data-taxonomy="' . esc_attr($taxonomy) . '"] .mindful-media-browse-card-image { aspect-ratio: ' . esc_attr($ratio) . ' !important; }';
+            
+            // Taxonomy archive template card thumbnails
+            echo '.mindful-media-' . esc_attr($short_name) . '-card-thumb { aspect-ratio: ' . esc_attr($ratio) . ' !important; }';
+            
+            // Term header avatars (for square, make them circular; otherwise rectangular)
+            if ($ratio === '1 / 1') {
+                echo '.mindful-media-term-avatar[data-taxonomy="' . esc_attr($taxonomy) . '"] { border-radius: 50% !important; width: 80px !important; height: 80px !important; }';
+                echo '.mindful-media-' . esc_attr($short_name) . '-avatar { border-radius: 50% !important; }';
+            } else {
+                echo '.mindful-media-term-avatar[data-taxonomy="' . esc_attr($taxonomy) . '"] { border-radius: 8px !important; aspect-ratio: ' . esc_attr($ratio) . ' !important; width: auto !important; height: 80px !important; }';
+                echo '.mindful-media-' . esc_attr($short_name) . '-avatar { border-radius: 8px !important; aspect-ratio: ' . esc_attr($ratio) . ' !important; width: auto !important; height: 80px !important; }';
+            }
+        }
+        
+        echo '</style>';
     }
     
     /**
@@ -4144,11 +4563,6 @@ class MindfulMedia_Shortcodes {
             // Wrap in a clean container for inline display
             $wrapped_html = '<div class="mindful-media-inline-embed">';
             $wrapped_html .= $player_html;
-            $wrapped_html .= '</div>';
-            
-            // Add scroll indicator arrow (pointing DOWN)
-            $wrapped_html .= '<div class="mindful-media-scroll-indicator" onclick="document.querySelector(\'.mindful-media-browse-below\').scrollIntoView({behavior: \'smooth\'});" style="cursor: pointer;">';
-            $wrapped_html .= '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>';
             $wrapped_html .= '</div>';
             
             $teachers = get_the_terms($post_id, 'media_teacher');
@@ -4471,6 +4885,36 @@ class MindfulMedia_Shortcodes {
                 }
             }
             
+            // Get engagement data
+            $engagement_data = array(
+                'enabled' => false
+            );
+            $mm_settings = MindfulMedia_Settings::get_settings();
+            
+            if (class_exists('MindfulMedia_Engagement')) {
+                $engagement = new MindfulMedia_Engagement();
+                $user_id = get_current_user_id();
+                
+                $engagement_data = array(
+                    'enabled' => true,
+                    'post_id' => $post_id,
+                    'likes_enabled' => !empty($mm_settings['enable_likes']),
+                    'like_count' => !empty($mm_settings['enable_likes']) ? $engagement->get_like_count($post_id) : 0,
+                    'user_liked' => $user_id ? $engagement->user_has_liked($user_id, $post_id) : false,
+                    'subscriptions_enabled' => !empty($mm_settings['enable_subscriptions']),
+                    'is_logged_in' => (bool) $user_id,
+                    'login_url' => $mm_settings['login_url'] ?? wp_login_url()
+                );
+                
+                // Add subscription data for teacher
+                if (!empty($mm_settings['enable_subscriptions']) && !empty($mm_settings['allow_subscription_teachers']) && $teachers && !is_wp_error($teachers)) {
+                    $teacher = $teachers[0];
+                    $engagement_data['teacher_id'] = $teacher->term_id;
+                    $engagement_data['teacher_name'] = $teacher->name;
+                    $engagement_data['user_subscribed'] = $user_id ? $engagement->user_is_subscribed($user_id, $teacher->term_id, 'media_teacher') : false;
+                }
+            }
+            
             wp_send_json_success(array(
                 'player' => $wrapped_html,
                 'title' => html_entity_decode($post->post_title, ENT_QUOTES, 'UTF-8'),
@@ -4482,7 +4926,8 @@ class MindfulMedia_Shortcodes {
                 'duration' => $duration,
                 'media_type' => $media_type_name,
                 'categories' => $category_names,
-                'topics' => $topic_names
+                'topics' => $topic_names,
+                'engagement' => $engagement_data
             ));
         } else {
             wp_send_json_error('Player class not found');

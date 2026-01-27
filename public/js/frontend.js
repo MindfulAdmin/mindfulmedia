@@ -1005,6 +1005,9 @@
                         destroyPlayerInstances($playerContent);
                         $playerContent.html(response.data.player);
                         
+                        // Store current post ID for progress tracking
+                        $inlinePlayer.data('current-post-id', postId);
+                        
                         // Render playlist sidebar if playlist data exists
                         if (response.data.playlist) {
                             renderPlaylistSidebar(response.data.playlist);
@@ -1023,6 +1026,11 @@
                         setTimeout(function() {
                             initUnifiedPlayers();
                         }, 100);
+                        
+                        // Record watch history and start progress tracking
+                        if (typeof MindfulMediaEngagement !== 'undefined') {
+                            recordWatchHistory(postId);
+                        }
                         
                         // Clear any existing browse section before deciding to show it
                         $('.mindful-media-browse-below').remove();
@@ -1057,6 +1065,54 @@
             // Remove existing content section
             $('.mindful-media-modal-content-section').remove();
             $('.mindful-media-more-info-toggle').remove();
+            $('.mindful-media-modal-engagement').remove();
+            
+            // Build engagement section HTML (likes, subscribe)
+            var engagementHtml = '';
+            if (data.engagement && data.engagement.enabled) {
+                engagementHtml = '<div class="mindful-media-modal-engagement">';
+                
+                // Like button
+                if (data.engagement.likes_enabled) {
+                    if (data.engagement.is_logged_in) {
+                        var likedClass = data.engagement.user_liked ? 'liked' : '';
+                        engagementHtml += '<button type="button" class="mm-like-btn ' + likedClass + '" data-post-id="' + data.engagement.post_id + '">';
+                        engagementHtml += '<svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>';
+                        engagementHtml += '<span class="mm-like-count">' + (data.engagement.like_count > 0 ? data.engagement.like_count : '') + '</span>';
+                        engagementHtml += '</button>';
+                    } else {
+                        engagementHtml += '<a href="' + data.engagement.login_url + '" class="mm-like-btn" title="Sign in to like">';
+                        engagementHtml += '<svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>';
+                        engagementHtml += '<span class="mm-like-count">' + (data.engagement.like_count > 0 ? data.engagement.like_count : '') + '</span>';
+                        engagementHtml += '</a>';
+                    }
+                }
+                
+                // Subscribe button for teacher
+                if (data.engagement.subscriptions_enabled && data.engagement.teacher_id) {
+                    if (data.engagement.is_logged_in) {
+                        var subscribedClass = data.engagement.user_subscribed ? 'subscribed' : '';
+                        var subscribedText = data.engagement.user_subscribed ? 'Subscribed' : 'Subscribe';
+                        var subscribedIcon = data.engagement.user_subscribed 
+                            ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'
+                            : '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>';
+                        engagementHtml += '<button type="button" class="mm-subscribe-btn ' + subscribedClass + '" data-object-id="' + data.engagement.teacher_id + '" data-object-type="media_teacher">';
+                        engagementHtml += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + subscribedIcon + '</svg>';
+                        engagementHtml += '<span class="mm-subscribe-text">' + subscribedText + '</span>';
+                        engagementHtml += '</button>';
+                    } else {
+                        engagementHtml += '<a href="' + data.engagement.login_url + '" class="mm-subscribe-btn" title="Sign in to subscribe">';
+                        engagementHtml += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>';
+                        engagementHtml += '<span class="mm-subscribe-text">Subscribe</span>';
+                        engagementHtml += '</a>';
+                    }
+                }
+                
+                engagementHtml += '</div>';
+                
+                // Insert engagement section after player content
+                $playerContent.after(engagementHtml);
+            }
             
             // Build content HTML
             var contentHtml = '';
@@ -1317,6 +1373,9 @@
                         $('.mindful-media-inline-share').data('permalink', response.data.permalink);
                         $playerContent.html(response.data.player);
                         
+                        // Store current post ID for progress tracking
+                        $inlinePlayer.data('current-post-id', postId);
+                        
                         // Render playlist sidebar - it should always exist for playlist items
                         if (response.data.playlist) {
                             renderPlaylistSidebar(response.data.playlist);
@@ -1365,6 +1424,9 @@
         
         $('.mindful-media-inline-close').on('click', function() {
             destroyPlayerInstances($playerContent);
+            
+            // Trigger custom event for engagement tracking cleanup
+            $(document).trigger('mindful-media-modal-closed');
             
             // Clear all "Now playing" indicators and reset card states
             $('.mindful-media-play-inline').each(function() {
@@ -1837,6 +1899,7 @@
                     });
                 },
                 'onStateChange': function(event) {
+                    var playerInstance = event.target;
                     if (event.data == YT.PlayerState.PLAYING) {
                         $player.addClass('playing controls-active'); // Enable custom controls once playing
                         updatePlayButton($player, 'pause');
@@ -1846,6 +1909,16 @@
                             $player.removeClass('mm-youtube-endscreen-active');
                         }
                         $player.trigger('playing'); // Trigger jQuery event for progress updates
+                        
+                        // Start progress tracking for Continue Watching
+                        var postId = $player.closest('.mindful-media-inline-player').data('current-post-id') || 
+                                     $player.closest('[data-post-id]').data('post-id');
+                        if (postId && typeof window.MindfulMediaEngagement !== 'undefined') {
+                            window.MindfulMediaEngagement.startProgressTracking(postId, {
+                                getCurrentTime: function() { return playerInstance.getCurrentTime(); },
+                                getDuration: function() { return playerInstance.getDuration(); }
+                            });
+                        }
                     } else if (event.data == YT.PlayerState.PAUSED) {
                         $player.removeClass('playing');
                         updatePlayButton($player, 'play');
@@ -1855,6 +1928,11 @@
                             $player.removeClass('mm-youtube-endscreen-active');
                         }
                         $player.trigger('pause'); // Trigger jQuery event
+                        
+                        // Save progress when paused
+                        if (typeof window.MindfulMediaEngagement !== 'undefined') {
+                            window.MindfulMediaEngagement.stopProgressTracking();
+                        }
                     } else if (event.data == YT.PlayerState.ENDED) {
                         $player.removeClass('playing');
                         updatePlayButton($player, 'play');
@@ -1864,6 +1942,11 @@
                             $player.addClass('mm-youtube-endscreen-active');
                         }
                         $player.trigger('ended'); // Trigger jQuery event
+                        
+                        // Stop progress tracking when ended
+                        if (typeof window.MindfulMediaEngagement !== 'undefined') {
+                            window.MindfulMediaEngagement.stopProgressTracking();
+                        }
                     }
                 }
             }
@@ -1944,6 +2027,17 @@
             var $bigPlay = $player.find('.mindful-media-big-play-btn');
             $bigPlay.addClass('hidden').css('display', 'none');
             $player.trigger('playing'); // Trigger jQuery event for progress updates
+            
+            // Start progress tracking for Continue Watching
+            var postId = $player.closest('.mindful-media-inline-player').data('current-post-id') || 
+                         $player.closest('[data-post-id]').data('post-id');
+            if (postId && typeof window.MindfulMediaEngagement !== 'undefined') {
+                // Pass Vimeo player directly - tracking function handles async API
+                window.MindfulMediaEngagement.startProgressTracking(postId, {
+                    getCurrentTime: function() { return player.getCurrentTime(); },
+                    getDuration: function() { return player.getDuration(); }
+                });
+            }
         });
         
         player.on('pause', function() {
@@ -1953,6 +2047,11 @@
             var $bigPlay = $player.find('.mindful-media-big-play-btn');
             $bigPlay.removeClass('hidden').css('display', 'flex');
             $player.trigger('pause'); // Trigger jQuery event
+            
+            // Save progress when paused
+            if (typeof window.MindfulMediaEngagement !== 'undefined') {
+                window.MindfulMediaEngagement.stopProgressTracking();
+            }
         });
         
         player.on('ended', function() {
@@ -1962,6 +2061,11 @@
             var $bigPlay = $player.find('.mindful-media-big-play-btn');
             $bigPlay.removeClass('hidden').css('display', 'flex');
             $player.trigger('ended'); // Trigger jQuery event
+            
+            // Stop progress tracking when ended
+            if (typeof window.MindfulMediaEngagement !== 'undefined') {
+                window.MindfulMediaEngagement.stopProgressTracking();
+            }
         });
         
         // Store player reference
@@ -2210,17 +2314,30 @@
                 $volumeSlider.val(0);
                 $volumeSlider.data('previous-volume', currentVolume);
                 api.mute();
+                updateVolumeSliderFill($volumeSlider, 0);
             } else {
                 var previousVolume = $volumeSlider.data('previous-volume') || 100;
                 $volumeSlider.val(previousVolume);
                 api.setVolume(previousVolume);
+                updateVolumeSliderFill($volumeSlider, previousVolume);
             }
         });
         
         $volumeSlider.on('input change', function() {
             var volume = parseInt($(this).val(), 10) || 0;
             api.setVolume(volume);
+            updateVolumeSliderFill($(this), volume);
         });
+        
+        // Function to update volume slider fill color
+        function updateVolumeSliderFill($slider, volume) {
+            var progressColor = getComputedStyle(document.documentElement).getPropertyValue('--mindful-media-progress-color').trim() || '#ff0000';
+            var percentage = volume;
+            $slider.css('background', 'linear-gradient(to right, ' + progressColor + ' 0%, ' + progressColor + ' ' + percentage + '%, rgba(255,255,255,0.3) ' + percentage + '%, rgba(255,255,255,0.3) 100%)');
+        }
+        
+        // Initialize volume slider fill on load
+        updateVolumeSliderFill($volumeSlider, parseInt($volumeSlider.val(), 10) || 80);
         
         // Fullscreen button
         $fullscreenBtn.on('click', function(e) {
@@ -2594,6 +2711,20 @@
             var $bigPlay = $player.find('.mindful-media-big-play-btn');
             $bigPlay.addClass('hidden').css('display', 'none');
             $player.trigger('playing');
+            
+            // Start progress tracking for Continue Watching
+            var postId = $player.closest('.mindful-media-inline-player').data('current-post-id') || 
+                         $player.closest('[data-post-id]').data('post-id');
+            if (postId && typeof window.MindfulMediaEngagement !== 'undefined') {
+                window.MindfulMediaEngagement.startProgressTracking(postId, {
+                    getCurrentTime: function(callback) { 
+                        widget.getPosition(function(pos) { callback(pos / 1000); }); 
+                    },
+                    getDuration: function(callback) { 
+                        widget.getDuration(function(dur) { callback(dur / 1000); }); 
+                    }
+                });
+            }
         });
         
         widget.bind(SC.Widget.Events.PAUSE, function() {
@@ -2603,6 +2734,11 @@
             var $bigPlay = $player.find('.mindful-media-big-play-btn');
             $bigPlay.removeClass('hidden').css('display', 'flex');
             $player.trigger('pause');
+            
+            // Save progress when paused
+            if (typeof window.MindfulMediaEngagement !== 'undefined') {
+                window.MindfulMediaEngagement.stopProgressTracking();
+            }
         });
         
         widget.bind(SC.Widget.Events.FINISH, function() {
@@ -2612,6 +2748,11 @@
             var $bigPlay = $player.find('.mindful-media-big-play-btn');
             $bigPlay.removeClass('hidden').css('display', 'flex');
             $player.trigger('ended');
+            
+            // Stop progress tracking when ended
+            if (typeof window.MindfulMediaEngagement !== 'undefined') {
+                window.MindfulMediaEngagement.stopProgressTracking();
+            }
         });
         
         // Click handlers for image container and big play button
@@ -3205,5 +3346,398 @@
         // Make slider tracks focusable
         $('.mm-slider-track').attr('tabindex', '0');
     }
+    
+    // ========================================================================
+    // ENGAGEMENT FEATURES - Likes, Comments, Subscriptions, Watch History
+    // ========================================================================
+    
+    /**
+     * Initialize engagement features
+     */
+    function initEngagement() {
+        // Like button handler
+        $(document).on('click', '.mm-like-btn', function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var postId = $btn.data('post-id');
+            
+            if ($btn.hasClass('loading')) return;
+            
+            $btn.addClass('loading');
+            
+            $.ajax({
+                url: mindfulMediaAjax.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'mindful_media_like',
+                    nonce: mindfulMediaAjax.nonce,
+                    post_id: postId
+                },
+                success: function(response) {
+                    $btn.removeClass('loading');
+                    if (response.success) {
+                        $btn.toggleClass('liked', response.data.liked);
+                        $btn.find('.mm-like-count').text(response.data.count || '');
+                        
+                        // Update any other like buttons for the same post
+                        $('.mm-like-btn[data-post-id="' + postId + '"]').each(function() {
+                            $(this).toggleClass('liked', response.data.liked);
+                            $(this).find('.mm-like-count').text(response.data.count || '');
+                        });
+                    }
+                },
+                error: function() {
+                    $btn.removeClass('loading');
+                }
+            });
+        });
+        
+        // Subscribe button handler
+        $(document).on('click', '.mm-subscribe-btn', function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var objectId = $btn.data('object-id');
+            var objectType = $btn.data('object-type');
+            
+            if ($btn.hasClass('loading')) return;
+            
+            $btn.addClass('loading');
+            
+            $.ajax({
+                url: mindfulMediaAjax.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'mindful_media_subscribe',
+                    nonce: mindfulMediaAjax.nonce,
+                    object_id: objectId,
+                    object_type: objectType,
+                    notify_email: true
+                },
+                success: function(response) {
+                    $btn.removeClass('loading');
+                    if (response.success) {
+                        $btn.toggleClass('subscribed', response.data.subscribed);
+                        $btn.find('.mm-subscribe-text').text(
+                            response.data.subscribed ? 'Subscribed' : 'Subscribe'
+                        );
+                    }
+                },
+                error: function() {
+                    $btn.removeClass('loading');
+                }
+            });
+        });
+        
+        // Comment composer focus
+        $(document).on('focus', '.mm-comment-input', function() {
+            $(this).closest('.mm-comment-composer').addClass('active');
+        });
+        
+        // Comment cancel
+        $(document).on('click', '.mm-comment-cancel-btn', function() {
+            var $composer = $(this).closest('.mm-comment-composer');
+            $composer.removeClass('active');
+            $composer.find('.mm-comment-input').val('');
+        });
+        
+        // Comment submit
+        $(document).on('click', '.mm-comment-submit-btn', function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var $composer = $btn.closest('.mm-comment-composer');
+            var postId = $composer.data('post-id');
+            var content = $composer.find('.mm-comment-input').val().trim();
+            
+            if (!content || $btn.hasClass('loading')) return;
+            
+            $btn.addClass('loading').prop('disabled', true);
+            
+            $.ajax({
+                url: mindfulMediaAjax.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'mindful_media_post_comment',
+                    nonce: mindfulMediaAjax.nonce,
+                    post_id: postId,
+                    content: content
+                },
+                success: function(response) {
+                    $btn.removeClass('loading').prop('disabled', false);
+                    if (response.success) {
+                        $composer.find('.mm-comment-input').val('');
+                        $composer.removeClass('active');
+                        // Reload comments
+                        loadComments(postId);
+                    }
+                },
+                error: function() {
+                    $btn.removeClass('loading').prop('disabled', false);
+                }
+            });
+        });
+        
+        // Enable/disable submit button based on input
+        $(document).on('input', '.mm-comment-input', function() {
+            var $input = $(this);
+            var $btn = $input.closest('.mm-comment-composer').find('.mm-comment-submit-btn');
+            $btn.prop('disabled', !$input.val().trim());
+        });
+        
+        // Library tab switching
+        $(document).on('click', '.mm-library-tab', function() {
+            var $tab = $(this);
+            var section = $tab.data('section');
+            
+            $('.mm-library-tab').removeClass('active');
+            $tab.addClass('active');
+            
+            $('.mm-library-section').removeClass('active');
+            $('.mm-library-section[data-section="' + section + '"]').addClass('active');
+        });
+        
+        // Subscription unsubscribe
+        $(document).on('click', '.mm-subscription-unsubscribe', function(e) {
+            e.preventDefault();
+            var $item = $(this).closest('.mm-library-subscription-item');
+            var objectId = $item.data('object-id');
+            var objectType = $item.data('object-type');
+            
+            $.ajax({
+                url: mindfulMediaAjax.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'mindful_media_subscribe',
+                    nonce: mindfulMediaAjax.nonce,
+                    object_id: objectId,
+                    object_type: objectType
+                },
+                success: function(response) {
+                    if (response.success && !response.data.subscribed) {
+                        $item.fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                    }
+                }
+            });
+        });
+    }
+    
+    /**
+     * Load comments for a post
+     */
+    function loadComments(postId) {
+        var $container = $('.mm-comments-list[data-post-id="' + postId + '"]');
+        if (!$container.length) return;
+        
+        $.ajax({
+            url: mindfulMediaAjax.ajaxUrl,
+            type: 'GET',
+            data: {
+                action: 'mindful_media_get_comments',
+                post_id: postId
+            },
+            success: function(response) {
+                if (response.success && response.data.comments) {
+                    var html = '';
+                    response.data.comments.forEach(function(comment) {
+                        html += renderComment(comment);
+                    });
+                    $container.html(html || '<p class="mm-comments-empty">No comments yet. Be the first to comment!</p>');
+                    
+                    // Update count
+                    $('.mm-comments-count[data-post-id="' + postId + '"]').text(
+                        response.data.total + ' ' + (response.data.total === 1 ? 'Comment' : 'Comments')
+                    );
+                }
+            }
+        });
+    }
+    
+    /**
+     * Render a single comment
+     */
+    function renderComment(comment) {
+        return '<div class="mm-comment" data-comment-id="' + comment.id + '">' +
+            '<div class="mm-comment-avatar">' +
+                '<img src="' + comment.avatar_url + '" alt="' + comment.display_name + '">' +
+            '</div>' +
+            '<div class="mm-comment-body">' +
+                '<div class="mm-comment-header">' +
+                    '<span class="mm-comment-author">' + comment.display_name + '</span>' +
+                    '<span class="mm-comment-time">' + comment.time_ago + '</span>' +
+                '</div>' +
+                '<div class="mm-comment-content">' + comment.content + '</div>' +
+            '</div>' +
+        '</div>';
+    }
+    
+    /**
+     * Track playback progress
+     */
+    var progressTrackingInterval = null;
+    var lastProgressUpdate = 0;
+    var currentTrackingPostId = null;
+    
+    function startProgressTracking(postId, player) {
+        // Clear any existing interval
+        if (progressTrackingInterval) {
+            clearInterval(progressTrackingInterval);
+        }
+        
+        currentTrackingPostId = postId;
+        currentTrackingPlayer = player;
+        lastProgressUpdate = 0;
+        
+        // Record watch history on first play
+        recordWatchHistory(postId);
+        
+        // Track progress every 10 seconds
+        progressTrackingInterval = setInterval(function() {
+            if (!player) return;
+            
+            if (typeof player.getCurrentTime === 'function') {
+                // Check if API uses callbacks (SoundCloud style: fn.length > 0)
+                if (player.getCurrentTime.length > 0) {
+                    // Callback-based API (SoundCloud)
+                    player.getCurrentTime(function(currentTime) {
+                        if (typeof player.getDuration === 'function' && player.getDuration.length > 0) {
+                            player.getDuration(function(duration) {
+                                if (Math.abs(currentTime - lastProgressUpdate) > 5) {
+                                    savePlaybackProgress(currentTrackingPostId, currentTime, duration);
+                                    lastProgressUpdate = currentTime;
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    // Sync or Promise-based API
+                    var timeResult = player.getCurrentTime();
+                    var durationResult = player.getDuration ? player.getDuration() : 0;
+                    
+                    // Check if result is a Promise (async API like Vimeo)
+                    if (timeResult && typeof timeResult.then === 'function') {
+                        // Async API - use Promises
+                        Promise.all([
+                            timeResult,
+                            typeof durationResult.then === 'function' ? durationResult : Promise.resolve(durationResult)
+                        ]).then(function(results) {
+                            var currentTime = results[0];
+                            var duration = results[1];
+                            
+                            if (Math.abs(currentTime - lastProgressUpdate) > 5) {
+                                savePlaybackProgress(currentTrackingPostId, currentTime, duration);
+                                lastProgressUpdate = currentTime;
+                            }
+                        });
+                    } else {
+                        // Sync API (YouTube)
+                        var currentTime = timeResult;
+                        var duration = durationResult;
+                        
+                        if (Math.abs(currentTime - lastProgressUpdate) > 5) {
+                            savePlaybackProgress(currentTrackingPostId, currentTime, duration);
+                            lastProgressUpdate = currentTime;
+                        }
+                    }
+                }
+            }
+        }, 10000);
+    }
+    
+    var currentTrackingPlayer = null;
+    
+    function stopProgressTracking() {
+        // Save final progress before stopping
+        if (currentTrackingPostId && currentTrackingPlayer) {
+            if (typeof currentTrackingPlayer.getCurrentTime === 'function') {
+                // Check if API uses callbacks
+                if (currentTrackingPlayer.getCurrentTime.length > 0) {
+                    // Callback-based API (SoundCloud)
+                    currentTrackingPlayer.getCurrentTime(function(currentTime) {
+                        if (typeof currentTrackingPlayer.getDuration === 'function' && currentTrackingPlayer.getDuration.length > 0) {
+                            currentTrackingPlayer.getDuration(function(duration) {
+                                savePlaybackProgress(currentTrackingPostId, currentTime, duration);
+                            });
+                        }
+                    });
+                } else {
+                    var timeResult = currentTrackingPlayer.getCurrentTime();
+                    var durationResult = currentTrackingPlayer.getDuration ? currentTrackingPlayer.getDuration() : 0;
+                    
+                    if (timeResult && typeof timeResult.then === 'function') {
+                        // Promise-based API
+                        Promise.all([
+                            timeResult,
+                            typeof durationResult.then === 'function' ? durationResult : Promise.resolve(durationResult)
+                        ]).then(function(results) {
+                            savePlaybackProgress(currentTrackingPostId, results[0], results[1]);
+                        });
+                    } else {
+                        // Sync API
+                        savePlaybackProgress(currentTrackingPostId, timeResult, durationResult);
+                    }
+                }
+            }
+        }
+        
+        if (progressTrackingInterval) {
+            clearInterval(progressTrackingInterval);
+            progressTrackingInterval = null;
+        }
+        currentTrackingPlayer = null;
+    }
+    
+    /**
+     * Save playback progress to server
+     */
+    function savePlaybackProgress(postId, progressSeconds, durationSeconds) {
+        if (!mindfulMediaAjax.isLoggedIn) return;
+        
+        $.ajax({
+            url: mindfulMediaAjax.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'mindful_media_save_progress',
+                nonce: mindfulMediaAjax.nonce,
+                post_id: postId,
+                progress_seconds: Math.floor(progressSeconds),
+                duration_seconds: Math.floor(durationSeconds)
+            }
+        });
+    }
+    
+    /**
+     * Record watch history
+     */
+    function recordWatchHistory(postId) {
+        if (!mindfulMediaAjax.isLoggedIn) return;
+        
+        $.ajax({
+            url: mindfulMediaAjax.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'mindful_media_record_watch',
+                nonce: mindfulMediaAjax.nonce,
+                post_id: postId
+            }
+        });
+    }
+    
+    // Initialize engagement on document ready
+    $(document).ready(function() {
+        initEngagement();
+    });
+    
+    // Stop progress tracking when modal closes
+    $(document).on('mindful-media-modal-closed', function() {
+        stopProgressTracking();
+    });
+    
+    // Expose functions for external use
+    window.MindfulMediaEngagement = {
+        startProgressTracking: startProgressTracking,
+        stopProgressTracking: stopProgressTracking,
+        loadComments: loadComments
+    };
     
 })(jQuery); 

@@ -3,7 +3,7 @@
  * Plugin Name: MindfulMedia
  * Plugin URI: https://mindfuldesign.me/plugins/mindful-media
  * Description: A comprehensive media management system for organizing and displaying audio, video, and multimedia content with advanced filtering, playlists, password protection, and customizable archives.
- * Version: 2.8.4
+ * Version: 2.13.0
  * Author: Mindful Design
  * Author URI: https://mindfuldesign.me
  * License: GPL v2 or later
@@ -27,7 +27,7 @@ class MindfulMedia {
     /**
      * Plugin version
      */
-    public $version = '2.8.4';
+    public $version = '2.13.0';
     
     /**
      * Constructor
@@ -84,7 +84,9 @@ class MindfulMedia {
             'includes/class-shortcodes.php',
             'includes/class-settings.php',
             'includes/class-blocks.php',
-            'includes/class-elementor.php'
+            'includes/class-elementor.php',
+            'includes/class-engagement.php',
+            'includes/class-notifications.php'
         );
         
         foreach ($includes as $file) {
@@ -134,6 +136,14 @@ class MindfulMedia {
         if (class_exists('MindfulMedia_Elementor')) {
             new MindfulMedia_Elementor();
         }
+        
+        if (class_exists('MindfulMedia_Engagement')) {
+            new MindfulMedia_Engagement();
+        }
+        
+        if (class_exists('MindfulMedia_Notifications')) {
+            new MindfulMedia_Notifications();
+        }
     }
     
     /**
@@ -171,6 +181,13 @@ class MindfulMedia {
         new MindfulMedia_Post_Types();
         new MindfulMedia_Taxonomies();
         
+        // Create engagement tables
+        require_once MINDFUL_MEDIA_PLUGIN_DIR . 'includes/class-engagement.php';
+        MindfulMedia_Engagement::create_tables();
+        
+        // Create My Library page if it doesn't exist
+        $this->create_library_page();
+        
         // Flush rewrite rules
         flush_rewrite_rules();
         
@@ -182,6 +199,35 @@ class MindfulMedia {
         
         // Clear various caches
         $this->clear_caches();
+    }
+    
+    /**
+     * Create My Library page on activation
+     */
+    private function create_library_page() {
+        $settings = get_option('mindful_media_settings', array());
+        
+        // Check if page already exists
+        if (!empty($settings['library_page_id'])) {
+            $page = get_post($settings['library_page_id']);
+            if ($page && $page->post_status !== 'trash') {
+                return;
+            }
+        }
+        
+        // Create the page
+        $page_id = wp_insert_post(array(
+            'post_title' => __('My Library', 'mindful-media'),
+            'post_content' => '[mindful_media_library]',
+            'post_status' => 'publish',
+            'post_type' => 'page',
+            'post_author' => 1
+        ));
+        
+        if ($page_id && !is_wp_error($page_id)) {
+            $settings['library_page_id'] = $page_id;
+            update_option('mindful_media_settings', $settings);
+        }
     }
     
     /**

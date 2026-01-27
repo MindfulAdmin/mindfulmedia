@@ -250,16 +250,36 @@ class MindfulMedia_Post_Types {
         // Determine action URL
         $action_url = $external_link ?: $media_url;
         
-        // Check if password protected
+        // Check access (password protection + MemberPress)
         $is_protected = get_post_meta($post->ID, '_mindful_media_password_protected', true);
         $has_access = false;
+        $access_locked = false;
+        $lock_reason = '';
+        $lock_message = '';
         
         if ($is_protected === '1') {
-            // Check cookie for access
+            // Check cookie for access (password protection)
             $cookie_name = 'mindful_media_access_' . $post->ID;
             $has_access = isset($_COOKIE[$cookie_name]) && $_COOKIE[$cookie_name] === wp_hash($post->ID . 'mindful_media_access');
+            if (!$has_access) {
+                $access_locked = true;
+                $lock_reason = 'password';
+            }
         } else {
-            $has_access = true; // Not protected, grant access
+            $has_access = true; // Not password protected
+        }
+        
+        // Check MemberPress access if password check passed
+        $required_levels = array();
+        if ($has_access && class_exists('MindfulMedia_Settings')) {
+            $access_result = MindfulMedia_Settings::user_can_view($post->ID);
+            if (is_array($access_result) && !empty($access_result['locked'])) {
+                $has_access = false;
+                $access_locked = true;
+                $lock_reason = $access_result['reason'];
+                $lock_message = $access_result['message'];
+                $required_levels = $access_result['required_levels'] ?? array();
+            }
         }
         
         // Get the media player embed using the media player class
@@ -334,7 +354,40 @@ class MindfulMedia_Post_Types {
             
             <!-- Full Width Player Area -->
             <div class="mindful-media-single-player-area">
-                <?php if ($media_player_embed): ?>
+                <?php if ($access_locked && $lock_reason === 'membership'): ?>
+                    <!-- Membership Locked Content -->
+                    <div class="mindful-media-single-locked">
+                        <?php if (has_post_thumbnail($post->ID)): ?>
+                            <div class="mindful-media-single-locked-bg">
+                                <?php echo get_the_post_thumbnail($post->ID, 'full'); ?>
+                            </div>
+                        <?php endif; ?>
+                        <div class="mindful-media-single-locked-overlay">
+                            <div class="mindful-media-lock-icon">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                                </svg>
+                            </div>
+                            <h2 class="mindful-media-lock-title"><?php echo esc_html($lock_message ?: __('Members Only', 'mindful-media')); ?></h2>
+                            <?php 
+                            // Get join URL for the first required level (or default)
+                            $first_required_level = !empty($required_levels) ? reset($required_levels) : null;
+                            $join_url = MindfulMedia_Settings::get_join_url($first_required_level);
+                            if ($join_url): 
+                            ?>
+                                <a href="<?php echo esc_url($join_url); ?>" class="mindful-media-lock-cta">
+                                    <?php _e('Become a Member', 'mindful-media'); ?>
+                                </a>
+                            <?php endif; ?>
+                            <?php if (!is_user_logged_in()): ?>
+                                <p class="mindful-media-lock-login">
+                                    <?php _e('Already a member?', 'mindful-media'); ?>
+                                    <a href="<?php echo esc_url($settings['login_url'] ?? wp_login_url(get_permalink())); ?>"><?php _e('Log in', 'mindful-media'); ?></a>
+                                </p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php elseif ($media_player_embed): ?>
                     <?php echo $media_player_embed; ?>
                 <?php elseif (has_post_thumbnail($post->ID)): ?>
                     <div class="mindful-media-single-image-container">
@@ -399,6 +452,66 @@ class MindfulMedia_Post_Types {
                             </div>
                         <?php endif; ?>
                     </div>
+                    
+                    <?php 
+                    // Engagement Section (Likes, Subscribe)
+                    if (!$access_locked && class_exists('MindfulMedia_Engagement')): 
+                        $engagement = new MindfulMedia_Engagement();
+                        $user_id = get_current_user_id();
+                        $like_count = $engagement->get_like_count($post->ID);
+                        $user_liked = $engagement->user_has_liked($user_id, $post->ID);
+                        $login_url = $settings['login_url'] ?? wp_login_url(get_permalink());
+                    ?>
+                    <div class="mindful-media-engagement">
+                        <div class="mindful-media-engagement-actions">
+                            <?php if (!empty($settings['enable_likes'])): ?>
+                                <?php if ($user_id): ?>
+                                    <button type="button" class="mm-like-btn <?php echo $user_liked ? 'liked' : ''; ?>" data-post-id="<?php echo esc_attr($post->ID); ?>">
+                                        <svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                                        <span class="mm-like-count"><?php echo $like_count > 0 ? esc_html($like_count) : ''; ?></span>
+                                    </button>
+                                <?php else: ?>
+                                    <a href="<?php echo esc_url($login_url); ?>" class="mm-like-btn" title="<?php esc_attr_e('Sign in to like', 'mindful-media'); ?>">
+                                        <svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                                        <span class="mm-like-count"><?php echo $like_count > 0 ? esc_html($like_count) : ''; ?></span>
+                                    </a>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                            
+                            <?php 
+                            // Subscribe button for teacher
+                            if (!empty($settings['enable_subscriptions']) && !empty($settings['allow_subscription_teachers']) && $teachers && !is_wp_error($teachers)):
+                                $teacher = $teachers[0];
+                                $is_subscribed = $user_id ? $engagement->user_is_subscribed($user_id, $teacher->term_id, 'media_teacher') : false;
+                            ?>
+                                <?php if ($user_id): ?>
+                                    <button type="button" class="mm-subscribe-btn <?php echo $is_subscribed ? 'subscribed' : ''; ?>" 
+                                            data-object-id="<?php echo esc_attr($teacher->term_id); ?>" 
+                                            data-object-type="media_teacher">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <?php if ($is_subscribed): ?>
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                            <?php else: ?>
+                                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                            <?php endif; ?>
+                                        </svg>
+                                        <span class="mm-subscribe-text"><?php echo $is_subscribed ? __('Subscribed', 'mindful-media') : __('Subscribe', 'mindful-media'); ?></span>
+                                    </button>
+                                <?php else: ?>
+                                    <a href="<?php echo esc_url($login_url); ?>" class="mm-subscribe-btn" title="<?php esc_attr_e('Sign in to subscribe', 'mindful-media'); ?>">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                        </svg>
+                                        <span class="mm-subscribe-text"><?php _e('Subscribe', 'mindful-media'); ?></span>
+                                    </a>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     
                     <!-- Description -->
                     <div class="mindful-media-single-description">
@@ -621,6 +734,65 @@ class MindfulMedia_Post_Types {
                                 </a>
                             </div>
                             <?php endwhile; wp_reset_postdata(); ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php 
+                    // Comments Section
+                    if (!$access_locked && !empty($settings['enable_comments']) && class_exists('MindfulMedia_Engagement')): 
+                        $engagement = isset($engagement) ? $engagement : new MindfulMedia_Engagement();
+                        $comment_count = $engagement->get_comment_count($post->ID);
+                        $comments = $engagement->get_comments($post->ID, 10);
+                        $user_id = get_current_user_id();
+                        $login_url = $settings['login_url'] ?? wp_login_url(get_permalink());
+                    ?>
+                    <div class="mm-comments">
+                        <div class="mm-comments-header">
+                            <span class="mm-comments-count" data-post-id="<?php echo esc_attr($post->ID); ?>">
+                                <?php echo esc_html($comment_count); ?> <?php echo $comment_count === 1 ? __('Comment', 'mindful-media') : __('Comments', 'mindful-media'); ?>
+                            </span>
+                        </div>
+                        
+                        <?php if ($user_id): ?>
+                            <div class="mm-comment-composer" data-post-id="<?php echo esc_attr($post->ID); ?>">
+                                <div class="mm-comment-composer-avatar">
+                                    <?php echo get_avatar($user_id, 40); ?>
+                                </div>
+                                <div class="mm-comment-composer-form">
+                                    <textarea class="mm-comment-input" placeholder="<?php esc_attr_e('Add a comment...', 'mindful-media'); ?>" rows="1"></textarea>
+                                    <div class="mm-comment-composer-actions">
+                                        <button type="button" class="mm-comment-cancel-btn"><?php _e('Cancel', 'mindful-media'); ?></button>
+                                        <button type="button" class="mm-comment-submit-btn" disabled><?php _e('Comment', 'mindful-media'); ?></button>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <div class="mm-engagement-guest-prompt">
+                                <p><?php _e('Sign in to leave a comment', 'mindful-media'); ?></p>
+                                <a href="<?php echo esc_url($login_url); ?>" class="mm-btn"><?php _e('Sign In', 'mindful-media'); ?></a>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <div class="mm-comments-list" data-post-id="<?php echo esc_attr($post->ID); ?>">
+                            <?php if (empty($comments)): ?>
+                                <p class="mm-comments-empty"><?php _e('No comments yet. Be the first to comment!', 'mindful-media'); ?></p>
+                            <?php else: ?>
+                                <?php foreach ($comments as $comment): ?>
+                                    <div class="mm-comment" data-comment-id="<?php echo esc_attr($comment->id); ?>">
+                                        <div class="mm-comment-avatar">
+                                            <img src="<?php echo esc_url($comment->avatar_url); ?>" alt="<?php echo esc_attr($comment->display_name); ?>">
+                                        </div>
+                                        <div class="mm-comment-body">
+                                            <div class="mm-comment-header">
+                                                <span class="mm-comment-author"><?php echo esc_html($comment->display_name); ?></span>
+                                                <span class="mm-comment-time"><?php echo esc_html($comment->time_ago); ?></span>
+                                            </div>
+                                            <div class="mm-comment-content"><?php echo esc_html($comment->content); ?></div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <?php endif; ?>

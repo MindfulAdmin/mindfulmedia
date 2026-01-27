@@ -251,6 +251,50 @@
             });
         });
         
+        // Fetch Duration Button
+        $('#mindful-media-fetch-duration').on('click', function(e) {
+            e.preventDefault();
+            
+            var $btn = $(this);
+            var $status = $('#mindful-media-duration-status');
+            var mediaUrl = $('#mindful_media_url').val();
+            
+            if (!mediaUrl) {
+                $status.html('<span style="color: #dc3232;">Please enter a media URL first.</span>');
+                return;
+            }
+            
+            $btn.prop('disabled', true);
+            $status.html('<span style="color: #666;">Fetching duration...</span>');
+            
+            $.post(ajaxurl, {
+                action: 'mindful_media_fetch_duration',
+                nonce: mindfulMediaAdmin.nonce,
+                url: mediaUrl
+            }, function(response) {
+                $btn.prop('disabled', false);
+                
+                if (response.success) {
+                    $('#mindful_media_duration_hours').val(response.data.hours);
+                    $('#mindful_media_duration_minutes').val(response.data.minutes);
+                    $status.html('<span style="color: #46b450;">✓ ' + response.data.message + '</span>');
+                    
+                    // Flash the fields
+                    $('#mindful_media_duration_hours, #mindful_media_duration_minutes')
+                        .css('border-color', '#46b450');
+                    setTimeout(function() {
+                        $('#mindful_media_duration_hours, #mindful_media_duration_minutes')
+                            .css('border-color', '');
+                    }, 1500);
+                } else {
+                    $status.html('<span style="color: #dc3232;">' + response.data + '</span>');
+                }
+            }).fail(function() {
+                $btn.prop('disabled', false);
+                $status.html('<span style="color: #dc3232;">Failed to fetch duration. Please enter manually.</span>');
+            });
+        });
+        
         // WordPress Media Library Uploader
         var mediaUploader;
         
@@ -421,6 +465,150 @@
             // Update preview on page load
             updateFontPreview();
         }
+        
+        // Reset Email Body Template
+        $('#mm-reset-email-body').on('click', function(e) {
+            e.preventDefault();
+            if (confirm('Reset email body to default template?')) {
+                var defaultTemplate = 'Hi {user_name},\n\nNew content is available from <strong>{term_name}</strong>:\n\n<div style="background: #f5f5f5; padding: 15px; border-radius: 6px; margin: 20px 0;">\n<strong>{post_title}</strong>\n<p style="margin: 8px 0 0; color: #666;">{post_excerpt}</p>\n</div>\n\n<a href="{post_url}" style="display: inline-block; background: {button_color}; color: {button_text_color}; padding: 12px 24px; border-radius: 4px; text-decoration: none; font-weight: 600;">Watch Now</a>';
+                $('textarea[name="email_body_template"]').val(defaultTemplate);
+            }
+        });
+        
+        // Email Logo Upload
+        var emailLogoUploader;
+        $('#email-logo-upload-btn').on('click', function(e) {
+            e.preventDefault();
+            
+            if (emailLogoUploader) {
+                emailLogoUploader.open();
+                return;
+            }
+            
+            emailLogoUploader = wp.media({
+                title: 'Select Email Logo',
+                button: { text: 'Use this image' },
+                library: { type: 'image' },
+                multiple: false
+            });
+            
+            emailLogoUploader.on('select', function() {
+                var attachment = emailLogoUploader.state().get('selection').first().toJSON();
+                $('#email_logo_id').val(attachment.id);
+                $('#email-logo-preview').show().find('img').attr('src', attachment.url);
+                $('#email-logo-remove-btn').show();
+                
+                // Update the email preview
+                $('#mm-email-preview-logo').attr('src', attachment.url).show();
+                $('#mm-email-preview-text').hide();
+            });
+            
+            emailLogoUploader.open();
+        });
+        
+        $('#email-logo-remove-btn').on('click', function(e) {
+            e.preventDefault();
+            $('#email_logo_id').val('');
+            $('#email-logo-preview').hide();
+            $(this).hide();
+            
+            // Update the email preview - show text instead
+            $('#mm-email-preview-logo').hide();
+            $('#mm-email-preview-text').show();
+        });
+        
+        // Send Test Email
+        $('#mm-send-test-email').on('click', function(e) {
+            e.preventDefault();
+            
+            var $btn = $(this);
+            var $spinner = $('#mm-test-email-spinner');
+            var $result = $('#mm-test-email-result');
+            var email = $('#mm-test-email-address').val();
+            
+            if (!email) {
+                $result.html('<p style="color: #d63638; margin: 0;">Please enter an email address.</p>');
+                return;
+            }
+            
+            // Show loading state
+            $btn.prop('disabled', true).text(mindfulMediaAdmin.strings.sending);
+            $spinner.addClass('is-active');
+            $result.html('');
+            
+            $.post(mindfulMediaAdmin.ajaxUrl, {
+                action: 'mindful_media_send_test_email',
+                nonce: mindfulMediaAdmin.nonce,
+                email: email
+            }, function(response) {
+                $btn.prop('disabled', false).text(mindfulMediaAdmin.strings.send_test);
+                $spinner.removeClass('is-active');
+                
+                if (response.success) {
+                    $result.html('<p style="color: #00a32a; margin: 0; padding: 10px; background: #d1f7d1; border-radius: 4px;">✓ ' + response.data.message + '</p>');
+                } else {
+                    $result.html('<p style="color: #d63638; margin: 0; padding: 10px; background: #ffd1d1; border-radius: 4px;">✗ ' + response.data.message + '</p>');
+                }
+            }).fail(function() {
+                $btn.prop('disabled', false).text(mindfulMediaAdmin.strings.send_test);
+                $spinner.removeClass('is-active');
+                $result.html('<p style="color: #d63638; margin: 0; padding: 10px; background: #ffd1d1; border-radius: 4px;">✗ ' + mindfulMediaAdmin.strings.error + '</p>');
+            });
+        });
+        
+        // Email Preview Color Updates (live preview)
+        // Header text live update
+        $('input[name="email_header_text"]').on('input change', function() {
+            $('#mm-email-preview-text').text($(this).val());
+        });
+        
+        $('input[name="email_header_bg"]').on('input change', function() {
+            $('#mm-email-preview-header').css('background-color', $(this).val());
+            $('input[name="email_header_bg_text"]').val($(this).val());
+        });
+        $('input[name="email_header_bg_text"]').on('input change', function() {
+            var color = $(this).val();
+            if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+                $('input[name="email_header_bg"]').val(color);
+                $('#mm-email-preview-header').css('background-color', color);
+            }
+        });
+        
+        $('input[name="email_header_text_color"]').on('input change', function() {
+            $('#mm-email-preview-header').css('color', $(this).val());
+            $('input[name="email_header_text_color_text"]').val($(this).val());
+        });
+        $('input[name="email_header_text_color_text"]').on('input change', function() {
+            var color = $(this).val();
+            if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+                $('input[name="email_header_text_color"]').val(color);
+                $('#mm-email-preview-header').css('color', color);
+            }
+        });
+        
+        $('input[name="email_button_bg"]').on('input change', function() {
+            $('#mm-email-preview-button').css('background-color', $(this).val());
+            $('input[name="email_button_bg_text"]').val($(this).val());
+        });
+        $('input[name="email_button_bg_text"]').on('input change', function() {
+            var color = $(this).val();
+            if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+                $('input[name="email_button_bg"]').val(color);
+                $('#mm-email-preview-button').css('background-color', color);
+            }
+        });
+        
+        $('input[name="email_button_text_color"]').on('input change', function() {
+            $('#mm-email-preview-button').css('color', $(this).val());
+            $('input[name="email_button_text_color_text"]').val($(this).val());
+        });
+        $('input[name="email_button_text_color_text"]').on('input change', function() {
+            var color = $(this).val();
+            if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+                $('input[name="email_button_text_color"]').val(color);
+                $('#mm-email-preview-button').css('color', color);
+            }
+        });
         
     });
     
